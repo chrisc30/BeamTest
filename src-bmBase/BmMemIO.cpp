@@ -591,7 +591,8 @@ BmRingBuf::Put(const char* data, uint32 len)
 	operator BmString()
 		-	return complete buffer as string (and removes it)
 \*------------------------------------------------------------------------------*/
-BmRingBuf::operator BmString()
+BmRingBuf::
+operator BmString()
 {
 	BmString str;
 	if (mCurrFront == mCurrTail)  // buffer is empty

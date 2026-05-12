@@ -1439,7 +1439,7 @@ BmString::Replace(char replaceThis, char withThis, int32 maxReplaceCount, int32 
 	CHECK_PARAM(fromOffset >= 0, "'fromOffset' must not be negative!");
 	if (maxReplaceCount > 0) {
 		for (int32 pos = min_clamp0(fromOffset, Length()); maxReplaceCount > 0;
-			 --maxReplaceCount, ++pos) {
+			--maxReplaceCount, ++pos) {
 			pos = FindFirst(replaceThis, pos);
 			if (pos < 0)
 				break;
@@ -1548,7 +1548,7 @@ BmString::IReplace(char replaceThis, char withThis, int32 maxReplaceCount, int32
 		return *this;
 
 	for (int32 pos = min_clamp0(fromOffset, Length()); maxReplaceCount > 0;
-		 --maxReplaceCount, ++pos) {
+		--maxReplaceCount, ++pos) {
 		pos = _IFindAfter(tmp, pos, 1);
 		if (pos < 0)
 			break;
@@ -2198,8 +2198,8 @@ BmString::_DoReplace(const char* findThis, const char* replaceWith, int32 maxRep
 	int32 lastSrcPos = fromOffset;
 	PosVect positions;
 	for (int32 srcPos = 0;
-		 maxReplaceCount > 0 && (srcPos = (this->*findMethod)(findThis, lastSrcPos, findLen)) >= 0;
-		 maxReplaceCount--) {
+		maxReplaceCount > 0 && (srcPos = (this->*findMethod)(findThis, lastSrcPos, findLen)) >= 0;
+		maxReplaceCount--) {
 		positions.Add(srcPos);
 		lastSrcPos = srcPos + findLen;
 	}

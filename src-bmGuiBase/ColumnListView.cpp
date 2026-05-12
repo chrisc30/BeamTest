@@ -988,7 +988,7 @@ ColumnListView::AddUnder(BListItem* a_item, BListItem* a_superitem)
 		ItemPos = DetermineSortedPosHierarchical(item, SuperItemPos + 1);
 		// now skip over any child-items belonging to the item before us:
 		for (CLVListItem* Temp = (CLVListItem*)fFullItemList.ItemAt(ItemPos);
-			 Temp && Temp->OutlineLevel() > item->OutlineLevel();) {
+			Temp && Temp->OutlineLevel() > item->OutlineLevel();) {
 			Temp = (CLVListItem*)fFullItemList.ItemAt(++ItemPos);
 		}
 	} else {
@@ -996,7 +996,7 @@ ColumnListView::AddUnder(BListItem* a_item, BListItem* a_superitem)
 		// now skip to end of items on same level as ourselves (add new
 		// item to the end):
 		for (CLVListItem* Temp = (CLVListItem*)fFullItemList.ItemAt(ItemPos);
-			 Temp && Temp->OutlineLevel() >= item->OutlineLevel();) {
+			Temp && Temp->OutlineLevel() >= item->OutlineLevel();) {
 			Temp = (CLVListItem*)fFullItemList.ItemAt(++ItemPos);
 		}
 	}
@@ -1039,7 +1039,7 @@ ColumnListView::DetermineSortedPosHierarchical(CLVListItem* item, uint32 startIn
 	while (lb <= ub) {
 		int CompareResult = 0;
 		for (int32 SortIteration = 0; SortIteration < SortDepth && CompareResult == 0;
-			 SortIteration++) {
+			SortIteration++) {
 			CLVColumn* Column = (CLVColumn*)fSortKeyList.ItemAt(SortIteration);
 			CompareResult = fCompare(item,
 				(CLVListItem*)FullListItemAt((int32)(addr_t)ThisLevelItems.ItemAt(currPos)),
@@ -1755,7 +1755,7 @@ ColumnListView::CompareItems(const CLVListItem* item1, const CLVListItem* item2)
 	int32 SortDepth = fSortKeyList.CountItems();
 	int CompareResult = 0;
 	for (int32 SortIteration = 0; SortIteration < SortDepth && CompareResult == 0;
-		 SortIteration++) {
+		SortIteration++) {
 		CLVColumn* Column = (CLVColumn*)fSortKeyList.ItemAt(SortIteration);
 		CompareResult = fCompare(item1, item2, fColumnList.IndexOf(Column), Column->Flags());
 		if (Column->fSortMode == Descending)
@@ -1812,7 +1812,7 @@ ColumnListView::PlainBListSortFunc(BListItem** a_item1, BListItem** a_item2)
 	int CompareResult = 0;
 	if (SortingContext->fCompare)
 		for (int32 SortIteration = 0; SortIteration < SortDepth && CompareResult == 0;
-			 SortIteration++) {
+			SortIteration++) {
 			CLVColumn* Column = (CLVColumn*)SortingContext->fSortKeyList.ItemAt(SortIteration);
 			CompareResult = SortingContext->fCompare(
 				item1, item2, SortingContext->fColumnList.IndexOf(Column), Column->Flags());
@@ -1907,7 +1907,7 @@ ColumnListView::SortListArray(CLVListItem** SortArray, int32 NumberOfItems)
 		for (int32 Counter2 = Counter1 + 1; Counter2 < NumberOfItems; Counter2++) {
 			int CompareResult = 0;
 			for (int32 SortIteration = 0; SortIteration < SortDepth && CompareResult == 0;
-				 SortIteration++) {
+				SortIteration++) {
 				CLVColumn* Column = (CLVColumn*)fSortKeyList.ItemAt(SortIteration);
 				CompareResult = fCompare(SortArray[Counter1], SortArray[Counter2],
 					fColumnList.IndexOf(Column), Column->Flags());

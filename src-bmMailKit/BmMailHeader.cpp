@@ -987,7 +987,7 @@ BmMailHeader::DetermineReceivingAddrFor(
 				for (int i = 0; !addr.Length() && i < 2; ++i) {
 					BmIdentityVect::const_iterator iter;
 					for (iter = identities.begin(); iter != identities.end() && !addr.Length();
-						 ++iter) {
+						++iter) {
 						if ((*iter)->HandlesAddrSpec(mailAddr, needExactMatch)) {
 							addr = mailAddr;
 							*identRefOut = *iter;
@@ -1204,7 +1204,7 @@ BmMailHeader::StripField(BmString fieldValue, BmString* commentBuffer)
 			BmString comment;
 			int32 nestLevel = 1;
 			for (endPos = pos + 1;
-				 *endPos && (*endPos != ')' || *(endPos - 1) == '\\' || --nestLevel); ++endPos) {
+				*endPos && (*endPos != ')' || *(endPos - 1) == '\\' || --nestLevel); ++endPos) {
 				if (*endPos == '(' && *(endPos - 1) != '\\') {
 					// take a note that we found a nested comment:
 					nestLevel++;
@@ -1236,8 +1236,8 @@ BmMailHeader::StripField(BmString fieldValue, BmString* commentBuffer)
 			// we copy characters until we find the start of a quoted-string,
 			// whitespace, or a comment:
 			for (endPos = pos + 1;
-				 *endPos && *endPos != '"' && *endPos != '(' && *endPos != '\t' && *endPos != ' ';
-				 ++endPos)
+				*endPos && *endPos != '"' && *endPos != '(' && *endPos != '\t' && *endPos != ' ';
+				++endPos)
 				;
 			int32 numChars = (int32)(endPos - pos);
 			stripped.Append(pos, numChars);

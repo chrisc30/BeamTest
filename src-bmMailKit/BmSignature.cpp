@@ -51,8 +51,8 @@ BmSignature::BmSignature(const char* name, BmSignatureList* model)
 BmSignature::BmSignature(BMessage* archive, BmSignatureList* model)
 	: inherited(FindMsgString(archive, MSG_NAME), model, (BmListModelItem*)NULL),
 	  mAccessLock((BmString("access_sig_") << FindMsgString(archive, MSG_NAME))
-					  .Truncate(B_OS_NAME_LENGTH)
-					  .String())
+			  .Truncate(B_OS_NAME_LENGTH)
+			  .String())
 {
 	int16 version;
 	if (archive->FindInt16(MSG_VERSION, &version) != B_OK)

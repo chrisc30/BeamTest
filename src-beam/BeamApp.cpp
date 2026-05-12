@@ -552,7 +552,7 @@ PrintMails(void* data)
 			beamApp->mPrintJob.BeginJob();
 			int32 page = 1;
 			for (uint32 mailIdx = 0;
-				 !beamApp->IsQuitting() && mailIdx < msgCount && page <= lastPage; ++mailIdx) {
+				!beamApp->IsQuitting() && mailIdx < msgCount && page <= lastPage; ++mailIdx) {
 				mailRef = (*refVect)[mailIdx].Get();
 				if (mailView->LockLooper()) {
 					mailView->BodyPartView()->SetViewColor(ui_color(B_DOCUMENT_BACKGROUND_COLOR));

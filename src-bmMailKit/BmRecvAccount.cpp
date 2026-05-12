@@ -165,7 +165,7 @@ BmRecvAccount::BmRecvAccount(BMessage* archive, BmRecvAccountList* model)
 		int32 timeDownloaded;
 		for (int32 i = 0; archive->FindString(MSG_UID, i, &uidStr) == B_OK
 						  && archive->FindInt32(MSG_UID_TIME, i, &timeDownloaded) == B_OK;
-			 ++i) {
+			++i) {
 			mUIDs[uidStr] = timeDownloaded;
 		}
 		// load attributes introduced in version 7:

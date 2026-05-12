@@ -360,7 +360,7 @@ BmMailFactory::AddQuotedText(const BmString& inText, BmString& out, const BmStri
 		int32 idx = 0;
 		isUrl = rxUrl.exec(text, "^\\s*(https?://|ftp://|nntp://|file://|mailto:)", Regexx::nocase);
 		for (int32 charCount = 0;
-			 charCount < maxTextLen || (isUrl && wrapPos == B_ERROR && text[idx]); ++charCount) {
+			charCount < maxTextLen || (isUrl && wrapPos == B_ERROR && text[idx]); ++charCount) {
 			if (IS_UTF8_STARTCHAR(text[idx])) {
 				idx++;
 				while (IS_WITHIN_UTF8_MULTICHAR(text[idx]))
@@ -436,7 +436,7 @@ BmReplyFactory::Produce()
 		typedef map<BmString, BmRef<BmMail> > BmNewMailMap;
 		BmNewMailMap newMailMap;
 		for (BmMailRefVect::const_iterator iter = mBaseRefVect.begin();
-			 !BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
+			!BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
 			mailRef = iter->Get();
 			BmRef<BmMail> mail = BmMail::CreateInstance(mailRef);
 			if (mail) {
@@ -482,14 +482,14 @@ BmReplyFactory::Produce()
 		}
 		// ...and now add all the freshly generated mails:
 		for (BmNewMailMap::const_iterator iter = newMailMap.begin();
-			 !BeamRoster->IsQuitting() && iter != newMailMap.end(); ++iter) {
+			!BeamRoster->IsQuitting() && iter != newMailMap.end(); ++iter) {
 			TheMails.push_back(iter->second);
 		}
 	} else {
 		// create one reply per mail:
 		BmRef<BmMail> newMail;
 		for (BmMailRefVect::const_iterator iter = mBaseRefVect.begin();
-			 !BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
+			!BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
 			mailRef = iter->Get();
 			BmRef<BmMail> mail = BmMail::CreateInstance(mailRef);
 			if (mail) {
@@ -713,7 +713,7 @@ BmForwardFactory::Produce()
 		typedef map<BmString, BmRef<BmMail> > BmNewMailMap;
 		BmNewMailMap newMailMap;
 		for (BmMailRefVect::const_iterator iter = mBaseRefVect.begin();
-			 !BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
+			!BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
 			mailRef = iter->Get();
 			BmRef<BmMail> mail = BmMail::CreateInstance(mailRef);
 			if (mail) {
@@ -762,7 +762,7 @@ BmForwardFactory::Produce()
 		// create one forward per mail:
 		BmRef<BmMail> newMail;
 		for (BmMailRefVect::const_iterator iter = mBaseRefVect.begin();
-			 !BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
+			!BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
 			mailRef = iter->Get();
 			BmRef<BmMail> mail = BmMail::CreateInstance(mailRef);
 			if (mail) {
@@ -896,7 +896,7 @@ BmRedirectFactory::Produce()
 
 	// create one redirection per mail:
 	for (BmMailRefVect::const_iterator iter = mBaseRefVect.begin();
-		 !BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
+		!BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
 		mailRef = iter->Get();
 		BmRef<BmMail> mail = BmMail::CreateInstance(mailRef);
 		if (mail) {
@@ -991,7 +991,7 @@ BmCopyMailFactory::Produce()
 
 	// create one copy per mail:
 	for (BmMailRefVect::const_iterator iter = mBaseRefVect.begin();
-		 !BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
+		!BeamRoster->IsQuitting() && iter != mBaseRefVect.end(); ++iter) {
 		mailRef = iter->Get();
 		BmRef<BmMail> mail = BmMail::CreateInstance(mailRef);
 		if (mail) {

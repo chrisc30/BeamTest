@@ -119,7 +119,7 @@ BmMailAddressCompleter::MailAddrChoiceModel ::FetchChoicesFor(const BmString& pa
 	}
 	BmKnownAddrSet::const_iterator kaIter;
 	for (kaIter = ThePeopleList->KnownAddrBegin(); kaIter != ThePeopleList->KnownAddrEnd();
-		 ++kaIter) {
+		++kaIter) {
 		BmString addr = *kaIter;
 		if (addr.ICompare(pattern, pattLen) == 0)
 			mChoicesList.AddItem(new Choice(addr, addr, 0, pattLen));

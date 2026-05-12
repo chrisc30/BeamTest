@@ -141,7 +141,8 @@ BmContentField::SetParam(BmString key, BmString value)
 	()
 		-
 \*------------------------------------------------------------------------------*/
-BmContentField::operator BmString() const
+BmContentField::
+operator BmString() const
 {
 	BmString fieldString;
 	fieldString << mValue;

@@ -532,7 +532,7 @@ BmPrefsSendMailView::MessageReceived(BMessage* msg)
 						// update any links to this smtp-account:
 						BAutolock lock(TheIdentityList->ModelLocker());
 						for (iter = TheIdentityList->begin(); iter != TheIdentityList->end();
-							 ++iter) {
+							++iter) {
 							BmIdentity* ident = dynamic_cast<BmIdentity*>(iter->second.Get());
 							if (ident && ident->SMTPAccount() == oldName)
 								ident->SMTPAccount(newName);

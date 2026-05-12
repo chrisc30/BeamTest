@@ -101,7 +101,7 @@ CLVColumnLabelView::Draw(BRect update_rect)
 			bool MergeWithRight = false;
 			if (ThisColumn->fFlags & CLV_MERGE_WITH_RIGHT) {
 				for (int32 ColumnCounter = ColumnDraw + 1; ColumnCounter < NumberOfColumns;
-					 ColumnCounter++) {
+					ColumnCounter++) {
 					CLVColumn* NextColumn = (CLVColumn*)fDisplayList->ItemAt(ColumnCounter);
 					if (NextColumn->IsShown()) {
 						// The next column is shown
@@ -410,7 +410,7 @@ CLVColumnLabelView::MouseMoved(BPoint where, uint32 code, const BMessage*)
 								&& (LastSwapColumn->fFlags & CLV_PUSH_PASS))) {
 							int32 NumberOfColumns = fDisplayList->CountItems();
 							for (int32 ColumnCounter = fDisplayList->IndexOf(LastSwapColumn) + 1;
-								 ColumnCounter < NumberOfColumns; ColumnCounter++) {
+								ColumnCounter < NumberOfColumns; ColumnCounter++) {
 								CLVColumn* ThisColumn
 									= (CLVColumn*)fDisplayList->ItemAt(ColumnCounter);
 								if (ThisColumn->IsShown()) {
@@ -551,21 +551,21 @@ CLVColumnLabelView::ShiftDragGroup(int32 NewPos)
 		if (GroupCounter != fDragGroup) {
 			ThisGroup = (CLVDragGroup*)fDragGroups.ItemAt(GroupCounter);
 			for (ColumnCounter = ThisGroup->GroupStartDispListIndex;
-				 ColumnCounter <= ThisGroup->GroupStopDispListIndex; ColumnCounter++)
+				ColumnCounter <= ThisGroup->GroupStopDispListIndex; ColumnCounter++)
 				NewDisplayList.AddItem(fDisplayList->ItemAt(ColumnCounter));
 		}
 	}
 	// Copy the group into the new position
 	ThisGroup = (CLVDragGroup*)fDragGroups.ItemAt(fDragGroup);
 	for (ColumnCounter = ThisGroup->GroupStartDispListIndex;
-		 ColumnCounter <= ThisGroup->GroupStopDispListIndex; ColumnCounter++)
+		ColumnCounter <= ThisGroup->GroupStopDispListIndex; ColumnCounter++)
 		NewDisplayList.AddItem(fDisplayList->ItemAt(ColumnCounter));
 	// Copy the rest of the groups, but skip the dragging group
 	for (GroupCounter = NewPos; GroupCounter < NumberOfGroups; GroupCounter++) {
 		if (GroupCounter != fDragGroup) {
 			ThisGroup = (CLVDragGroup*)fDragGroups.ItemAt(GroupCounter);
 			for (ColumnCounter = ThisGroup->GroupStartDispListIndex;
-				 ColumnCounter <= ThisGroup->GroupStopDispListIndex; ColumnCounter++)
+				ColumnCounter <= ThisGroup->GroupStopDispListIndex; ColumnCounter++)
 				NewDisplayList.AddItem(fDisplayList->ItemAt(ColumnCounter));
 		}
 	}
@@ -678,7 +678,7 @@ CLVColumnLabelView::SetSnapMinMax()
 	for (GroupCounter = 0; GroupCounter < NumberOfGroups; GroupCounter++) {
 		ThisGroup = (CLVDragGroup*)fDragGroups.ItemAt(GroupCounter);
 		for (ColumnCount = ThisGroup->GroupStartDispListIndex;
-			 ColumnCount <= ThisGroup->GroupStopDispListIndex; ColumnCount++)
+			ColumnCount <= ThisGroup->GroupStopDispListIndex; ColumnCount++)
 			if (fDisplayList->ItemAt(ColumnCount) == fColumnClicked) {
 				fDragGroup = GroupCounter;
 				fTheDragGroup = ThisGroup;

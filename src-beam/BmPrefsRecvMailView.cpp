@@ -602,7 +602,7 @@ BmPrefsRecvMailView::MessageReceived(BMessage* msg)
 						// update any links to this account:
 						BAutolock lock(TheIdentityList->ModelLocker());
 						for (iter = TheIdentityList->begin(); iter != TheIdentityList->end();
-							 ++iter) {
+							++iter) {
 							BmIdentity* ident = dynamic_cast<BmIdentity*>(iter->second.Get());
 							if (ident) {
 								// rename link to this account
@@ -619,7 +619,7 @@ BmPrefsRecvMailView::MessageReceived(BMessage* msg)
 							TheIdentityList->RenameItem(oldName, newName);
 						BAutolock lock2(TheSmtpAccountList->ModelLocker());
 						for (iter = TheSmtpAccountList->begin(); iter != TheSmtpAccountList->end();
-							 ++iter) {
+							++iter) {
 							BmSmtpAccount* acc = dynamic_cast<BmSmtpAccount*>(iter->second.Get());
 							if (acc && acc->AccForSmtpAfterPop() == oldName)
 								acc->AccForSmtpAfterPop(newName);

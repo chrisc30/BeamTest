@@ -121,7 +121,7 @@ BmApplication::BmApplication(const char* sig, bool testModeRequested)
 			"Trying to initialize more than one instance "
 			"of class BmApplication");
 
-		// find out if we are running on Dano (or newer):
+	// find out if we are running on Dano (or newer):
 #ifndef __HAIKU__
 	system_info sysInfo;
 	get_system_info(&sysInfo);
