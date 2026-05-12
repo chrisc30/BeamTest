@@ -14,7 +14,7 @@
 #include <layout-all.h>
 
 #include "regexx.hh"
-	using namespace regexx;
+using namespace regexx;
 
 #include "UserResizeSplitView.h"
 
@@ -49,52 +49,56 @@ const char* const BmMailViewWin::MSG_HSPLITTER = "bm:hspl";
 		-	creates a new mail-view window
 		-	initialiazes the window's dimensions by reading its archive-file (if any)
 \*------------------------------------------------------------------------------*/
-BmMailViewWin* BmMailViewWin::CreateInstance( BmMailRef* mailRef) {
-	BmMailViewWin* win = new BmMailViewWin( mailRef);
+BmMailViewWin*
+BmMailViewWin::CreateInstance(BmMailRef* mailRef)
+{
+	BmMailViewWin* win = new BmMailViewWin(mailRef);
 	win->ReadStateInfo();
 	return win;
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmMailViewWin::BmMailViewWin( BmMailRef* mailRef)
-	:	inherited( "MailViewWin", BRect(50,50,800,600), "View mail", 
-					  ThePrefs->GetBool( "UseDocumentResizer", true) 
-					  		? B_DOCUMENT_WINDOW_LOOK 
-					  		: B_TITLED_WINDOW_LOOK, 
-					  B_NORMAL_WINDOW_FEEL, B_ASYNCHRONOUS_CONTROLS)
-	,	mFilterMenu( NULL)
+BmMailViewWin::BmMailViewWin(BmMailRef* mailRef)
+	: inherited("MailViewWin", BRect(50, 50, 800, 600), "View mail",
+		  ThePrefs->GetBool("UseDocumentResizer", true) ? B_DOCUMENT_WINDOW_LOOK
+														: B_TITLED_WINDOW_LOOK,
+		  B_NORMAL_WINDOW_FEEL, B_ASYNCHRONOUS_CONTROLS),
+	  mFilterMenu(NULL)
 {
 	CreateGUI();
 	if (mailRef) {
-		mMailRefView->StartJob( mailRef->ListModel().Get());
-		ShowMail( mailRef);
+		mMailRefView->StartJob(mailRef->ListModel().Get());
+		ShowMail(mailRef);
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmMailViewWin::ArchiveState( BMessage* archive) const {
-	status_t ret = inherited::ArchiveState( archive)
-						|| archive->AddFloat( MSG_HSPLITTER, 
-													 mHorzSplitter->DividerLeftOrTop());
+status_t
+BmMailViewWin::ArchiveState(BMessage* archive) const
+{
+	status_t ret = inherited::ArchiveState(archive)
+				   || archive->AddFloat(MSG_HSPLITTER, mHorzSplitter->DividerLeftOrTop());
 	return ret;
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmMailViewWin::UnarchiveState( BMessage* archive) {
+status_t
+BmMailViewWin::UnarchiveState(BMessage* archive)
+{
 	float hDividerPos;
-	status_t ret = inherited::UnarchiveState( archive)
-						|| archive->FindFloat( MSG_HSPLITTER, &hDividerPos);
+	status_t ret
+		= inherited::UnarchiveState(archive) || archive->FindFloat(MSG_HSPLITTER, &hDividerPos);
 	if (ret == B_OK) {
-		mHorzSplitter->SetPreferredDividerLeftOrTop( hDividerPos);
+		mHorzSplitter->SetPreferredDividerLeftOrTop(hDividerPos);
 		BRect frame = Frame();
 		if (nNextXPos != frame.left || nNextYPos != frame.top) {
 			nNextXPos = frame.left;
@@ -108,14 +112,14 @@ status_t BmMailViewWin::UnarchiveState( BMessage* archive) {
 			}
 		}
 		BRect scrFrame = beamApp->ScreenFrame();
-		frame.bottom = MIN( frame.bottom, scrFrame.bottom-5);
-		frame.right = MIN( frame.right, scrFrame.right-5);
-		MoveTo( BPoint( nNextXPos, nNextYPos));
-		ResizeTo( frame.Width(), frame.Height());
+		frame.bottom = MIN(frame.bottom, scrFrame.bottom - 5);
+		frame.right = MIN(frame.right, scrFrame.right - 5);
+		MoveTo(BPoint(nNextXPos, nNextYPos));
+		ResizeTo(frame.Width(), frame.Height());
 		WriteStateInfo();
 	} else {
-		MoveTo( BPoint( nNextXPos, nNextYPos));
-		ResizeTo( 400, 400);
+		MoveTo(BPoint(nNextXPos, nNextYPos));
+		ResizeTo(400, 400);
 		WriteStateInfo();
 	}
 	return ret;
@@ -123,178 +127,151 @@ status_t BmMailViewWin::UnarchiveState( BMessage* archive) {
 
 /*------------------------------------------------------------------------------*\
 	CreateGUI()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailViewWin::CreateGUI() {
+void
+BmMailViewWin::CreateGUI()
+{
 	// Get maximum button size
-	float width=0, height=0;
+	float width = 0, height = 0;
 	BmToolbarButton::CalcMaxSize(width, height, "New");
 	BmToolbarButton::CalcMaxSize(width, height, "Reply", true);
 	BmToolbarButton::CalcMaxSize(width, height, "Forward", true);
 	BmToolbarButton::CalcMaxSize(width, height, "Print");
 	BmToolbarButton::CalcMaxSize(width, height, "Trash");
 
-	int32 defaultFwdMsgType = 
-		ThePrefs->GetString( "DefaultForwardType")=="Inline"
-			? BMM_FORWARD_INLINE
-			: BMM_FORWARD_ATTACHED;
-	mOuterGroup = 
-		new VGroup(
-			minimax( 500, 400, 1E5, 1E5),
-			CreateMenu(),
-			mToolbar = new BmToolbar( 
-				new HGroup(
-					minimax( -1, -1, 1E5, -1),
-					mNewButton = new BmToolbarButton( "New", 
-																 width, height,
-																 new BMessage(BMM_NEW_MAIL), this, 
-																 "Compose a new mail message"),
-					mReplyButton = new BmToolbarButton( "Reply", 
-																 	width, height,
-																	new BMessage(BMM_REPLY), this, 
-																	"Reply to person or list", true),
-					mForwardButton = new BmToolbarButton( "Forward", 
-																 	  width, height,
-																	  new BMessage( defaultFwdMsgType), this, 
-																	  "Forward mail to somewhere else", true),
-					mSpamButton	= new BmToolbarButton( "Spam", 
-																  width, height,
-																  new BMessage(BMM_LEARN_AS_SPAM), this,
-																  "Treat this mail as Spam"),
-					mTofuButton	= new BmToolbarButton( "Tofu", 
-																  width, height,
-																  new BMessage(BMM_LEARN_AS_TOFU), this,
-																  "Treat this mail as Tofu"),
-					mPrintButton = new BmToolbarButton( "Print", 
-																   width, height,
-																	new BMessage(BMM_PRINT), this, 
-																	"Print this mail"),
-					mTrashButton = new BmToolbarButton( "Trash", 
-																   width, height,
-																	new BMessage(BMM_TRASH), this, 
-																	"Move this mail to Trash"),
-					new BmToolbarSpace(),
-					0
-				)
-			),
-			mHorzSplitter = new UserResizeSplitView( 
-				new VGroup(
-					new HGroup(
-						mMailRefViewFilterControl = new BmMailRefViewFilterControl(),
-						new Space(minimax(0,0,1E5,1E5, 0.3f)),
-						0
-					),
-					new BetterScrollView( 
-						minimax(300,50,1E5,1E5), 
-						mMailRefView = BmMailRefView::CreateInstance( 400, 200),
-						BM_SV_H_SCROLLBAR | BM_SV_V_SCROLLBAR | BM_SV_CORNER
-						| BM_SV_BUSYVIEW | BM_SV_CAPTION,
-						"99999 messages"
-					),
-					0
-				),
-				new BmMailViewContainer(
-					minimax(200,80,1E5,1E5), 
-					mMailView = BmMailView::CreateInstance( BRect(0,0,400,200), 
-																		 false)
-				),
-				"hsplitter", 0, B_HORIZONTAL, true, true, true, true, 
-				false, B_FOLLOW_NONE
-			),
-			0
-		);
-		
-	mMailRefView->TeamUpWith( mMailView);
-	mMailView->TeamUpWith( mMailRefView);
+	int32 defaultFwdMsgType = ThePrefs->GetString("DefaultForwardType") == "Inline"
+								  ? BMM_FORWARD_INLINE
+								  : BMM_FORWARD_ATTACHED;
+	mOuterGroup = new VGroup(minimax(500, 400, 1E5, 1E5), CreateMenu(),
+		mToolbar = new BmToolbar(new HGroup(minimax(-1, -1, 1E5, -1),
+			mNewButton = new BmToolbarButton("New", width, height, new BMessage(BMM_NEW_MAIL), this,
+				"Compose a new mail message"),
+			mReplyButton = new BmToolbarButton("Reply", width, height, new BMessage(BMM_REPLY),
+				this, "Reply to person or list", true),
+			mForwardButton = new BmToolbarButton("Forward", width, height,
+				new BMessage(defaultFwdMsgType), this, "Forward mail to somewhere else", true),
+			mSpamButton = new BmToolbarButton("Spam", width, height,
+				new BMessage(BMM_LEARN_AS_SPAM), this, "Treat this mail as Spam"),
+			mTofuButton = new BmToolbarButton("Tofu", width, height,
+				new BMessage(BMM_LEARN_AS_TOFU), this, "Treat this mail as Tofu"),
+			mPrintButton = new BmToolbarButton(
+				"Print", width, height, new BMessage(BMM_PRINT), this, "Print this mail"),
+			mTrashButton = new BmToolbarButton(
+				"Trash", width, height, new BMessage(BMM_TRASH), this, "Move this mail to Trash"),
+			new BmToolbarSpace(), 0)),
+		mHorzSplitter = new UserResizeSplitView(
+			new VGroup(new HGroup(mMailRefViewFilterControl = new BmMailRefViewFilterControl(),
+						   new Space(minimax(0, 0, 1E5, 1E5, 0.3f)), 0),
+				new BetterScrollView(minimax(300, 50, 1E5, 1E5),
+					mMailRefView = BmMailRefView::CreateInstance(400, 200),
+					BM_SV_H_SCROLLBAR | BM_SV_V_SCROLLBAR | BM_SV_CORNER | BM_SV_BUSYVIEW
+						| BM_SV_CAPTION,
+					"99999 messages"),
+				0),
+			new BmMailViewContainer(minimax(200, 80, 1E5, 1E5),
+				mMailView = BmMailView::CreateInstance(BRect(0, 0, 400, 200), false)),
+			"hsplitter", 0, B_HORIZONTAL, true, true, true, true, false, B_FOLLOW_NONE),
+		0);
+
+	mMailRefView->TeamUpWith(mMailView);
+	mMailView->TeamUpWith(mMailRefView);
 	mMailRefViewFilterControl->TeamUpWith(mMailRefView);
 	mMailRefView->TeamUpWith(mMailRefViewFilterControl);
 
-	mReplyButton->AddActionVariation( "Reply", new BMessage(BMM_REPLY));
-	mReplyButton->AddActionVariation( "Reply to list", new BMessage(BMM_REPLY_LIST));
-	mReplyButton->AddActionVariation( "Reply to person", new BMessage(BMM_REPLY_ORIGINATOR));
-	mReplyButton->AddActionVariation( "Reply to all", new BMessage(BMM_REPLY_ALL));
-	mForwardButton->AddActionVariation( "Forward as attachment", new BMessage(BMM_FORWARD_ATTACHED));
-	mForwardButton->AddActionVariation( "Forward inline", new BMessage(BMM_FORWARD_INLINE));
-	mForwardButton->AddActionVariation( "Forward inline (with attachments)", new BMessage(BMM_FORWARD_INLINE_ATTACH));
+	mReplyButton->AddActionVariation("Reply", new BMessage(BMM_REPLY));
+	mReplyButton->AddActionVariation("Reply to list", new BMessage(BMM_REPLY_LIST));
+	mReplyButton->AddActionVariation("Reply to person", new BMessage(BMM_REPLY_ORIGINATOR));
+	mReplyButton->AddActionVariation("Reply to all", new BMessage(BMM_REPLY_ALL));
+	mForwardButton->AddActionVariation("Forward as attachment", new BMessage(BMM_FORWARD_ATTACHED));
+	mForwardButton->AddActionVariation("Forward inline", new BMessage(BMM_FORWARD_INLINE));
+	mForwardButton->AddActionVariation(
+		"Forward inline (with attachments)", new BMessage(BMM_FORWARD_INLINE_ATTACH));
 
-	mMailView->StartWatching( this, BM_NTFY_MAIL_VIEW);
+	mMailView->StartWatching(this, BM_NTFY_MAIL_VIEW);
 
-	AddChild( dynamic_cast<BView*>(mOuterGroup));
+	AddChild(dynamic_cast<BView*>(mOuterGroup));
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmMailViewWin::~BmMailViewWin() {
-}
+BmMailViewWin::~BmMailViewWin() {}
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-MMenuBar* BmMailViewWin::CreateMenu() {
+MMenuBar*
+BmMailViewWin::CreateMenu()
+{
 	MMenuBar* menubar = new MMenuBar();
 	BMenu* menu = NULL;
 	// File
-	menu = new BMenu( "File");
-	menu->AddItem( CreateMenuItem( "Page setup" B_UTF8_ELLIPSIS, BMM_PAGE_SETUP));
-	menu->AddItem( CreateMenuItem( "Print message" B_UTF8_ELLIPSIS, BMM_PRINT));
+	menu = new BMenu("File");
+	menu->AddItem(CreateMenuItem("Page setup" B_UTF8_ELLIPSIS, BMM_PAGE_SETUP));
+	menu->AddItem(CreateMenuItem("Print message" B_UTF8_ELLIPSIS, BMM_PRINT));
 	menu->AddSeparatorItem();
-	AddItemToMenu( menu, CreateMenuItem( "Preferences" B_UTF8_ELLIPSIS, BMM_PREFERENCES), beamApp);
+	AddItemToMenu(menu, CreateMenuItem("Preferences" B_UTF8_ELLIPSIS, BMM_PREFERENCES), beamApp);
 	menu->AddSeparatorItem();
-	menu->AddItem( CreateMenuItem( "Close", B_QUIT_REQUESTED));
+	menu->AddItem(CreateMenuItem("Close", B_QUIT_REQUESTED));
 	menu->AddSeparatorItem();
-	AddItemToMenu( menu, CreateMenuItem( "Quit Beam", B_QUIT_REQUESTED), beamApp);
-	menubar->AddItem( menu);
+	AddItemToMenu(menu, CreateMenuItem("Quit Beam", B_QUIT_REQUESTED), beamApp);
+	menubar->AddItem(menu);
 
 	// Edit
-	menu = new BMenu( "Edit");
-	menu->AddItem( CreateMenuItem( "Cut", B_CUT));
-	menu->AddItem( CreateMenuItem( "Copy", B_COPY));
-	menu->AddItem( CreateMenuItem( "Select all", B_SELECT_ALL));
+	menu = new BMenu("Edit");
+	menu->AddItem(CreateMenuItem("Cut", B_CUT));
+	menu->AddItem(CreateMenuItem("Copy", B_COPY));
+	menu->AddItem(CreateMenuItem("Select all", B_SELECT_ALL));
 	menu->AddSeparatorItem();
-	menu->AddItem( CreateMenuItem( "Find" B_UTF8_ELLIPSIS, BMM_FIND));
-	menu->AddItem( CreateMenuItem( "Find next", BMM_FIND_NEXT));
-	menubar->AddItem( menu);
+	menu->AddItem(CreateMenuItem("Find" B_UTF8_ELLIPSIS, BMM_FIND));
+	menu->AddItem(CreateMenuItem("Find next", BMM_FIND_NEXT));
+	menubar->AddItem(menu);
 
 	// Message
-	menu = new BMenu( "Message");
-	menu->AddItem( CreateMenuItem( "New message", BMM_NEW_MAIL));
+	menu = new BMenu("Message");
+	menu->AddItem(CreateMenuItem("New message", BMM_NEW_MAIL));
 	menu->AddSeparatorItem();
-	mMailRefView->AddMailRefMenu( menu, this, false);
+	mMailRefView->AddMailRefMenu(menu, this, false);
 	menu->AddSeparatorItem();
-	menu->AddItem( CreateMenuItem( "Toggle header mode", BMM_SWITCH_HEADER));
-	menu->AddItem( CreateMenuItem( "Show raw message", BMM_SWITCH_RAW));
-	menubar->AddItem( menu);
+	menu->AddItem(CreateMenuItem("Toggle header mode", BMM_SWITCH_HEADER));
+	menu->AddItem(CreateMenuItem("Show raw message", BMM_SWITCH_RAW));
+	menubar->AddItem(menu);
 
 	return menubar;
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailViewWin::BeginLife() {
+void
+BmMailViewWin::BeginLife()
+{
 	BMenuBar* menuBar = KeyMenuBar();
 	if (menuBar) {
-		menuBar->FindItem( BMM_SWITCH_RAW)->SetTarget( mMailView);
-		menuBar->FindItem( BMM_SWITCH_RAW)->SetMarked( mMailView->ShowRaw());
-		menuBar->FindItem( BMM_SWITCH_HEADER)->SetTarget( mMailView->HeaderView());
-		menuBar->FindItem( BMM_PAGE_SETUP)->SetTarget( beamApp);
+		menuBar->FindItem(BMM_SWITCH_RAW)->SetTarget(mMailView);
+		menuBar->FindItem(BMM_SWITCH_RAW)->SetMarked(mMailView->ShowRaw());
+		menuBar->FindItem(BMM_SWITCH_HEADER)->SetTarget(mMailView->HeaderView());
+		menuBar->FindItem(BMM_PAGE_SETUP)->SetTarget(beamApp);
 	}
-	mMailView->MakeFocus( true);
+	mMailView->MakeFocus(true);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailViewWin::MessageReceived( BMessage* msg) {
+void
+BmMailViewWin::MessageReceived(BMessage* msg)
+{
 	try {
-		switch( msg->what) {
-			case BMM_NEW_MAIL: {
-				be_app_messenger.SendMessage( msg);
+		switch (msg->what) {
+			case BMM_NEW_MAIL:
+			{
+				be_app_messenger.SendMessage(msg);
 				break;
 			}
 			case BMM_MARK_AS:
@@ -308,128 +285,131 @@ void BmMailViewWin::MessageReceived( BMessage* msg) {
 			case BMM_FORWARD_ATTACHED:
 			case BMM_FORWARD_INLINE:
 			case BMM_FORWARD_INLINE_ATTACH:
-			case BMM_EDIT_AS_NEW: {
+			case BMM_EDIT_AS_NEW:
+			{
 				BmRef<BmMail> mail = mMailView->CurrMail();
 				if (mail) {
 					BmString selectedText;
 					int32 start, finish;
-					mMailView->GetSelection( &start, &finish);
+					mMailView->GetSelection(&start, &finish);
 					if (start < finish)
-						selectedText.SetTo( mMailView->Text()+start, finish-start);
+						selectedText.SetTo(mMailView->Text() + start, finish - start);
 					const BmRef<BmMailRef> mailRef = mail->MailRef();
 					if (mailRef) {
 						BmMailRefVect* refVect = new BmMailRefVect();
-						refVect->push_back( mailRef);
-						msg->AddPointer( BeamApplication::MSG_MAILREF_VECT, 
-											  static_cast< void*>( refVect));
+						refVect->push_back(mailRef);
+						msg->AddPointer(
+							BeamApplication::MSG_MAILREF_VECT, static_cast<void*>(refVect));
 						if (selectedText.Length())
-							msg->AddString( BeamApplication::MSG_SELECTED_TEXT, 
-												 selectedText.String());
-						be_app_messenger.SendMessage( msg);
+							msg->AddString(
+								BeamApplication::MSG_SELECTED_TEXT, selectedText.String());
+						be_app_messenger.SendMessage(msg);
 					}
 					if (mMailRefView->IsHidden()
-					&& (msg->what == BMM_TRASH
-						|| (ThePrefs->GetBool("CloseViewWinAfterMailAction", true)
-							&& (msg->what == BMM_REDIRECT
-								|| msg->what == BMM_FORWARD_INLINE
-								|| msg->what == BMM_FORWARD_INLINE_ATTACH
-								|| msg->what == BMM_FORWARD_ATTACHED
-								|| msg->what == BMM_REPLY
-								|| msg->what == BMM_REPLY_LIST
-								|| msg->what == BMM_REPLY_ORIGINATOR
-								|| msg->what == BMM_REPLY_ALL))))
-					{
-						PostMessage( B_QUIT_REQUESTED);
+						&& (msg->what == BMM_TRASH
+							|| (ThePrefs->GetBool("CloseViewWinAfterMailAction", true)
+								&& (msg->what == BMM_REDIRECT || msg->what == BMM_FORWARD_INLINE
+									|| msg->what == BMM_FORWARD_INLINE_ATTACH
+									|| msg->what == BMM_FORWARD_ATTACHED || msg->what == BMM_REPLY
+									|| msg->what == BMM_REPLY_LIST
+									|| msg->what == BMM_REPLY_ORIGINATOR
+									|| msg->what == BMM_REPLY_ALL)))) {
+						PostMessage(B_QUIT_REQUESTED);
 					}
 				}
 				break;
 			}
-			case BMM_FILTER: {
+			case BMM_FILTER:
+			{
 				BmRef<BmMail> mail = mMailView->CurrMail();
 				if (mail && mail->MailRef()) {
 					static int32 jobNum = 1;
-					BMessage tmpMsg( BM_JOBWIN_FILTER);
+					BMessage tmpMsg(BM_JOBWIN_FILTER);
 					BmMailRefVect* refVect = new BmMailRefVect();
-					refVect->push_back( mail->MailRef());
-					tmpMsg.AddPointer( BeamApplication::MSG_MAILREF_VECT, 
-											  static_cast< void*>( refVect));
-					BmString jobName = msg->FindString( BmListModel::MSG_ITEMKEY);
-					tmpMsg.AddString( BmListModel::MSG_ITEMKEY, jobName.String());
+					refVect->push_back(mail->MailRef());
+					tmpMsg.AddPointer(
+						BeamApplication::MSG_MAILREF_VECT, static_cast<void*>(refVect));
+					BmString jobName = msg->FindString(BmListModel::MSG_ITEMKEY);
+					tmpMsg.AddString(BmListModel::MSG_ITEMKEY, jobName.String());
 					jobName << jobNum++;
-					tmpMsg.AddString( BmJobModel::MSG_JOB_NAME, jobName.String());
-					TheJobStatusWin->PostMessage( &tmpMsg);
+					tmpMsg.AddString(BmJobModel::MSG_JOB_NAME, jobName.String());
+					TheJobStatusWin->PostMessage(&tmpMsg);
 				}
 				break;
 			}
-			case BMM_CREATE_FILTER: {
+			case BMM_CREATE_FILTER:
+			{
 				BmRef<BmMail> mail = mMailView->CurrMail();
 				if (mail && mail->MailRef()) {
 					BmMailRefVect* refVect = new BmMailRefVect();
-					refVect->push_back( mail->MailRef());
-					msg->AddPointer( BeamApplication::MSG_MAILREF_VECT, 
-										  static_cast< void*>( refVect));
-					BMessage appMsg( BMM_PREFERENCES);
-					appMsg.AddString( "SubViewName", "Filters");
-					appMsg.AddMessage( "SubViewMsg", msg);
-					be_app_messenger.SendMessage( &appMsg);
+					refVect->push_back(mail->MailRef());
+					msg->AddPointer(BeamApplication::MSG_MAILREF_VECT, static_cast<void*>(refVect));
+					BMessage appMsg(BMM_PREFERENCES);
+					appMsg.AddString("SubViewName", "Filters");
+					appMsg.AddMessage("SubViewMsg", msg);
+					be_app_messenger.SendMessage(&appMsg);
 				}
 				break;
 			}
-			case B_OBSERVER_NOTICE_CHANGE: {
-				switch( msg->FindInt32( B_OBSERVE_WHAT_CHANGE)) {
-					case BM_NTFY_MAIL_VIEW: {
-						bool hasMail = msg->FindBool( BmMailView::MSG_HAS_MAIL);
+			case B_OBSERVER_NOTICE_CHANGE:
+			{
+				switch (msg->FindInt32(B_OBSERVE_WHAT_CHANGE)) {
+					case BM_NTFY_MAIL_VIEW:
+					{
+						bool hasMail = msg->FindBool(BmMailView::MSG_HAS_MAIL);
 						// adjust menu:
 						BMenuBar* menuBar = KeyMenuBar();
-						menuBar->FindItem( BMM_FIND)->SetEnabled( hasMail);
-						menuBar->FindItem( BMM_FIND_NEXT)->SetEnabled( hasMail);
-						menuBar->FindItem( BMM_SWITCH_HEADER)->SetEnabled( hasMail);
-						BMenuItem* item = menuBar->FindItem( BMM_SWITCH_RAW);
-						item->SetEnabled( hasMail);
-						item->SetMarked( mMailView->ShowRaw());
+						menuBar->FindItem(BMM_FIND)->SetEnabled(hasMail);
+						menuBar->FindItem(BMM_FIND_NEXT)->SetEnabled(hasMail);
+						menuBar->FindItem(BMM_SWITCH_HEADER)->SetEnabled(hasMail);
+						BMenuItem* item = menuBar->FindItem(BMM_SWITCH_RAW);
+						item->SetEnabled(hasMail);
+						item->SetMarked(mMailView->ShowRaw());
 						break;
 					}
 				}
 				break;
 			}
 			case BMM_FIND:
-			case BMM_FIND_NEXT: {
-				PostMessage( msg, mMailView);
+			case BMM_FIND_NEXT:
+			{
+				PostMessage(msg, mMailView);
 				break;
 			}
 			case BMM_PREVIOUS_MESSAGE:
-			case BMM_NEXT_MESSAGE: {
-				const char bytes
-					= (msg->what == BMM_NEXT_MESSAGE) 
-						? B_DOWN_ARROW
-						: B_UP_ARROW;
-				mMailRefView->KeyDown( &bytes, 1);
+			case BMM_NEXT_MESSAGE:
+			{
+				const char bytes = (msg->what == BMM_NEXT_MESSAGE) ? B_DOWN_ARROW : B_UP_ARROW;
+				mMailRefView->KeyDown(&bytes, 1);
 				break;
 			}
 			default:
-				inherited::MessageReceived( msg);
+				inherited::MessageReceived(msg);
 		}
-	}
-	catch( BM_error &err) {
+	} catch (BM_error& err) {
 		// a problem occurred, we tell the user:
-		BM_SHOWERR( BmString("MailViewWin: ") << err.what());
+		BM_SHOWERR(BmString("MailViewWin: ") << err.what());
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	ShowMail()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailViewWin::ShowMail( BmMailRef* mailRef, bool async) {
-	mMailView->ShowMail( mailRef, async);
+void
+BmMailViewWin::ShowMail(BmMailRef* mailRef, bool async)
+{
+	mMailView->ShowMail(mailRef, async);
 }
 
 /*------------------------------------------------------------------------------*\
 	QuitRequested()
 		-	standard BeOS-behaviour, we allow a quit
 \*------------------------------------------------------------------------------*/
-bool BmMailViewWin::QuitRequested() {
-	BM_LOG2( BM_LogGui, BmString("MailViewWin has been asked to quit"));
+bool
+BmMailViewWin::QuitRequested()
+{
+	BM_LOG2(BM_LogGui, BmString("MailViewWin has been asked to quit"));
 	return true;
 }
 
@@ -437,9 +417,10 @@ bool BmMailViewWin::QuitRequested() {
 	Quit()
 		-	standard BeOS-behaviour, we quit
 \*------------------------------------------------------------------------------*/
-void BmMailViewWin::Quit() {
+void
+BmMailViewWin::Quit()
+{
 	mMailView->DetachModel();
-	BM_LOG2( BM_LogGui, BmString("MailViewWin has quit"));
+	BM_LOG2(BM_LogGui, BmString("MailViewWin has quit"));
 	inherited::Quit();
 }
-

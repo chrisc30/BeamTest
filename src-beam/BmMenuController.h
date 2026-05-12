@@ -13,28 +13,25 @@
 
 /*------------------------------------------------------------------------------*\
 	BmMenuController
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-class BmMenuController : public BmMenuControllerBase
-{
+class BmMenuController : public BmMenuControllerBase {
 	typedef BmMenuControllerBase inherited;
-	
-public:
 
-	BmMenuController( const char* label, BHandler* msgTarget, 
-							BMessage* msgTemplate,
-							BmRebuildMenuFunc fn, int32 flags=0);
-	
+public:
+	BmMenuController(const char* label, BHandler* msgTarget, BMessage* msgTemplate,
+		BmRebuildMenuFunc fn, int32 flags = 0);
+
 	~BmMenuController();
 
 	// overrides of base-methods:
 	void UpdateItemList();
 	void Clear();
-	
+
 private:
 	// Hide copy-constructor and assignment:
-	BmMenuController( const BmMenuController&);
-	BmMenuController operator=( const BmMenuController&);
+	BmMenuController(const BmMenuController&);
+	BmMenuController operator=(const BmMenuController&);
 };
 
 #endif

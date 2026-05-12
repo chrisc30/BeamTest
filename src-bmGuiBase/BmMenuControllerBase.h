@@ -19,11 +19,11 @@
 
 
 enum {
-	BM_MC_MOVE_RIGHT			= 1<<0,
-	BM_MC_SKIP_FIRST_LEVEL	= 1<<1,
-	BM_MC_ADD_NONE_ITEM		= 1<<2,
-	BM_MC_LABEL_FROM_MARKED	= 1<<3,
-	BM_MC_RADIO_MODE			= 1<<4
+	BM_MC_MOVE_RIGHT = 1 << 0,
+	BM_MC_SKIP_FIRST_LEVEL = 1 << 1,
+	BM_MC_ADD_NONE_ITEM = 1 << 2,
+	BM_MC_LABEL_FROM_MARKED = 1 << 3,
+	BM_MC_RADIO_MODE = 1 << 4
 };
 
 enum {
@@ -34,39 +34,36 @@ class BMenuItem;
 
 typedef void (BmGuiRosterBase::*BmRebuildMenuFunc)(BmMenuControllerBase*);
 
-class IMPEXPBMGUIBASE BmMenuControllerBase : public BPopUpMenu
-{
+class IMPEXPBMGUIBASE BmMenuControllerBase : public BPopUpMenu {
 	typedef BPopUpMenu inherited;
-	
+
 
 public:
-
-	BmMenuControllerBase( const char* label, BHandler* msgTarget, 
-								 BMessage* msgTemplate,
-								 BmRebuildMenuFunc fn, int32 flags=0);
+	BmMenuControllerBase(const char* label, BHandler* msgTarget, BMessage* msgTemplate,
+		BmRebuildMenuFunc fn, int32 flags = 0);
 
 	virtual ~BmMenuControllerBase();
 
 	// native methods
-	void MarkItem( const char* label);
+	void MarkItem(const char* label);
 	void ClearMark();
 	virtual void Clear();
 	//
-	static BMenuItem* MarkItemInMenu( BMenu* menu, const char* label);
-	static void ClearMarkInMenu( BMenu* menu);
-	
+	static BMenuItem* MarkItemInMenu(BMenu* menu, const char* label);
+	static void ClearMarkInMenu(BMenu* menu);
+
 	// overrides of view-base
 	void AttachedToWindow();
 	BPoint ScreenLocation();
 
 	// getters:
 	BHandler* MsgTarget() const;
-	BMessage* MsgTemplate() 		 		{ return mMsgTemplate; }
-	const BmString& Shortcuts() const 	{ return mShortcuts; }
+	BMessage* MsgTemplate() { return mMsgTemplate; }
+	const BmString& Shortcuts() const { return mShortcuts; }
 
 	// setters:
-	void MsgTarget( BHandler* t)  		{ mMsgTarget = t; }
-	void Shortcuts( const BmString s);
+	void MsgTarget(BHandler* t) { mMsgTarget = t; }
+	void Shortcuts(const BmString s);
 
 protected:
 	virtual void UpdateItemList();
@@ -80,8 +77,8 @@ protected:
 
 private:
 	// Hide copy-constructor and assignment:
-	BmMenuControllerBase( const BmMenuControllerBase&);
-	BmMenuControllerBase operator=( const BmMenuControllerBase&);
+	BmMenuControllerBase(const BmMenuControllerBase&);
+	BmMenuControllerBase operator=(const BmMenuControllerBase&);
 };
 
 

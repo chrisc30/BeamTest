@@ -6,7 +6,7 @@
  *		Oliver Tappe <beam@hirschkaefer.de>
  */
 #ifdef BEAM_FOR_BONE
-# include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #include <NetAddress.h>
 #include <NetEndpoint.h>
@@ -17,16 +17,16 @@
 // #pragma mark - BmNetEndpoint
 //*****************************************************************************
 
-const char* const BmNetEndpoint::MSG_CLIENT_CERT_NAME = 	"bm:clcrtnm";
-const char* const BmNetEndpoint::MSG_SERVER_NAME = 		"bm:servnm";
+const char* const BmNetEndpoint::MSG_CLIENT_CERT_NAME = "bm:clcrtnm";
+const char* const BmNetEndpoint::MSG_SERVER_NAME = "bm:servnm";
 const char* const BmNetEndpoint::MSG_ACCEPTED_CERT_ID = "bm:acccrtid";
 /*------------------------------------------------------------------------------*\
 	BmNetEndpoint()
 		-	constructor
 \*------------------------------------------------------------------------------*/
 BmNetEndpoint::BmNetEndpoint()
-	:	mSocket( new BNetEndpoint( SOCK_STREAM))
-	,	mStopRequested( false)
+	: mSocket(new BNetEndpoint(SOCK_STREAM)),
+	  mStopRequested(false)
 {
 }
 
@@ -34,7 +34,7 @@ BmNetEndpoint::BmNetEndpoint()
 	~BmNetEndpoint()
 		-	destructor
 \*------------------------------------------------------------------------------*/
-BmNetEndpoint::~BmNetEndpoint() 
+BmNetEndpoint::~BmNetEndpoint()
 {
 	Close();
 	delete mSocket;
@@ -42,81 +42,90 @@ BmNetEndpoint::~BmNetEndpoint()
 
 /*------------------------------------------------------------------------------*\
 	InitCheck()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmNetEndpoint::InitCheck() const
+status_t
+BmNetEndpoint::InitCheck() const
 {
 	return mSocket->InitCheck();
 }
 
 /*------------------------------------------------------------------------------*\
 	Error()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int BmNetEndpoint::Error() const
+int
+BmNetEndpoint::Error() const
 {
 	return mSocket->Error();
 }
 
 /*------------------------------------------------------------------------------*\
 	ErrorStr()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmString BmNetEndpoint::ErrorStr() const
+BmString
+BmNetEndpoint::ErrorStr() const
 {
 	return mSocket->ErrorStr();
 }
 
 /*------------------------------------------------------------------------------*\
 	Connect()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmNetEndpoint::Connect( const BNetAddress& address) 
+status_t
+BmNetEndpoint::Connect(const BNetAddress& address)
 {
-	return mSocket->Connect( address);
+	return mSocket->Connect(address);
 }
 
 /*------------------------------------------------------------------------------*\
 	Close()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetEndpoint::Close() 
+void
+BmNetEndpoint::Close()
 {
 	mSocket->Close();
 }
 
 /*------------------------------------------------------------------------------*\
 	StartEncryption()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmNetEndpoint::StartEncryption(const char* encType) 
+status_t
+BmNetEndpoint::StartEncryption(const char* encType)
 {
 	return B_ERROR;
 }
 
 /*------------------------------------------------------------------------------*\
 	StopEncryption()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmNetEndpoint::StopEncryption() 
+status_t
+BmNetEndpoint::StopEncryption()
 {
 	return B_ERROR;
 }
 
 /*------------------------------------------------------------------------------*\
 	EncryptionIsActive()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmNetEndpoint::EncryptionIsActive() 
+bool
+BmNetEndpoint::EncryptionIsActive()
 {
 	return false;
 }
 
 /*------------------------------------------------------------------------------*\
 	SetAdditionalInfo()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetEndpoint::SetAdditionalInfo(const BMessage* msg)
+void
+BmNetEndpoint::SetAdditionalInfo(const BMessage* msg)
 {
 	if (msg)
 		mAdditionalInfo = *msg;
@@ -125,55 +134,60 @@ void BmNetEndpoint::SetAdditionalInfo(const BMessage* msg)
 
 /*------------------------------------------------------------------------------*\
 	NewAcceptedCertID()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-const BmString& BmNetEndpoint::NewAcceptedCertID()
+const BmString&
+BmNetEndpoint::NewAcceptedCertID()
 {
 	return mNewAcceptedCertID;
 }
 
 /*------------------------------------------------------------------------------*\
 	NewAcceptedCertID()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetEndpoint::NewAcceptedCertID(const BmString& s)
+void
+BmNetEndpoint::NewAcceptedCertID(const BmString& s)
 {
 	mNewAcceptedCertID = s;
 }
 
 /*------------------------------------------------------------------------------*\
 	Send()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int32 BmNetEndpoint::Send( const void* buffer, size_t size, int flags) 
+int32
+BmNetEndpoint::Send(const void* buffer, size_t size, int flags)
 {
 	return mSocket->Send(buffer, size, flags);
 }
 
 /*------------------------------------------------------------------------------*\
 	Receive()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int32 BmNetEndpoint::Receive( void* buffer, size_t size, int flags) 
+int32
+BmNetEndpoint::Receive(void* buffer, size_t size, int flags)
 {
 	return mSocket->Receive(buffer, size, flags);
 }
 
 /*------------------------------------------------------------------------------*\
 	IsDataPending()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmNetEndpoint::IsDataPending( bigtime_t timeout) 
+bool
+BmNetEndpoint::IsDataPending(bigtime_t timeout)
 {
-	return mSocket->IsDataPending( timeout);
+	return mSocket->IsDataPending(timeout);
 }
 
 /*------------------------------------------------------------------------------*\
 	SetTimeout()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetEndpoint::SetTimeout(int32 timeout)
+void
+BmNetEndpoint::SetTimeout(int32 timeout)
 {
 	mSocket->SetTimeout(timeout);
 }
-

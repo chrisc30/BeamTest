@@ -17,7 +17,7 @@
 class BmMailFolder;
 /*------------------------------------------------------------------------------*\
 	BmMailMonitor
-		-	class 
+		-	class
 \*------------------------------------------------------------------------------*/
 class IMPEXPBMMAILKIT BmMailMonitor : public BLooper {
 	typedef BLooper inherited;
@@ -28,22 +28,21 @@ public:
 	BmMailMonitor();
 	~BmMailMonitor();
 
-	void CacheRefToFolder( node_ref& nref, const BmString& fKey);
+	void CacheRefToFolder(node_ref& nref, const BmString& fKey);
 	bool IsIdle(uint32 msecs = 1000);
 
 	// overrides of looper base:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 	void Quit();
 
 	static BmMailMonitor* theInstance;
 
 private:
-
 	class BmMailMonitorWorker* mWorker;
 
 	// Hide copy-constructor and assignment:
-	BmMailMonitor( const BmMailMonitor&);
-	BmMailMonitor operator=( const BmMailMonitor&);
+	BmMailMonitor(const BmMailMonitor&);
+	BmMailMonitor operator=(const BmMailMonitor&);
 };
 
 #define TheMailMonitor BmMailMonitor::theInstance

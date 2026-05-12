@@ -17,9 +17,9 @@ using namespace regexx;
 
 #include "BmBasics.h"
 #include "BmIdentity.h"
+#include "BmImapAccount.h"
 #include "BmLogHandler.h"
 #include "BmMailFolder.h"
-#include "BmImapAccount.h"
 #include "BmRosterBase.h"
 #include "BmUtil.h"
 
@@ -34,8 +34,8 @@ const char* const BmImapAccount::nType = "IMAP";
 	BmImapAccount()
 		-	c'tor
 \*------------------------------------------------------------------------------*/
-BmImapAccount::BmImapAccount( const char* name, BmRecvAccountList* model) 
-	:	inherited( name, model)
+BmImapAccount::BmImapAccount(const char* name, BmRecvAccountList* model)
+	: inherited(name, model)
 {
 	mPortNr = 143;
 	mPortNrString = "143";
@@ -47,8 +47,8 @@ BmImapAccount::BmImapAccount( const char* name, BmRecvAccountList* model)
 		-	c'tor
 		-	constructs a BmImapAccount from a BMessage
 \*------------------------------------------------------------------------------*/
-BmImapAccount::BmImapAccount( BMessage* archive, BmRecvAccountList* model) 
-	:	inherited( archive, model)
+BmImapAccount::BmImapAccount(BMessage* archive, BmRecvAccountList* model)
+	: inherited(archive, model)
 {
 	SetupIntervalRunner();
 }
@@ -57,14 +57,14 @@ BmImapAccount::BmImapAccount( BMessage* archive, BmRecvAccountList* model)
 	~BmImapAccount()
 		-	d'tor
 \*------------------------------------------------------------------------------*/
-BmImapAccount::~BmImapAccount() {
-}
+BmImapAccount::~BmImapAccount() {}
 
 /*------------------------------------------------------------------------------*\
 	GetSupportedAuthTypes()
 		-
 \*------------------------------------------------------------------------------*/
-void BmImapAccount::GetSupportedAuthTypes(vector<BmString>& outList) const
+void
+BmImapAccount::GetSupportedAuthTypes(vector<BmString>& outList) const
 {
 	outList.push_back(AUTH_AUTO);
 	outList.push_back(AUTH_CRAM_MD5);

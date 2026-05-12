@@ -111,7 +111,7 @@ extern IMPEXPBMMAILKIT const char* BM_MAIL_CLASS_TOFU;
 
 class BmFilter;
 /*------------------------------------------------------------------------------*\
-	BmMail 
+	BmMail
 		-	represents a single mail-message in Beam
 		-	contains functionality to parse mail-headers and body-parts
 		-	can instantiate a mail from text or from a file
@@ -121,48 +121,44 @@ class BmFilter;
 class IMPEXPBMMAILKIT BmMail : public BmJobModel {
 	typedef BmJobModel inherited;
 
-	typedef map<int32,BmString> BmQuoteLevelMap;
-	typedef vector< BmRef< BmMailRef> > BmMailRefVect;
+	typedef map<int32, BmString> BmQuoteLevelMap;
+	typedef vector<BmRef<BmMailRef> > BmMailRefVect;
 
 public:
-	static BmRef<BmMail> CreateInstance( BmMailRef* ref);
-	BmMail( bool outbound);
-	BmMail( const BmString &msgText, const BmString account=BmString());
+	static BmRef<BmMail> CreateInstance(BmMailRef* ref);
+	BmMail(bool outbound);
+	BmMail(const BmString& msgText, const BmString account = BmString());
 	virtual ~BmMail();
 
 	// native methods:
 	bool ReconstructRawText();
 	bool ConstructAndStore();
-	bool ConstructRawText( const BmString& editableUtf8Text, 
-								  const BmString& charset,
-								  BmString smtpAccount);
-	void SetTo( const BmString &text, const BmString account);
-	void SetNewHeader( const BmString& headerStr);
-	void SetSignatureByName( const BmString sigName);
-	void SetupFromIdentityAndRecvAddr( BmIdentity* ident, 
-												  const BmString& recvAddr);
+	bool ConstructRawText(
+		const BmString& editableUtf8Text, const BmString& charset, BmString smtpAccount);
+	void SetTo(const BmString& text, const BmString account);
+	void SetNewHeader(const BmString& headerStr);
+	void SetSignatureByName(const BmString sigName);
+	void SetupFromIdentityAndRecvAddr(BmIdentity* ident, const BmString& recvAddr);
 	//
 	void ApplyOutboundFilters();
 	void ApplyInboundFilters();
-	bool Send( bool now=true);
+	bool Send(bool now = true);
 	bool Store();
-	void StoreIntoFile( BDirectory* destDir, BmString filename, 
-							  const BmString& status, bigtime_t whenCreated, 
-							  BEntry* backupEntry = NULL);
+	void StoreIntoFile(BDirectory* destDir, BmString filename, const BmString& status,
+		bigtime_t whenCreated, BEntry* backupEntry = NULL);
 	void ResyncFromDisk();
 	//
-	const BmString& GetFieldVal( const BmString fieldName);
+	const BmString& GetFieldVal(const BmString fieldName);
 	bool HasAttachments() const;
 	bool HasComeFromList() const;
-	void DetermineRecvAddrAndIdentity( BmString& receivingAddr,
-												  BmRef<BmIdentity>& ident);
-	void MarkAs( const char* status);
-	void RemoveField( const BmString fieldName);
-	void SetFieldVal( const BmString fieldName, const BmString value);
-	bool IsFieldEmpty( const BmString fieldName);
+	void DetermineRecvAddrAndIdentity(BmString& receivingAddr, BmRef<BmIdentity>& ident);
+	void MarkAs(const char* status);
+	void RemoveField(const BmString fieldName);
+	void SetFieldVal(const BmString fieldName, const BmString value);
+	bool IsFieldEmpty(const BmString fieldName);
 	const BmString& Status() const;
 	//
-	void RatioSpam( float rs);
+	void RatioSpam(float rs);
 	float RatioSpam() const;
 	bool HasBeenClassified() const;
 	void MarkAsSpam();
@@ -170,128 +166,114 @@ public:
 	bool IsMarkedAsSpam() const;
 	bool IsMarkedAsTofu() const;
 	//
-	void AddAttachmentFromRef( const entry_ref* ref,
-										const BmString& defaultCharset);
+	void AddAttachmentFromRef(const entry_ref* ref, const BmString& defaultCharset);
 	//
-	bool SetDestFolderName( const BmString& destFolderName);
+	bool SetDestFolderName(const BmString& destFolderName);
 	BmRef<BmMailFolder> DestFolder() const;
-	//	
+	//
 	bool MoveToDestFolder();
 	//
-	void SetBaseMailInfo( BmMailRef* ref, const BmString newStatus);
-	void AddBaseMailRef( BmMailRef* ref);
+	void SetBaseMailInfo(BmMailRef* ref, const BmString newStatus);
+	void AddBaseMailRef(BmMailRef* ref);
 
 	// overrides of jobmodel base:
 	bool StartJob();
 
 	// getters:
-	inline const status_t InitCheck() const	
-													{ return mInitCheck; }
-	inline const BmString& AccountName(){ return mAccountName; }
+	inline const status_t InitCheck() const { return mInitCheck; }
+	inline const BmString& AccountName() { return mAccountName; }
 	BmBodyPartList* Body() const;
 	BmMailHeader* Header() const;
 	int32 HeaderLength() const;
-	inline int32 RightMargin() const		{ return mRightMargin; }
-	inline const BmString& RawText() const		
-													{ return mText; }
+	inline int32 RightMargin() const { return mRightMargin; }
+	inline const BmString& RawText() const { return mText; }
 	const BmString& HeaderText() const;
-	inline const bool Outbound() const	{ return mOutbound; }
+	inline const bool Outbound() const { return mOutbound; }
 	bool IsRedirect() const;
 	BmMailRef* MailRef() const;
-	const BmString& DefaultCharset()	const;
-	inline BmString SignatureName() const		
-													{ return mSignatureName; }
-	inline const BmString& IdentityName() const	
-													{ return mIdentityName; }
-	inline const BmString& DestFolderName() const	
-													{ return mDestFolderName; }
-	inline const BmString& ImapUID() const	
-													{ return mImapUID; }
+	const BmString& DefaultCharset() const;
+	inline BmString SignatureName() const { return mSignatureName; }
+	inline const BmString& IdentityName() const { return mIdentityName; }
+	inline const BmString& DestFolderName() const { return mDestFolderName; }
+	inline const BmString& ImapUID() const { return mImapUID; }
 
 	// setters:
-	inline void BumpRightMargin( int32 i)		
-													{ mRightMargin = MAX(i,mRightMargin); }
-	inline void RightMargin( int32 i)	{ mRightMargin = i; }
-	void IsRedirect( bool b);
-	inline void Outbound( bool b)			{ mOutbound = b; }
-	inline void AccountName( const BmString& s)
-													{ mAccountName = s; }
-	inline void IdentityName( const BmString& s)
-													{ mIdentityName = s; }
-	inline void Classification( const BmString& s)
-													{ mClassification = s; }
-	inline void MoveToTrash( bool b)		{ mMoveToTrash = b; }
-	inline void SuggestedCharset( const BmString& s)
-													{ mSuggestedCharset = s; }
-	inline void ImapUID( const BmString& s)	
-													{ mImapUID = s; }
+	inline void BumpRightMargin(int32 i) { mRightMargin = MAX(i, mRightMargin); }
+	inline void RightMargin(int32 i) { mRightMargin = i; }
+	void IsRedirect(bool b);
+	inline void Outbound(bool b) { mOutbound = b; }
+	inline void AccountName(const BmString& s) { mAccountName = s; }
+	inline void IdentityName(const BmString& s) { mIdentityName = s; }
+	inline void Classification(const BmString& s) { mClassification = s; }
+	inline void MoveToTrash(bool b) { mMoveToTrash = b; }
+	inline void SuggestedCharset(const BmString& s) { mSuggestedCharset = s; }
+	inline void ImapUID(const BmString& s) { mImapUID = s; }
 
 	static const int32 BM_READ_MAIL_JOB = 1;
 
 protected:
-	BmMail( BmMailRef* ref);
+	BmMail(BmMailRef* ref);
 
 	BmString CreateBasicFilename();
-	void StoreAttributes( BNode& mailNode, const BmString& status, 
-								 bigtime_t whenCreated);
+	void StoreAttributes(BNode& mailNode, const BmString& status, bigtime_t whenCreated);
 
 private:
-	void SetDefaultHeaders( const BmString& defaultHeaders);
+	void SetDefaultHeaders(const BmString& defaultHeaders);
 	BmMail();
-	
+
 	const BmString& DefaultStatus() const;
 
 	BmRef<BmMailHeader> mHeader;
-							// contains header-information
+	// contains header-information
 	BmRef<BmBodyPartList> mBody;
-							// contains body-information (split into subparts)
+	// contains body-information (split into subparts)
 	BmString mText;
-							// text of complete message
+	// text of complete message
 	BmString mAccountName;
-							// name of account this message came from/is sent through
+	// name of account this message came from/is sent through
 	BmString mIdentityName;
-							// name of identity this message belongs to
+	// name of identity this message belongs to
 	BmString mClassification;
-							// genuine or spam
+	// genuine or spam
 	float mRatioSpam;
-							// 0.00 (genuine) .. 1.0 (spam)
+	// 0.00 (genuine) .. 1.0 (spam)
 	BEntry mEntry;
-							// filesystem-entry for this mail 
+	// filesystem-entry for this mail
 	BmRef<BmMailRef> mMailRef;
-							// the mail-ref that corresponds to this mail. 
-							// This exists if (and only if) a mail lives on disk
+	// the mail-ref that corresponds to this mail.
+	// This exists if (and only if) a mail lives on disk
 	bool mOutbound;
-							// true if mail is for sending (as opposed to received)
+	// true if mail is for sending (as opposed to received)
 	int32 mRightMargin;
-							// the current right-margin for this mail
+	// the current right-margin for this mail
 	BmMailRefVect mBaseRefVect;
-							// the mailref(s) that created us (via forward/reply)
+	// the mailref(s) that created us (via forward/reply)
 	BmString mNewBaseStatus;
-							// new status of base mail (forwarded/replied)
+	// new status of base mail (forwarded/replied)
 	BmString mSignatureName;
-							// name of signature to use in this mail
+	// name of signature to use in this mail
 	BmRef<BmMailHeader> mDefaultHeader;
-							// default header-values (comes from identity)
+	// default header-values (comes from identity)
 	bool mMoveToTrash;
-							// indicates that this mail should be trashed (after being
-							// stored)
+	// indicates that this mail should be trashed (after being
+	// stored)
 	mutable BmString mDestFolderName;
-							// name of folder where the mail shall be stored into
-							// (this may be changed by a mail-filter)
+	// name of folder where the mail shall be stored into
+	// (this may be changed by a mail-filter)
 	mutable BmString mDefaultStatus;
-							// default status of this mail, only relevant
-							// before mail lives on disk
+	// default status of this mail, only relevant
+	// before mail lives on disk
 	BmString mSuggestedCharset;
-							// charset explicitly selected by user, overrides
-							// any other.
+	// charset explicitly selected by user, overrides
+	// any other.
 	BmString mImapUID;
-							// UID for this mail as retrieved from the IMAP
-							// server.
+	// UID for this mail as retrieved from the IMAP
+	// server.
 	status_t mInitCheck;
 
 	// Hide copy-constructor and assignment:
-	BmMail( const BmMail&);
-	BmMail operator=( const BmMail&);
+	BmMail(const BmMail&);
+	BmMail operator=(const BmMail&);
 };
 
 #endif

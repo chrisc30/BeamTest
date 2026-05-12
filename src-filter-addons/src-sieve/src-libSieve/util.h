@@ -1,5 +1,5 @@
 /* util.h -- general utility functions
- * 
+ *
  * Header file for util.c
  *
  * Copyrights removed. The text contained herein is purely functional,
@@ -22,6 +22,6 @@ extern const unsigned char convert_to_lowercase[256];
 
 /* convert string to all lower case
  */
-char *lcase (char *str);
+char* lcase(char* str);
 
 #endif /* INCLUDED_UTIL_H */

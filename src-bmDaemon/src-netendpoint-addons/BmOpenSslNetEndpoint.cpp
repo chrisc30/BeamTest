@@ -7,16 +7,16 @@
  *		Oliver Tappe <beam@hirschkaefer.de>
  */
 
-#include <vector>
 #include <map>
+#include <vector>
 
+#include <FindDirectory.h>
 #include <Font.h>
-#include <Path.h>
 #include <Locker.h>
 #include <Message.h>
-#include <FindDirectory.h>
+#include <Path.h>
 #ifdef BEAM_FOR_BONE
-# include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #include <NetEndpoint.h>
 
@@ -24,19 +24,20 @@
 #include "BmRosterBase.h"
 
 #include <openssl/err.h>
-#include <openssl/pkcs12.h> 
-#include <openssl/x509v3.h> 
+#include <openssl/pkcs12.h>
+#include <openssl/x509v3.h>
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-static BmString CollectSslErrorString()
+static BmString
+CollectSslErrorString()
 {
 	BmString errStr;
 	unsigned long err;
 	char errBuf[256];
-	while((err = ERR_get_error()) != 0) {
+	while ((err = ERR_get_error()) != 0) {
 		ERR_error_string(err, errBuf);
 		errStr << errBuf << "\n";
 	}
@@ -47,32 +48,32 @@ static BmString CollectSslErrorString()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-extern "C" 
-void locking_callback(int mode, int type, const char *file, int line)
+extern "C" void
+locking_callback(int mode, int type, const char* file, int line)
 {
 	BmOpenSslNetEndpoint::LockingCallback(mode, type, file, line);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-extern "C"
-unsigned long thread_id_callback(void)
+extern "C" unsigned long
+thread_id_callback(void)
 {
 	return BmOpenSslNetEndpoint::ThreadIdCallback();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmOpenSslNetEndpoint::ContextManager::ContextManager()
-	:	mLocker("OpenSslContextManagerLock")
-	,	mTlsContext(NULL)
-	,	mStatus(B_NO_INIT)
+	: mLocker("OpenSslContextManagerLock"),
+	  mTlsContext(NULL),
+	  mStatus(B_NO_INIT)
 {
 	if (!SSL_library_init())
 		return;
@@ -104,11 +105,9 @@ BmOpenSslNetEndpoint::ContextManager::ContextManager()
 		"DHE-RSA-AES256-SHA:"
 		"AES128-SHA:"
 		"AES256-SHA");
-	SSL_CTX_set_client_cert_cb(mTlsContext, 
-		BmOpenSslNetEndpoint::ClientCertCallback);
-	SSL_CTX_set_verify(mTlsContext, SSL_VERIFY_PEER,
-		BmOpenSslNetEndpoint::VerifyCallback);
-	
+	SSL_CTX_set_client_cert_cb(mTlsContext, BmOpenSslNetEndpoint::ClientCertCallback);
+	SSL_CTX_set_verify(mTlsContext, SSL_VERIFY_PEER, BmOpenSslNetEndpoint::VerifyCallback);
+
 	BPath certificateStore;
 	find_directory(B_SYSTEM_DATA_DIRECTORY, &certificateStore);
 	certificateStore.Append("ssl/CARootCertificates.pem");
@@ -120,21 +119,22 @@ BmOpenSslNetEndpoint::ContextManager::ContextManager()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmOpenSslNetEndpoint::ContextManager::~ContextManager()
 {
 	if (mTlsContext)
-		SSL_CTX_free( mTlsContext);
+		SSL_CTX_free(mTlsContext);
 	_CleanupSslLocks();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmOpenSslNetEndpoint::ContextManager
-::LockingCallback(int mode, int type, const char *file, int line)
+void
+BmOpenSslNetEndpoint::ContextManager ::LockingCallback(
+	int mode, int type, const char* file, int line)
 {
 	if (mode & CRYPTO_LOCK)
 		mSslLocks[type]->Lock();
@@ -144,19 +144,20 @@ void BmOpenSslNetEndpoint::ContextManager
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-unsigned long BmOpenSslNetEndpoint::ContextManager::ThreadIdCallback(void)
+unsigned long
+BmOpenSslNetEndpoint::ContextManager::ThreadIdCallback(void)
 {
 	return (unsigned long)find_thread(NULL);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmOpenSslNetEndpoint::ContextManager
-::SetUserdataForCurrentThread(BmOpenSslNetEndpoint* userdata)
+void
+BmOpenSslNetEndpoint::ContextManager ::SetUserdataForCurrentThread(BmOpenSslNetEndpoint* userdata)
 {
 	if (mLocker.Lock()) {
 		mUserdataMap[find_thread(NULL)] = userdata;
@@ -166,10 +167,10 @@ void BmOpenSslNetEndpoint::ContextManager
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmOpenSslNetEndpoint* BmOpenSslNetEndpoint::ContextManager
-::GetUserdataForCurrentThread()
+BmOpenSslNetEndpoint*
+BmOpenSslNetEndpoint::ContextManager ::GetUserdataForCurrentThread()
 {
 	BmOpenSslNetEndpoint* userdata = NULL;
 	if (mLocker.Lock()) {
@@ -183,9 +184,10 @@ BmOpenSslNetEndpoint* BmOpenSslNetEndpoint::ContextManager
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmOpenSslNetEndpoint::ContextManager::RemoveUserdataForCurrentThread()
+void
+BmOpenSslNetEndpoint::ContextManager::RemoveUserdataForCurrentThread()
 {
 	if (mLocker.Lock()) {
 		mUserdataMap.erase(find_thread(NULL));
@@ -195,11 +197,12 @@ void BmOpenSslNetEndpoint::ContextManager::RemoveUserdataForCurrentThread()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmOpenSslNetEndpoint::ContextManager::_SetupSslLocks(void)
+void
+BmOpenSslNetEndpoint::ContextManager::_SetupSslLocks(void)
 {
-	for (int i=0; i<CRYPTO_num_locks(); i++)
+	for (int i = 0; i < CRYPTO_num_locks(); i++)
 		mSslLocks.push_back(new BLocker("crypto lock"));
 	CRYPTO_set_id_callback(thread_id_callback);
 	CRYPTO_set_locking_callback(locking_callback);
@@ -207,29 +210,29 @@ void BmOpenSslNetEndpoint::ContextManager::_SetupSslLocks(void)
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmOpenSslNetEndpoint::ContextManager::_CleanupSslLocks(void)
+void
+BmOpenSslNetEndpoint::ContextManager::_CleanupSslLocks(void)
 {
 	CRYPTO_set_id_callback(NULL);
 	CRYPTO_set_locking_callback(NULL);
-	for (int i=0; i<CRYPTO_num_locks(); i++)
+	for (int i = 0; i < CRYPTO_num_locks(); i++)
 		delete mSslLocks[i];
 	mSslLocks.clear();
 }
 
 // #pragma mark - BmOpenSslNetEndpoint
 
-BmOpenSslNetEndpoint::ContextManager
-BmOpenSslNetEndpoint::nContextManager;
+BmOpenSslNetEndpoint::ContextManager BmOpenSslNetEndpoint::nContextManager;
 
 /*------------------------------------------------------------------------------*\
 	BmOpenSslNetEndpoint()
 		-	constructor
 \*------------------------------------------------------------------------------*/
 BmOpenSslNetEndpoint::BmOpenSslNetEndpoint()
-	:	mSSL(NULL)
-	,	mError(0)
+	: mSSL(NULL),
+	  mError(0)
 {
 }
 
@@ -237,10 +240,10 @@ BmOpenSslNetEndpoint::BmOpenSslNetEndpoint()
 	~BmOpenSslNetEndpoint()
 		-	destructor
 \*------------------------------------------------------------------------------*/
-BmOpenSslNetEndpoint::~BmOpenSslNetEndpoint() 
+BmOpenSslNetEndpoint::~BmOpenSslNetEndpoint()
 {
 	if (mSSL)
-		SSL_free( mSSL);
+		SSL_free(mSSL);
 
 	// cleanup error queue of current thread:
 	ERR_remove_state(0);
@@ -248,32 +251,37 @@ BmOpenSslNetEndpoint::~BmOpenSslNetEndpoint()
 
 /*------------------------------------------------------------------------------*\
 	Connect()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmOpenSslNetEndpoint::Connect( const BNetAddress& address) {
+status_t
+BmOpenSslNetEndpoint::Connect(const BNetAddress& address)
+{
 	// already connected?
 	if (mSSL)
 		return B_BAD_VALUE;
 
 	// establish the underlying socket connection
-	status_t error = inherited::Connect( address);
+	status_t error = inherited::Connect(address);
 	return error;
 }
 
 /*------------------------------------------------------------------------------*\
 	Close()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmOpenSslNetEndpoint::Close() {
+void
+BmOpenSslNetEndpoint::Close()
+{
 	StopEncryption();
 	inherited::Close();
 }
 
 /*------------------------------------------------------------------------------*\
 	Error()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int BmOpenSslNetEndpoint::Error() const
+int
+BmOpenSslNetEndpoint::Error() const
 {
 	if (mError != 0)
 		return mError;
@@ -283,22 +291,20 @@ int BmOpenSslNetEndpoint::Error() const
 
 /*------------------------------------------------------------------------------*\
 	ErrorStr()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmString BmOpenSslNetEndpoint::ErrorStr() const
+BmString
+BmOpenSslNetEndpoint::ErrorStr() const
 {
 	BmString errStr;
 	if (mVerificationError.Length())
 		errStr << mVerificationError << "\n";
-	if (mError == 0) 
+	if (mError == 0)
 		errStr << inherited::ErrorStr();
 	else if (mError >= 2 && mError <= 4) {
-		const char* ssl_errs[] = {
-			"Want Read",
-			"Want Write",
-			"Want X509 lookup, but don't know how to do that!"
-		};
-		errStr << ssl_errs[mError-2];
+		const char* ssl_errs[]
+			= {"Want Read", "Want Write", "Want X509 lookup, but don't know how to do that!"};
+		errStr << ssl_errs[mError - 2];
 	} else {
 		errStr << CollectSslErrorString();
 	}
@@ -307,9 +313,11 @@ BmString BmOpenSslNetEndpoint::ErrorStr() const
 
 /*------------------------------------------------------------------------------*\
 	StartEncryption()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmOpenSslNetEndpoint::StartEncryption(const char* encType) {
+status_t
+BmOpenSslNetEndpoint::StartEncryption(const char* encType)
+{
 	// encryption already on?
 	if (mSSL)
 		return B_NOT_ALLOWED;
@@ -327,7 +335,7 @@ status_t BmOpenSslNetEndpoint::StartEncryption(const char* encType) {
 	SSL_CTX* context = nContextManager.TlsContext();
 
 	// create SSL structure
-	mSSL = SSL_new( context);
+	mSSL = SSL_new(context);
 	if (!mSSL)
 		return B_ERROR;
 
@@ -336,18 +344,18 @@ status_t BmOpenSslNetEndpoint::StartEncryption(const char* encType) {
 
 	int result;
 	// set SSL file descriptor
-	if ((result = SSL_set_fd( mSSL, socket)) != 1) {
-		mError = SSL_get_error( mSSL, result);
+	if ((result = SSL_set_fd(mSSL, socket)) != 1) {
+		mError = SSL_get_error(mSSL, result);
 		return B_ERROR;
 	}
 
 	// connect
 	_ClearErrorState();
-	if ((result = SSL_connect( mSSL)) != 1) {
-		mError = SSL_get_error( mSSL, result);
+	if ((result = SSL_connect(mSSL)) != 1) {
+		mError = SSL_get_error(mSSL, result);
 		return B_ERROR;
 	}
-	
+
 	if ((result = _PostHandshakeCheck()) != X509_V_OK) {
 		mError = result;
 		return B_ERROR;
@@ -358,9 +366,11 @@ status_t BmOpenSslNetEndpoint::StartEncryption(const char* encType) {
 
 /*------------------------------------------------------------------------------*\
 	StopEncryption()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmOpenSslNetEndpoint::StopEncryption() {
+status_t
+BmOpenSslNetEndpoint::StopEncryption()
+{
 	if (!mSSL)
 		return B_BAD_VALUE;
 
@@ -369,11 +379,11 @@ status_t BmOpenSslNetEndpoint::StopEncryption() {
 	// shutdown connection
 	if (mError == 0) {
 		if (SSL_shutdown(mSSL) == 0)
-			SSL_shutdown(mSSL);	// as per documentation (bidirectional shutdown)
+			SSL_shutdown(mSSL);	 // as per documentation (bidirectional shutdown)
 	} else
 		SSL_clear(mSSL);
 
-	SSL_free( mSSL);
+	SSL_free(mSSL);
 	mSSL = NULL;
 
 	return B_OK;
@@ -381,44 +391,49 @@ status_t BmOpenSslNetEndpoint::StopEncryption() {
 
 /*------------------------------------------------------------------------------*\
 	EncryptionIsActive()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmOpenSslNetEndpoint::EncryptionIsActive() 
+bool
+BmOpenSslNetEndpoint::EncryptionIsActive()
 {
 	return mSSL != NULL;
 }
 
 /*------------------------------------------------------------------------------*\
 	Send()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int32 BmOpenSslNetEndpoint::Send( const void* buffer, size_t size, int flags) {
+int32
+BmOpenSslNetEndpoint::Send(const void* buffer, size_t size, int flags)
+{
 	if (!mSSL)
 		return inherited::Send(buffer, size, flags);
 
 	if (!buffer)
 		return B_BAD_VALUE;
 
-	int result = SSL_write( mSSL, buffer, (int)size);
+	int result = SSL_write(mSSL, buffer, (int)size);
 	if (result > 0)
 		return result;
 
 	// translate the error
-	return _TranslateErrorCode( result);
+	return _TranslateErrorCode(result);
 }
 
 /*------------------------------------------------------------------------------*\
 	Receive()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int32 BmOpenSslNetEndpoint::Receive( void* buffer, size_t size, int flags) {
+int32
+BmOpenSslNetEndpoint::Receive(void* buffer, size_t size, int flags)
+{
 	if (!mSSL)
 		return inherited::Receive(buffer, size, flags);
 
 	if (!buffer)
 		return B_BAD_VALUE;
 
-	int result = SSL_read( mSSL, buffer, (int)size);
+	int result = SSL_read(mSSL, buffer, (int)size);
 	if (result > 0)
 		return result;
 
@@ -428,21 +443,23 @@ int32 BmOpenSslNetEndpoint::Receive( void* buffer, size_t size, int flags) {
 
 /*------------------------------------------------------------------------------*\
 	IsDataPending()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmOpenSslNetEndpoint::IsDataPending( bigtime_t timeout) 
+bool
+BmOpenSslNetEndpoint::IsDataPending(bigtime_t timeout)
 {
 	// TODO: We might actually need to do something here. Data pending on
 	// the socket doesn't mean that we could also read something from the
 	// SSL connection.
-	return inherited::IsDataPending( timeout);
+	return inherited::IsDataPending(timeout);
 }
 
 /*------------------------------------------------------------------------------*\
 	GetEncryptionInfo()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmOpenSslNetEndpoint::GetEncryptionInfo(BMessage* encryptionInfo)
+status_t
+BmOpenSslNetEndpoint::GetEncryptionInfo(BMessage* encryptionInfo)
 {
 	if (!encryptionInfo)
 		return B_BAD_VALUE;
@@ -456,13 +473,12 @@ status_t BmOpenSslNetEndpoint::GetEncryptionInfo(BMessage* encryptionInfo)
 
 /*------------------------------------------------------------------------------*\
 	ClientCertCallback()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int BmOpenSslNetEndpoint
-::ClientCertCallback(SSL* ssl, X509 **certP, EVP_PKEY **pkeyP)
+int
+BmOpenSslNetEndpoint ::ClientCertCallback(SSL* ssl, X509** certP, EVP_PKEY** pkeyP)
 {
-	BmOpenSslNetEndpoint* endpoint 
-		= nContextManager.GetUserdataForCurrentThread();
+	BmOpenSslNetEndpoint* endpoint = nContextManager.GetUserdataForCurrentThread();
 	if (endpoint) {
 		if (endpoint->_FetchClientCertificateAndKey(ssl, certP, pkeyP) == B_OK)
 			return 1;
@@ -472,13 +488,13 @@ int BmOpenSslNetEndpoint
 
 /*------------------------------------------------------------------------------*\
 	VerifyCallback()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int BmOpenSslNetEndpoint::VerifyCallback(int ok, X509_STORE_CTX *store)
+int
+BmOpenSslNetEndpoint::VerifyCallback(int ok, X509_STORE_CTX* store)
 {
 	if (!ok) {
-		BmOpenSslNetEndpoint* endpoint 
-			= nContextManager.GetUserdataForCurrentThread();
+		BmOpenSslNetEndpoint* endpoint = nContextManager.GetUserdataForCurrentThread();
 		if (endpoint)
 			ok = endpoint->_FetchVerificationError(store);
 	}
@@ -487,30 +503,32 @@ int BmOpenSslNetEndpoint::VerifyCallback(int ok, X509_STORE_CTX *store)
 
 /*------------------------------------------------------------------------------*\
 	LockingCallback()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmOpenSslNetEndpoint::LockingCallback(int mode, int type, const char *file, int line)
+void
+BmOpenSslNetEndpoint::LockingCallback(int mode, int type, const char* file, int line)
 {
 	return nContextManager.LockingCallback(mode, type, file, line);
 }
 
 /*------------------------------------------------------------------------------*\
 	ThreadIdCallback()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-unsigned long BmOpenSslNetEndpoint::ThreadIdCallback(void)
+unsigned long
+BmOpenSslNetEndpoint::ThreadIdCallback(void)
 {
 	return nContextManager.ThreadIdCallback();
 }
 
 /*------------------------------------------------------------------------------*\
 	_FetchClientCertificateAndKey()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmOpenSslNetEndpoint
-::_FetchClientCertificateAndKey(SSL* ssl, X509 **certP, EVP_PKEY **pkeyP)
+status_t
+BmOpenSslNetEndpoint ::_FetchClientCertificateAndKey(SSL* ssl, X509** certP, EVP_PKEY** pkeyP)
 {
-	if (!ssl || !certP  || !pkeyP)
+	if (!ssl || !certP || !pkeyP)
 		return B_BAD_VALUE;
 	BmString name = mAdditionalInfo.FindString(MSG_CLIENT_CERT_NAME);
 	if (!name.Length())
@@ -524,11 +542,9 @@ status_t BmOpenSslNetEndpoint
 	int errLib = 0;
 	int errReason = 0;
 	bool stop = false;
-	while(!stop) {
+	while (!stop) {
 		BmString pwd;
-		BmString text 
-			= BmString("Please give passphrase for client certificate '")
-								<< name << "':";
+		BmString text = BmString("Please give passphrase for client certificate '") << name << "':";
 		if (!BeamGuiRoster->AskUserForPwd(text, pwd)) {
 			mStopRequested = true;
 			return B_INTERRUPTED;
@@ -563,39 +579,40 @@ status_t BmOpenSslNetEndpoint
 
 /*------------------------------------------------------------------------------*\
 	_FetchVerificationError()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int BmOpenSslNetEndpoint::_FetchVerificationError(X509_STORE_CTX *store)
+int
+BmOpenSslNetEndpoint::_FetchVerificationError(X509_STORE_CTX* store)
 {
 	int err = X509_STORE_CTX_get_error(store);
-	mVerificationError
-		<< "   " << err << " - " << X509_verify_cert_error_string(err) << "\n";
-	// in order to delegate error handling to _PostHandshakeCheck(), 
+	mVerificationError << "   " << err << " - " << X509_verify_cert_error_string(err) << "\n";
+	// in order to delegate error handling to _PostHandshakeCheck(),
 	// we always pretend that the certificate is ok:
 	return 1;
 }
 
 /*------------------------------------------------------------------------------*\
 	_FingerprintForCert()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmString BmOpenSslNetEndpoint::_FingerprintForCert(X509* cert)
+BmString
+BmOpenSslNetEndpoint::_FingerprintForCert(X509* cert)
 {
 	unsigned int n;
 	unsigned char md[EVP_MAX_MD_SIZE];
-	
+
 	if (!X509_digest(cert, EVP_md5(), md, &n))
 		return "";
 
 	BmString fp;
-	char* buf = fp.LockBuffer(n*3);
+	char* buf = fp.LockBuffer(n * 3);
 	if (!buf)
 		return "";
-	for (unsigned int j=0; j < n; ++j) {
-  		unsigned char c = md[j];
-		*buf++ = char((c > 0x9F ? 'A'-10 : '0')+(c>>4));
-		*buf++ = char(((c&0x0F) > 9 ? 'A'-10 : '0')+(c&0x0F));
-		if (j+1 < n)
+	for (unsigned int j = 0; j < n; ++j) {
+		unsigned char c = md[j];
+		*buf++ = char((c > 0x9F ? 'A' - 10 : '0') + (c >> 4));
+		*buf++ = char(((c & 0x0F) > 9 ? 'A' - 10 : '0') + (c & 0x0F));
+		if (j + 1 < n)
 			*buf++ = ':';
 	}
 	*buf = '\0';
@@ -605,10 +622,10 @@ BmString BmOpenSslNetEndpoint::_FingerprintForCert(X509* cert)
 
 /*------------------------------------------------------------------------------*\
 	_MatchHostname()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmOpenSslNetEndpoint::_MatchHostname(const BmString& hostname,
-														const BmString& pattern)
+bool
+BmOpenSslNetEndpoint::_MatchHostname(const BmString& hostname, const BmString& pattern)
 {
 	if (hostname.ICompare(pattern) == 0)
 		return true;
@@ -618,11 +635,11 @@ bool BmOpenSslNetEndpoint::_MatchHostname(const BmString& hostname,
 	int32 psPos = 0;
 	int32 pePos = pattern.Length();
 	bool stop = false;
-	while(!stop) {
+	while (!stop) {
 		if (hePos >= 0) {
-			hsPos = hostname.FindLast('.', hePos-1);
+			hsPos = hostname.FindLast('.', hePos - 1);
 			if (hsPos >= 0) {
-				hPart.SetTo(hostname.String()+hsPos+1, hePos-(hsPos+1));
+				hPart.SetTo(hostname.String() + hsPos + 1, hePos - (hsPos + 1));
 				hePos = hsPos;
 			} else {
 				hPart.SetTo(hostname.String(), hePos);
@@ -633,9 +650,9 @@ bool BmOpenSslNetEndpoint::_MatchHostname(const BmString& hostname,
 			stop = true;
 		}
 		if (pePos >= 0) {
-			psPos = pattern.FindLast('.', pePos-1);
+			psPos = pattern.FindLast('.', pePos - 1);
 			if (psPos >= 0) {
-				pPart.SetTo(pattern.String()+psPos+1, pePos-(psPos+1));
+				pPart.SetTo(pattern.String() + psPos + 1, pePos - (psPos + 1));
 				pePos = psPos;
 			} else {
 				pPart.SetTo(pattern.String(), pePos);
@@ -646,7 +663,7 @@ bool BmOpenSslNetEndpoint::_MatchHostname(const BmString& hostname,
 			stop = true;
 		}
 		int32 asteriskPos = pPart.FindFirst('*');
-		int32 matchLen = asteriskPos<0 ? pPart.Length() : asteriskPos;
+		int32 matchLen = asteriskPos < 0 ? pPart.Length() : asteriskPos;
 		if (hPart.ICompare(pPart, matchLen) != 0)
 			return false;
 	}
@@ -660,8 +677,9 @@ bool BmOpenSslNetEndpoint::_MatchHostname(const BmString& hostname,
 			+ if no match is found, commonName is tried.
 		-	implementation ripped from cURL (ssluse.c) [thanks, Daniel et al.!]
 \*------------------------------------------------------------------------------*/
-bool BmOpenSslNetEndpoint::_VerifyHostname(X509* cert, const BmString& hostname,
-														 BmString& namesFoundInCert)
+bool
+BmOpenSslNetEndpoint::_VerifyHostname(
+	X509* cert, const BmString& hostname, BmString& namesFoundInCert)
 {
 	namesFoundInCert.Truncate(0);
 	if (!cert)
@@ -669,43 +687,40 @@ bool BmOpenSslNetEndpoint::_VerifyHostname(X509* cert, const BmString& hostname,
 	bool matched = false;
 
 	/* get a "list" of alternative names */
-	STACK_OF(GENERAL_NAME) *altNames;
+	STACK_OF(GENERAL_NAME) * altNames;
 	altNames = static_cast<STACK_OF(GENERAL_NAME)*>(
-		X509_get_ext_d2i(cert, NID_subject_alt_name, NULL, NULL)
-	);
+		X509_get_ext_d2i(cert, NID_subject_alt_name, NULL, NULL));
 	if (altNames) {
 		/* get amount of alternatives, RFC2459 claims there MUST be at least
 		   one, but we don't depend on it... */
 		int numAlts = sk_GENERAL_NAME_num(altNames);
 
 		/* loop through all alternatives while none has matched */
-		for(int i=0; i<numAlts && !matched; i++) {
+		for (int i = 0; i < numAlts && !matched; i++) {
 			/* get a handle to alternative name number i */
-			const GENERAL_NAME *check = sk_GENERAL_NAME_value(altNames, i);
+			const GENERAL_NAME* check = sk_GENERAL_NAME_value(altNames, i);
 
 			/* only check alternatives of the same type the target is */
 			if (check->type == GEN_DNS) {
 				/* get data and length */
-				const char *altPtr = (char *)ASN1_STRING_data(check->d.ia5);
+				const char* altPtr = (char*)ASN1_STRING_data(check->d.ia5);
 				/* The OpenSSL man page explicitly says: "In general it cannot be
-			     assumed that the data returned by ASN1_STRING_data() is null
-			     terminated or does not contain embedded nulls." But also that
-			     "The actual format of the data will depend on the actual string
-			     type itself: for example for and IA5String the data will be ASCII"
-			
-			     Gisle researched the OpenSSL sources:
-			     "I checked the 0.9.6 and 0.9.8 sources before my patch and
-			     it always 0-terminates an IA5String."
+				 assumed that the data returned by ASN1_STRING_data() is null
+				 terminated or does not contain embedded nulls." But also that
+				 "The actual format of the data will depend on the actual string
+				 type itself: for example for and IA5String the data will be ASCII"
+
+				 Gisle researched the OpenSSL sources:
+				 "I checked the 0.9.6 and 0.9.8 sources before my patch and
+				 it always 0-terminates an IA5String."
 				*/
 				if (_MatchHostname(hostname, altPtr))
 					matched = true;
-				namesFoundInCert 
-					<< (namesFoundInCert.Length() ? ", " : "")
-					<< altPtr;
+				namesFoundInCert << (namesFoundInCert.Length() ? ", " : "") << altPtr;
 			}
 		}
 		GENERAL_NAMES_free(altNames);
-	} 
+	}
 	if (!matched) {
 		X509_NAME* subj = X509_get_subject_name(cert);
 		if (subj) {
@@ -715,9 +730,7 @@ bool BmOpenSslNetEndpoint::_VerifyHostname(X509* cert, const BmString& hostname,
 				BmString commonName(data, len);
 				if (_MatchHostname(hostname, commonName))
 					matched = true;
-				namesFoundInCert 
-					<< (namesFoundInCert.Length() ? ", " : "")
-					<< commonName;
+				namesFoundInCert << (namesFoundInCert.Length() ? ", " : "") << commonName;
 			}
 		}
 	}
@@ -726,9 +739,10 @@ bool BmOpenSslNetEndpoint::_VerifyHostname(X509* cert, const BmString& hostname,
 
 /*------------------------------------------------------------------------------*\
 	_CertAsString()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmString BmOpenSslNetEndpoint::_CertAsString(X509* cert)
+BmString
+BmOpenSslNetEndpoint::_CertAsString(X509* cert)
 {
 	char data[256];
 	BmString str;
@@ -772,9 +786,10 @@ BmString BmOpenSslNetEndpoint::_CertAsString(X509* cert)
 
 /*------------------------------------------------------------------------------*\
 	_ClearErrorState()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmOpenSslNetEndpoint::_ClearErrorState()
+void
+BmOpenSslNetEndpoint::_ClearErrorState()
 {
 	mVerificationError.Truncate(0);
 	mError = 0;
@@ -782,9 +797,10 @@ void BmOpenSslNetEndpoint::_ClearErrorState()
 
 /*------------------------------------------------------------------------------*\
 	_PostHandshakeCheck()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmOpenSslNetEndpoint::_PostHandshakeCheck()
+status_t
+BmOpenSslNetEndpoint::_PostHandshakeCheck()
 {
 	BmString serverName = mAdditionalInfo.FindString(MSG_SERVER_NAME);
 	if (!serverName.Length())
@@ -793,25 +809,23 @@ status_t BmOpenSslNetEndpoint::_PostHandshakeCheck()
 	status_t result = X509_V_ERR_APPLICATION_VERIFICATION;
 	if (cert) {
 		// since the user can setup Beam such that it blindly accepts a server
-		// certificate given a specific id, we need to be able to *uniquely* 
+		// certificate given a specific id, we need to be able to *uniquely*
 		// identify each and every server certificate. In order to get such an
 		// id, we compute the certificate fingerprint and use it for that purpose:
 		BmString certID = _FingerprintForCert(cert);
-		BmString acceptedCertID
-			= mAdditionalInfo.FindString(MSG_ACCEPTED_CERT_ID);
+		BmString acceptedCertID = mAdditionalInfo.FindString(MSG_ACCEPTED_CERT_ID);
 		if (certID == acceptedCertID)
 			return X509_V_OK;
-		
+
 		result = (status_t)SSL_get_verify_result(mSSL);
 		BmString namesFoundInCert;
 		bool hostVerified = _VerifyHostname(cert, serverName, namesFoundInCert);
 		X509_free(cert);
 		if (!hostVerified) {
-			mVerificationError 
-				<< "   The given hostname\n"
-				<< "      " << serverName << "\n"
-				<< "   doesn't match any of the names found in the certificate:\n"
-				<< "      " << namesFoundInCert << "\n";
+			mVerificationError << "   The given hostname\n"
+							   << "      " << serverName << "\n"
+							   << "   doesn't match any of the names found in the certificate:\n"
+							   << "      " << namesFoundInCert << "\n";
 		}
 		if (mVerificationError.Length()) {
 			// if any error occured, be it during openssl-internal verification
@@ -819,26 +833,21 @@ status_t BmOpenSslNetEndpoint::_PostHandshakeCheck()
 			// message...
 			BmString boundary;
 			float count = 296.0f / be_plain_font->StringWidth("-");
-				// hack to avoid wrapping of boundary
+			// hack to avoid wrapping of boundary
 			boundary.SetTo('-', int32(count));
 			BmString problemMsg;
-			problemMsg
-				<< "The server-certificate received from " << serverName << "\n"
-				<< "could not be validated properly!\n"
-				<< boundary << "\n"
-				<< "Certificate Info\n"
-				<< "   MD5-Fingerprint:   " << certID << "\n"
-				<< _CertAsString(cert)
-				<< boundary << "\n"
-				<< "During validation, these problems occured:\n"
-				<< mVerificationError
-				<< boundary << "\n"
-				<< "Would you still like to accept this certificate and proceed?";
+			problemMsg << "The server-certificate received from " << serverName << "\n"
+					   << "could not be validated properly!\n"
+					   << boundary << "\n"
+					   << "Certificate Info\n"
+					   << "   MD5-Fingerprint:   " << certID << "\n"
+					   << _CertAsString(cert) << boundary << "\n"
+					   << "During validation, these problems occured:\n"
+					   << mVerificationError << boundary << "\n"
+					   << "Would you still like to accept this certificate and proceed?";
 			// ...and tell the user and ask if we should go on:
-			int32 choice = BeamGuiRoster->ShowAlert(problemMsg, 
-																 "Cancel", 
-																 "Accept Permanently", 
-																 "Accept");
+			int32 choice
+				= BeamGuiRoster->ShowAlert(problemMsg, "Cancel", "Accept Permanently", "Accept");
 			result = X509_V_OK;
 			if (choice == 1) {
 				// set new accepted certID such that it gets stored
@@ -855,9 +864,10 @@ status_t BmOpenSslNetEndpoint::_PostHandshakeCheck()
 
 /*------------------------------------------------------------------------------*\
 	_TranslateErrorCode()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmOpenSslNetEndpoint::_TranslateErrorCode( int result)
+status_t
+BmOpenSslNetEndpoint::_TranslateErrorCode(int result)
 {
 	if (!mSSL)
 		return B_NO_INIT;
@@ -865,7 +875,7 @@ status_t BmOpenSslNetEndpoint::_TranslateErrorCode( int result)
 	if (result > 0)
 		return B_OK;
 
-	switch (SSL_get_error( mSSL, result)) {
+	switch (SSL_get_error(mSSL, result)) {
 		case SSL_ERROR_WANT_READ:
 		case SSL_ERROR_WANT_WRITE:
 		case SSL_ERROR_WANT_CONNECT:
@@ -881,21 +891,20 @@ status_t BmOpenSslNetEndpoint::_TranslateErrorCode( int result)
 
 /*------------------------------------------------------------------------------*\
 	InstantiateNetEndpoint()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-extern "C"
-BmNetEndpoint* InstantiateNetEndpoint()
+extern "C" BmNetEndpoint*
+InstantiateNetEndpoint()
 {
 	return new BmOpenSslNetEndpoint();
 }
 
 /*------------------------------------------------------------------------------*\
 	GetEncryptionInfo()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-extern "C"
-status_t GetEncryptionInfo(BMessage* encryptionInfo)
+extern "C" status_t
+GetEncryptionInfo(BMessage* encryptionInfo)
 {
 	return BmOpenSslNetEndpoint::GetEncryptionInfo(encryptionInfo);
 }
-

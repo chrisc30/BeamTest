@@ -10,66 +10,59 @@
 #define _BmPrefsSignatureView_h
 
 #include "BmListController.h"
-#include "BmSignature.h"
 #include "BmPrefsView.h"
+#include "BmSignature.h"
 
 /*------------------------------------------------------------------------------*\
 	BmSignatureItem
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-class BmSignatureItem : public BmListViewItem
-{
+class BmSignatureItem : public BmListViewItem {
 	typedef BmListViewItem inherited;
 
 public:
 	// c'tors and d'tor:
-	BmSignatureItem( ColumnListView* lv, BmListModelItem* item);
+	BmSignatureItem(ColumnListView* lv, BmListModelItem* item);
 	~BmSignatureItem();
 
 	// overrides of listitem base:
-	void UpdateView( BmUpdFlags flags, bool redraw = true, 
-						  uint32 updColBitmap = 0);
+	void UpdateView(BmUpdFlags flags, bool redraw = true, uint32 updColBitmap = 0);
 
 private:
 	// Hide copy-constructor and assignment:
-	BmSignatureItem( const BmSignatureItem&);
-	BmSignatureItem operator=( const BmSignatureItem&);
+	BmSignatureItem(const BmSignatureItem&);
+	BmSignatureItem operator=(const BmSignatureItem&);
 };
-
 
 
 /*------------------------------------------------------------------------------*\
 	BmSignatureView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-class BmSignatureView : public BmListViewController
-{
+class BmSignatureView : public BmListViewController {
 	typedef BmListViewController inherited;
-	
+
 public:
 	// c'tors and d'tor:
-	BmSignatureView( int32 width, int32 height);
+	BmSignatureView(int32 width, int32 height);
 	~BmSignatureView();
 
 	// native methods:
-	BmListViewItem* CreateListViewItem( BmListModelItem* item, BMessage* archive=NULL);
-	
+	BmListViewItem* CreateListViewItem(BmListModelItem* item, BMessage* archive = NULL);
+
 	// overrides of controller base:
-	BmString StateInfoBasename()			{ return "SignatureView"; }
-	BmListViewItem* AddModelItem( BmListModelItem* item);
-	const char* ItemNameForCaption()		{ return "signature"; }
+	BmString StateInfoBasename() { return "SignatureView"; }
+	BmListViewItem* AddModelItem(BmListModelItem* item);
+	const char* ItemNameForCaption() { return "signature"; }
 
 	// overrides of listview base:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 private:
-
 	// Hide copy-constructor and assignment:
-	BmSignatureView( const BmSignatureView&);
-	BmSignatureView operator=( const BmSignatureView&);
+	BmSignatureView(const BmSignatureView&);
+	BmSignatureView operator=(const BmSignatureView&);
 };
-
-
 
 
 class BmMultiLineTextControl;
@@ -79,26 +72,26 @@ class BmMenuControl;
 class MButton;
 /*------------------------------------------------------------------------------*\
 	BmPrefsSignatureView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmPrefsSignatureView : public BmPrefsView {
 	typedef BmPrefsView inherited;
 
 	enum {
-		BM_DYNAMIC_CHANGED 		= 'bmDC',
-		BM_CHARSET_SELECTED 		= 'bmCS',
-		BM_ADD_SIGNATURE			= 'bmAS',
-		BM_REMOVE_SIGNATURE		= 'bmRS',
-		BM_TEST_SIGNATURE			= 'bmTS'
+		BM_DYNAMIC_CHANGED = 'bmDC',
+		BM_CHARSET_SELECTED = 'bmCS',
+		BM_ADD_SIGNATURE = 'bmAS',
+		BM_REMOVE_SIGNATURE = 'bmRS',
+		BM_TEST_SIGNATURE = 'bmTS'
 	};
-	
+
 public:
 	// c'tors and d'tor:
 	BmPrefsSignatureView();
 	virtual ~BmPrefsSignatureView();
-	
+
 	// native methods:
-	void ShowSignature( int32 selection);
+	void ShowSignature(int32 selection);
 
 	// overrides of BmPrefsView base:
 	void Initialize();
@@ -108,7 +101,7 @@ public:
 	void UndoChanges();
 
 	// overrides of BView base:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 	// getters:
 
@@ -125,10 +118,10 @@ private:
 	MButton* mTestButton;
 
 	BmRef<BmSignature> mCurrSig;
-	
+
 	// Hide copy-constructor and assignment:
-	BmPrefsSignatureView( const BmPrefsSignatureView&);
-	BmPrefsSignatureView operator=( const BmPrefsSignatureView&);
+	BmPrefsSignatureView(const BmPrefsSignatureView&);
+	BmPrefsSignatureView operator=(const BmPrefsSignatureView&);
 };
 
 #endif

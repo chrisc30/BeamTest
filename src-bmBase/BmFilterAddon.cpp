@@ -12,25 +12,20 @@
 	BmFilterAddon
 \********************************************************************************/
 
-const char* const BmFilterAddon::FK_FOLDER =   "bm:folder";
+const char* const BmFilterAddon::FK_FOLDER = "bm:folder";
 const char* const BmFilterAddon::FK_IDENTITY = "bm:identity";
 
 /*------------------------------------------------------------------------------*\
 	BmFilterAddon()
 		-	c'tor
 \*------------------------------------------------------------------------------*/
-BmFilterAddon::BmFilterAddon() 
-{
-}
+BmFilterAddon::BmFilterAddon() {}
 
 /*------------------------------------------------------------------------------*\
 	~BmFilterAddon()
 		-	standard d'tor
 \*------------------------------------------------------------------------------*/
-BmFilterAddon::~BmFilterAddon()
-{
-}
-
+BmFilterAddon::~BmFilterAddon() {}
 
 
 /********************************************************************************\
@@ -42,8 +37,8 @@ BmFilterAddon::~BmFilterAddon()
 		-	c'tor
 \*------------------------------------------------------------------------------*/
 BmMsgContext::BmMsgContext()
-	:	mail( NULL)
-	,	headerInfos( NULL)
+	: mail(NULL),
+	  headerInfos(NULL)
 {
 }
 
@@ -51,28 +46,31 @@ BmMsgContext::BmMsgContext()
 	~BmMsgContext()
 		-	standard d'tor
 \*------------------------------------------------------------------------------*/
-BmMsgContext::~BmMsgContext() {
+BmMsgContext::~BmMsgContext()
+{
 	if (headerInfos) {
-		for( int i=0; i<headerInfoCount; ++i)
-			delete [] headerInfos[i].values;
-		delete [] headerInfos;
+		for (int i = 0; i < headerInfoCount; ++i)
+			delete[] headerInfos[i].values;
+		delete[] headerInfos;
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMsgContext::ResetChanges()
+void
+BmMsgContext::ResetChanges()
 {
 	mStatusMsg.MakeEmpty();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmMsgContext::FieldHasChanged(const char* fieldName) const
+bool
+BmMsgContext::FieldHasChanged(const char* fieldName) const
 {
 	bool dummy;
 	return mStatusMsg.FindBool(fieldName, &dummy) == B_OK;
@@ -80,18 +78,20 @@ bool BmMsgContext::FieldHasChanged(const char* fieldName) const
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMsgContext::ResetData()
+void
+BmMsgContext::ResetData()
 {
 	mDataMsg.MakeEmpty();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMsgContext::NoteChange(const char* fieldName)
+void
+BmMsgContext::NoteChange(const char* fieldName)
 {
 	bool dummy;
 	if (mStatusMsg.FindBool(fieldName, &dummy) != B_OK)
@@ -100,9 +100,10 @@ void BmMsgContext::NoteChange(const char* fieldName)
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmMsgContext::HasField(const char* fieldName) const
+bool
+BmMsgContext::HasField(const char* fieldName) const
 {
 	type_code type;
 	return mDataMsg.GetInfo(fieldName, &type) == B_OK;
@@ -110,9 +111,10 @@ bool BmMsgContext::HasField(const char* fieldName) const
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMsgContext::SetInt32(const char* fieldName, int32 value)
+void
+BmMsgContext::SetInt32(const char* fieldName, int32 value)
 {
 	mDataMsg.RemoveName(fieldName);
 	mDataMsg.AddInt32(fieldName, value);
@@ -121,18 +123,20 @@ void BmMsgContext::SetInt32(const char* fieldName, int32 value)
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int32 BmMsgContext::GetInt32(const char* fieldName) const
+int32
+BmMsgContext::GetInt32(const char* fieldName) const
 {
 	return mDataMsg.FindInt32(fieldName);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMsgContext::SetString(const char* fieldName, const char* value)
+void
+BmMsgContext::SetString(const char* fieldName, const char* value)
 {
 	mDataMsg.RemoveName(fieldName);
 	mDataMsg.AddString(fieldName, value);
@@ -141,18 +145,20 @@ void BmMsgContext::SetString(const char* fieldName, const char* value)
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-const char* BmMsgContext::GetString(const char* fieldName) const
+const char*
+BmMsgContext::GetString(const char* fieldName) const
 {
 	return mDataMsg.FindString(fieldName);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMsgContext::SetBool(const char* fieldName, bool value)
+void
+BmMsgContext::SetBool(const char* fieldName, bool value)
 {
 	mDataMsg.RemoveName(fieldName);
 	mDataMsg.AddBool(fieldName, value);
@@ -161,18 +167,20 @@ void BmMsgContext::SetBool(const char* fieldName, bool value)
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmMsgContext::GetBool(const char* fieldName) const
+bool
+BmMsgContext::GetBool(const char* fieldName) const
 {
 	return mDataMsg.FindBool(fieldName);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMsgContext::SetDouble(const char* fieldName, double value)
+void
+BmMsgContext::SetDouble(const char* fieldName, double value)
 {
 	mDataMsg.RemoveName(fieldName);
 	mDataMsg.AddDouble(fieldName, value);
@@ -181,10 +189,10 @@ void BmMsgContext::SetDouble(const char* fieldName, double value)
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-double BmMsgContext::GetDouble(const char* fieldName) const
+double
+BmMsgContext::GetDouble(const char* fieldName) const
 {
 	return mDataMsg.FindDouble(fieldName);
 }
-

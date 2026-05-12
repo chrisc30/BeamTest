@@ -15,29 +15,29 @@ class BmTextControl;
 class BmMenuControl;
 /*------------------------------------------------------------------------------*\
 	BmPrefsLoggingView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmPrefsLoggingView : public BmPrefsView {
 	typedef BmPrefsView inherited;
 
 	enum {
-		BM_LOG_POP_SELECTED 				= 'bmPO',
-		BM_LOG_JOBWIN_SELECTED 			= 'bmJW',
-		BM_LOG_MAILPARSE_SELECTED 		= 'bmMP',
-		BM_LOG_APP_SELECTED 				= 'bmAP',
-		BM_LOG_MAILTRACKING_SELECTED	= 'bmMT',
-		BM_LOG_GUI_SELECTED 				= 'bmGU',
+		BM_LOG_POP_SELECTED = 'bmPO',
+		BM_LOG_JOBWIN_SELECTED = 'bmJW',
+		BM_LOG_MAILPARSE_SELECTED = 'bmMP',
+		BM_LOG_APP_SELECTED = 'bmAP',
+		BM_LOG_MAILTRACKING_SELECTED = 'bmMT',
+		BM_LOG_GUI_SELECTED = 'bmGU',
 		BM_LOG_MODELCONTROLLER_SELECTED = 'bmMC',
-		BM_LOG_SMTP_SELECTED 			= 'bmSM',
-		BM_LOG_FILTER_SELECTED 			= 'bmFI',
-		BM_LOG_REFCOUNT_SELECTED 		= 'bmRC'
+		BM_LOG_SMTP_SELECTED = 'bmSM',
+		BM_LOG_FILTER_SELECTED = 'bmFI',
+		BM_LOG_REFCOUNT_SELECTED = 'bmRC'
 	};
-	
+
 public:
 	// c'tors and d'tor:
 	BmPrefsLoggingView();
 	virtual ~BmPrefsLoggingView();
-	
+
 	// overrides of BmPrefsView base:
 	void Initialize();
 	void Update();
@@ -45,10 +45,9 @@ public:
 	void UndoChanges();
 
 	// overrides of BView base:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 private:
-
 	BmTextControl* mMinLogfileSizeControl;
 	BmTextControl* mMaxLogfileSizeControl;
 
@@ -64,8 +63,8 @@ private:
 	BmMenuControl* mLogRefCountControl;
 
 	// Hide copy-constructor and assignment:
-	BmPrefsLoggingView( const BmPrefsLoggingView&);
-	BmPrefsLoggingView operator=( const BmPrefsLoggingView&);
+	BmPrefsLoggingView(const BmPrefsLoggingView&);
+	BmPrefsLoggingView operator=(const BmPrefsLoggingView&);
 };
 
 #endif

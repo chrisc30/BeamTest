@@ -25,52 +25,54 @@ extern const char* const BM_DeskbarNew;
 
 // menu-messages for deskbar-view:
 enum {
-	BMM_RESET_ICON = 		'bMDa'
+	BMM_RESET_ICON = 'bMDa'
 };
 
 // messages send from deskbar-view to app:
 enum {
-	BM_DESKBAR_GET_MBOX = 	'bMDb'
+	BM_DESKBAR_GET_MBOX = 'bMDb'
 };
 
-class BmDeskbarView: public BView {
+class BmDeskbarView : public BView {
 	typedef BView inherited;
 	typedef std::map<int64, entry_ref> NewMailMap;
+
 public:
 	// c'tors and d'tor:
-	BmDeskbarView( BRect frame);
-	BmDeskbarView( BMessage *data);
+	BmDeskbarView(BRect frame);
+	BmDeskbarView(BMessage* data);
 	~BmDeskbarView();
-	
-	static BmDeskbarView *Instantiate( BMessage *data);
+
+	static BmDeskbarView* Instantiate(BMessage* data);
 
 	void AddRef(int64 node, const entry_ref& eref);
 	void RemoveRef(int64 node);
 	void UpdateRef(int64 node, const entry_ref& eref);
-protected:	
+
+protected:
 	// native methods:
-	void ChangeIcon( const char* iconName);
-	void ShowMenu( BPoint point);
+	void ChangeIcon(const char* iconName);
+	void ShowMenu(BPoint point);
 	void IncNewMailCount();
 	void DecNewMailCount();
 	int32 NewMailCount();
-	void SendToBeam( BMessage *msg, BHandler *replyHandler = NULL);
+	void SendToBeam(BMessage* msg, BHandler* replyHandler = NULL);
 	bool LivesInMailbox(const entry_ref& eref);
-	
+
 	// overrides of BView base:
-	void Draw( BRect updateRect);
-	status_t Archive(BMessage *data, bool deep = true) const;
+	void Draw(BRect updateRect);
+	status_t Archive(BMessage* data, bool deep = true) const;
 	void MouseDown(BPoint);
-	void MessageReceived(BMessage *message);
-	void Pulse( void);
+	void MessageReceived(BMessage* message);
+	void Pulse(void);
 	void AttachedToWindow();
 	void DetachedFromWindow();
-	
+
 private:
 	int32 mNewMailCount;
 	bool mNewMailCountNeedsUpdate;
 	BString mCurrIconName;
-	BBitmap *mCurrIcon;
+	BBitmap* mCurrIcon;
 	entry_ref mMailboxRef;
 	NewMailMap mNewMailMap;
 };

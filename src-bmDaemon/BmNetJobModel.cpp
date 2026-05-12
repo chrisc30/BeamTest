@@ -6,12 +6,12 @@
  *		Oliver Tappe <beam@hirschkaefer.de>
  */
 #ifdef BEAM_FOR_HAIKU
-# include <sys/socket.h>
+#include <sys/socket.h>
 #else
-# include <socket.h>
+#include <socket.h>
 #endif
 #ifdef BEAM_FOR_BONE
-# include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 
 #include <ctype.h>
@@ -20,7 +20,7 @@
 
 #include "BmBasics.h"
 #include "BmEncoding.h"
-	using namespace BmEncoding;
+using namespace BmEncoding;
 #include "BmLogHandler.h"
 #include "BmNetEndpointRoster.h"
 #include "BmNetJobModel.h"
@@ -32,29 +32,29 @@
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmStatusFilter::BmStatusFilter( BmMemIBuf* input, uint32 blockSize)
-	:	inherited( input, blockSize, nTagImmediatePassOn)
-	,	mHaveStatus( false)
-	,	mUpdate( false)
-	,	mInfoMsg( NULL)
+BmStatusFilter::BmStatusFilter(BmMemIBuf* input, uint32 blockSize)
+	: inherited(input, blockSize, nTagImmediatePassOn),
+	  mHaveStatus(false),
+	  mUpdate(false),
+	  mInfoMsg(NULL)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmStatusFilter::Reset( BmMemIBuf* input)
+void
+BmStatusFilter::Reset(BmMemIBuf* input)
 {
-	inherited::Reset( input);
+	inherited::Reset(input);
 	mHaveStatus = false;
-	mStatusText.Truncate( 0);
-	mBottomStatusText.Truncate( 0);
+	mStatusText.Truncate(0);
+	mBottomStatusText.Truncate(0);
 	mInfoMsg = NULL;
 }
-
 
 
 /********************************************************************************\
@@ -64,41 +64,39 @@ void BmStatusFilter::Reset( BmMemIBuf* input)
 #undef BM_LOGNAME
 #define BM_LOGNAME Name()
 
-const char* const BmNetJobModel::MSG_MODEL = 		"bm:model";
-const char* const BmNetJobModel::MSG_DELTA = 		"bm:delta";
-const char* const BmNetJobModel::MSG_TRAILING = 	"bm:trailing";
-const char* const BmNetJobModel::MSG_LEADING = 		"bm:leading";
-const char* const BmNetJobModel::MSG_ENCRYPTED = 	"bm:encrypted";
-const char* const BmNetJobModel::MSG_FAILED = 		"bm:failed";
+const char* const BmNetJobModel::MSG_MODEL = "bm:model";
+const char* const BmNetJobModel::MSG_DELTA = "bm:delta";
+const char* const BmNetJobModel::MSG_TRAILING = "bm:trailing";
+const char* const BmNetJobModel::MSG_LEADING = "bm:leading";
+const char* const BmNetJobModel::MSG_ENCRYPTED = "bm:encrypted";
+const char* const BmNetJobModel::MSG_FAILED = "bm:failed";
 
-const char* const BmNetJobModel::IMSG_NEED_DATA = 	"needData";
+const char* const BmNetJobModel::IMSG_NEED_DATA = "needData";
 
 /*------------------------------------------------------------------------------*\
 	BmNetJobModel()
 		-	constructor
 \*------------------------------------------------------------------------------*/
-BmNetJobModel::BmNetJobModel( const BmString& name, uint32 logType, 
-										BmStatusFilter* statusFilter)
-	:	inherited( name)
-	,	mConnection( NULL)
-	,	mConnected( false)
-	,	mStatusFilter( statusFilter)
-	,	mLogType( logType)
+BmNetJobModel::BmNetJobModel(const BmString& name, uint32 logType, BmStatusFilter* statusFilter)
+	: inherited(name),
+	  mConnection(NULL),
+	  mConnected(false),
+	  mStatusFilter(statusFilter),
+	  mLogType(logType)
 {
-	mReader = new BmNetIBuf( this);
+	mReader = new BmNetIBuf(this);
 	uint32 logLevel = ThePrefs->GetNumericLogLevelFor(mLogType);
-	int32 logLimits[4] = { 0, 256, 2048, 32768 };
-	mIncomingLogger 
-		= new BmTrafficLogger(mReader, this, logLimits[logLevel], "<--\n");
+	int32 logLimits[4] = {0, 256, 2048, 32768};
+	mIncomingLogger = new BmTrafficLogger(mReader, this, logLimits[logLevel], "<--\n");
 
-	mWriter = new BmNetOBuf( this);
+	mWriter = new BmNetOBuf(this);
 }
 
 /*------------------------------------------------------------------------------*\
 	~BmNetJobModel()
 		-	destructor
 \*------------------------------------------------------------------------------*/
-BmNetJobModel::~BmNetJobModel() 
+BmNetJobModel::~BmNetJobModel()
 {
 	Disconnect();
 	delete mWriter;
@@ -109,13 +107,14 @@ BmNetJobModel::~BmNetJobModel()
 
 /*------------------------------------------------------------------------------*\
 	Connect()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmNetJobModel::Connect( const BNetAddress* addr)
+bool
+BmNetJobModel::Connect(const BNetAddress* addr)
 {
 	Disconnect();
 	mConnection = TheNetEndpointRoster->CreateEndpoint();
-	mErrorString.Truncate( 0);
+	mErrorString.Truncate(0);
 	if (mConnection->InitCheck() != B_OK) {
 		mErrorString = "unable to create BNetEndpoint";
 		return false;
@@ -124,7 +123,7 @@ bool BmNetJobModel::Connect( const BNetAddress* addr)
 	SetupAdditionalInfo(&additionalInfo);
 	mConnection->SetAdditionalInfo(&additionalInfo);
 	status_t err;
-	if ((err=mConnection->Connect( *addr)) != B_OK) {
+	if ((err = mConnection->Connect(*addr)) != B_OK) {
 		if (mConnection->IsStopRequested())
 			return true;
 		mErrorString = strerror(err);
@@ -136,9 +135,10 @@ bool BmNetJobModel::Connect( const BNetAddress* addr)
 
 /*------------------------------------------------------------------------------*\
 	Disconnect()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetJobModel::Disconnect()
+void
+BmNetJobModel::Disconnect()
 {
 	if (mConnection) {
 		if (mConnected)
@@ -153,7 +153,8 @@ void BmNetJobModel::Disconnect()
 	StartEncryption()
 		-	tries to activate SSL/TLS encryption layer
 \*------------------------------------------------------------------------------*/
-bool BmNetJobModel::StartEncryption(const char* encType)
+bool
+BmNetJobModel::StartEncryption(const char* encType)
 {
 	// start connection encryption:
 	status_t error = mConnection->StartEncryption(encType);
@@ -162,7 +163,7 @@ bool BmNetJobModel::StartEncryption(const char* encType)
 			StopJob();
 			return false;
 		}
-		throw BM_network_error( "Failed to start connection encryption.\n");
+		throw BM_network_error("Failed to start connection encryption.\n");
 	}
 	return true;
 }
@@ -173,7 +174,8 @@ bool BmNetJobModel::StartEncryption(const char* encType)
 		-	if the job has been stopped, we pass this info on to our
 			status-filter so that this will really stop the network connection
 \*------------------------------------------------------------------------------*/
-bool BmNetJobModel::ShouldContinue()
+bool
+BmNetJobModel::ShouldContinue()
 {
 	bool shouldCont = inherited::ShouldContinue();
 	if (!shouldCont)
@@ -183,36 +185,35 @@ bool BmNetJobModel::ShouldContinue()
 
 /*------------------------------------------------------------------------------*\
 	CheckForPositiveAnswer()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmNetJobModel::CheckForPositiveAnswer( uint32 expectedSize, 
-														  bool dotstuffDecoding,
-														  bool update,
-														  BMessage* infoMsg)
+bool
+BmNetJobModel::CheckForPositiveAnswer(
+	uint32 expectedSize, bool dotstuffDecoding, bool update, BMessage* infoMsg)
 {
-	BM_ASSERT( mStatusFilter);
-	GetAnswer( expectedSize, dotstuffDecoding, update, infoMsg);
+	BM_ASSERT(mStatusFilter);
+	GetAnswer(expectedSize, dotstuffDecoding, update, infoMsg);
 	return mStatusFilter->CheckForPositiveAnswer() && ShouldContinue();
 }
 
 /*------------------------------------------------------------------------------*\
 	GetAnswer()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetJobModel::GetAnswer( uint32 expectedSize, bool dotstuffDecoding,
-										 bool update, BMessage* infoMsg) 
+void
+BmNetJobModel::GetAnswer(uint32 expectedSize, bool dotstuffDecoding, bool update, BMessage* infoMsg)
 {
 	mIncomingLogger->Reset();
-	mStatusFilter->Reset( mIncomingLogger);
-	mStatusFilter->DoUpdate( update);
+	mStatusFilter->Reset(mIncomingLogger);
+	mStatusFilter->DoUpdate(update);
 	if (!infoMsg) {
 		mInfoMsg.MakeEmpty();
 		infoMsg = &mInfoMsg;
 	}
 	mStatusFilter->SetInfoMsg(infoMsg);
 
-	uint32 blockSize = ThePrefs->GetInt( "NetReceiveBufferSize", 10*1500);
-	BmStringOBuf answerBuf( std::max( expectedSize+128, blockSize), 2.0);
+	uint32 blockSize = ThePrefs->GetInt("NetReceiveBufferSize", 10 * 1500);
+	BmStringOBuf answerBuf(std::max(expectedSize + 128, blockSize), 2.0);
 
 	if (dotstuffDecoding) {
 		bool dummy;
@@ -221,110 +222,111 @@ void BmNetJobModel::GetAnswer( uint32 expectedSize, bool dotstuffDecoding,
 			// there would be nothing we could decode...):
 			infoMsg->AddBool(IMSG_NEED_DATA, true);
 		}
-		BmDotstuffDecoder decoder( mStatusFilter, this, blockSize);
-		answerBuf.Write( &decoder, blockSize);
+		BmDotstuffDecoder decoder(mStatusFilter, this, blockSize);
+		answerBuf.Write(&decoder, blockSize);
 	} else
-		answerBuf.Write( mStatusFilter, blockSize);
-	mAnswerText.Adopt( answerBuf.TheString());
+		answerBuf.Write(mStatusFilter, blockSize);
+	mAnswerText.Adopt(answerBuf.TheString());
 }
 
 /*------------------------------------------------------------------------------*\
 	SendCommand( cmd)
 		-	sends the specified command to the server.
 \*------------------------------------------------------------------------------*/
-void BmNetJobModel::SendCommand( const BmString& cmd, const BmString& secret,
-											bool dotstuffEncoding, bool update) 
+void
+BmNetJobModel::SendCommand(
+	const BmString& cmd, const BmString& secret, bool dotstuffEncoding, bool update)
 {
-	BmStringIBuf cmdBuf( cmd);
-	SendCommandBuf( cmdBuf, secret, dotstuffEncoding, update);
+	BmStringIBuf cmdBuf(cmd);
+	SendCommandBuf(cmdBuf, secret, dotstuffEncoding, update);
 }
 
 /*------------------------------------------------------------------------------*\
 	_SendCommand( cmd)
 		-	sends the specified command to the server.
 \*------------------------------------------------------------------------------*/
-void BmNetJobModel::SendCommandBuf( BmStringIBuf& cmd, 
-												const BmString& secret,
-												bool dotstuffEncoding, bool update)
+void
+BmNetJobModel::SendCommandBuf(
+	BmStringIBuf& cmd, const BmString& secret, bool dotstuffEncoding, bool update)
 {
-	BmString logStr( "-->\n");
-	logStr.Append( cmd.FirstBuf(), std::min( (uint32)16384, cmd.FirstSize()));
+	BmString logStr("-->\n");
+	logStr.Append(cmd.FirstBuf(), std::min((uint32)16384, cmd.FirstSize()));
 	if (secret.Length()) {
 		logStr << " secret_data_omitted_here";
-							// we do not want to log any passwords...
-		cmd.AddBuffer( secret);
+		// we do not want to log any passwords...
+		cmd.AddBuffer(secret);
 	}
-	BM_LOG( mLogType, logStr);
+	BM_LOG(mLogType, logStr);
 	if (!cmd.EndsWithNewline())
-		cmd.AddBuffer( "\r\n", 2);
-	uint32 blockSize = ThePrefs->GetInt( "NetSendBufferSize", 10*1500);
-	mWriter->DoUpdate( update);
+		cmd.AddBuffer("\r\n", 2);
+	uint32 blockSize = ThePrefs->GetInt("NetSendBufferSize", 10 * 1500);
+	mWriter->DoUpdate(update);
 	uint32 writtenLen;
 	if (dotstuffEncoding) {
-		BmDotstuffEncoder encoder( &cmd, this, blockSize);
-		writtenLen = mWriter->Write( &encoder, blockSize);
+		BmDotstuffEncoder encoder(&cmd, this, blockSize);
+		writtenLen = mWriter->Write(&encoder, blockSize);
 	} else
-		writtenLen = mWriter->Write( &cmd, blockSize);
+		writtenLen = mWriter->Write(&cmd, blockSize);
 	if (ShouldContinue() && writtenLen < cmd.Size()) {
-		BmString s = BmString( "Wrote only ") << writtenLen 
-							<< " bytes when at least " << cmd.Size() 
-							<< " should have been written";
-		throw BM_network_error( s);
+		BmString s = BmString("Wrote only ") << writtenLen << " bytes when at least " << cmd.Size()
+											 << " should have been written";
+		throw BM_network_error(s);
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	SetupAdditionalInfo()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetJobModel::SetupAdditionalInfo( BMessage* additionalInfo)
+void
+BmNetJobModel::SetupAdditionalInfo(BMessage* additionalInfo)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	AuthDigestMD5()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetJobModel::AuthDigestMD5( const BmString& username,
-											  const BmString& password,
-											  const BmString& serviceUri)
-{ 
+void
+BmNetJobModel::AuthDigestMD5(
+	const BmString& username, const BmString& password, const BmString& serviceUri)
+{
 	// splits a challenge-string into the given map (see RFC-2831):
 	struct MapSplitter {
-		bool operator() (BmString str, map<BmString,BmString>& m)
+		bool operator()(BmString str, map<BmString, BmString>& m)
 		{
 			m.clear();
 			const char* key;
 			const char* val;
 			char* s = (char*)str.String();
-			while(*s != 0) {
-				while(isspace(*s))
+			while (*s != 0) {
+				while (isspace(*s))
 					s++;
 				key = s;
-				while(isalpha(*s))
+				while (isalpha(*s))
 					s++;
 				if (*s != '=')
 					return false;
 				*s++ = '\0';
-				while(isspace(*s))
+				while (isspace(*s))
 					s++;
-				if (*s=='"') {
+				if (*s == '"') {
 					val = ++s;
-					while(*s!='"') {
+					while (*s != '"') {
 						if (*s == 0)
 							return false;
 						s++;
-					}			
+					}
 					*s++ = '\0';
 				} else {
 					val = s;
-					while(*s!=0 && *s!=',' && !isspace(*s))
+					while (*s != 0 && *s != ',' && !isspace(*s))
 						s++;
 					if (*s != 0)
 						*s++ = '\0';
 				}
 				m[key] = val;
-				while(isspace(*s))
+				while (isspace(*s))
 					s++;
 				if (*s != ',')
 					return false;
@@ -343,9 +345,9 @@ void BmNetJobModel::AuthDigestMD5( const BmString& username,
 	if (BmNetJobModel::CheckForPositiveAnswer()) {
 		BmString base64, rawChallenge;
 		ExtractBase64(StatusText(), base64);
-		Decode( "base64", base64, rawChallenge);
-		map<BmString,BmString> challengeMap;
-		BM_LOG2( mLogType, BmString("challenge:\n") << rawChallenge);
+		Decode("base64", base64, rawChallenge);
+		map<BmString, BmString> challengeMap;
+		BM_LOG2(mLogType, BmString("challenge:\n") << rawChallenge);
 		MapSplitter mapSplitter;
 		mapSplitter(rawChallenge, challengeMap);
 		BmString rawResponse = BmString("username=") << '"' << username << '"';
@@ -353,21 +355,21 @@ void BmNetJobModel::AuthDigestMD5( const BmString& username,
 		rawResponse << ",nonce=" << '"' << challengeMap["nonce"] << '"';
 		char temp[33];
 		srand((unsigned int)system_time());
-		for( int i=0; i<32; ++i)
-			temp[i] = char(1+rand()%254);
+		for (int i = 0; i < 32; ++i)
+			temp[i] = char(1 + rand() % 254);
 		temp[32] = '\0';
 		BmString rawCnonce(temp);
 		BmString cnonce;
 		Encode("base64", rawCnonce, cnonce);
-		rawResponse	<< ",cnonce=" << '"' << cnonce << '"';
-		rawResponse	<< ",nc=00000001";
-		rawResponse	<< ",qop=auth";
-		rawResponse	<< ",digest-uri=" << '"' << serviceUri << '"';
+		rawResponse << ",cnonce=" << '"' << cnonce << '"';
+		rawResponse << ",nc=00000001";
+		rawResponse << ",qop=auth";
+		rawResponse << ",digest-uri=" << '"' << serviceUri << '"';
 		char sum0[17], hd1[33], hd2[33], hd3[33];
-		BmString a1,a2,kd;
+		BmString a1, a2, kd;
 		BmString t1 = username + ":" + challengeMap["realm"] + ":" + password;
 		if (challengeMap["charset"].ICompare("utf-8") == 0) {
-			rawResponse	<< ",charset=utf-8";
+			rawResponse << ",charset=utf-8";
 		} else {
 			// username and password must be encoded in iso8859-1, unless the server
 			// has specified that it supports utf-8
@@ -380,47 +382,46 @@ void BmNetJobModel::AuthDigestMD5( const BmString& username,
 		MD5Digest((unsigned char*)a1.String(), hd1);
 		a2 << "AUTHENTICATE:" << serviceUri;
 		MD5Digest((unsigned char*)a2.String(), hd2);
-		kd << hd1 << ':' << challengeMap["nonce"] << ":" << "00000001"
-			<< ':' << cnonce << ':' << "auth" << ':' << hd2;
+		kd << hd1 << ':' << challengeMap["nonce"] << ":" << "00000001" << ':' << cnonce << ':'
+		   << "auth" << ':' << hd2;
 		MD5Digest((unsigned char*)kd.String(), hd3);
-		rawResponse	<< ",response=" << hd3;
-		rawResponse	<< ",maxbuf=65535";
-		BM_LOG2( mLogType, BmString("response:\n") << rawResponse);
+		rawResponse << ",response=" << hd3;
+		rawResponse << ",maxbuf=65535";
+		BM_LOG2(mLogType, BmString("response:\n") << rawResponse);
 		BmString tags = BmBase64Encoder::nTagOnSingleLine;
-		Encode( "base64", rawResponse, base64, tags);
-		BmNetJobModel::SendCommand( base64);
+		Encode("base64", rawResponse, base64, tags);
+		BmNetJobModel::SendCommand(base64);
 		if (BmNetJobModel::CheckForPositiveAnswer()) {
 			// now compute expected answer from server and compare it with
 			// real server response:
 			BmString a2s, serverAuthResp, clientAuthResp;
 			ExtractBase64(StatusText(), base64);
-			Decode( "base64", base64, serverAuthResp);
+			Decode("base64", base64, serverAuthResp);
 			a2s << ":" << serviceUri;
 			MD5Digest((unsigned char*)a2s.String(), hd2);
 			kd = "";
-			kd << hd1 << ':' << challengeMap["nonce"] << ":" << "00000001"
-				<< ':' << cnonce << ':' << "auth" << ':' << hd2;
+			kd << hd1 << ':' << challengeMap["nonce"] << ":" << "00000001" << ':' << cnonce << ':'
+			   << "auth" << ':' << hd2;
 			MD5Digest((unsigned char*)kd.String(), hd3);
 			clientAuthResp << "rspauth=" << hd3;
-			BM_LOG2( mLogType, BmString("expected <") << clientAuthResp.String()
-										<< ">\ngot <" << serverAuthResp.String() << ">");
+			BM_LOG2(mLogType, BmString("expected <") << clientAuthResp.String() << ">\ngot <"
+													 << serverAuthResp.String() << ">");
 			if (serverAuthResp != clientAuthResp)
 				throw BM_network_error(
 					"ATTENTION: Auth-Response from Server is incorrect!\n"
-					"This server probably isn't the right one, we better stop."
-				);
-			BmNetJobModel::SendCommand( "");
+					"This server probably isn't the right one, we better stop.");
+			BmNetJobModel::SendCommand("");
 		}
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	AuthCramMD5()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetJobModel::AuthCramMD5( const BmString& username, 
-											const BmString& pwd)
-{ 
+void
+BmNetJobModel::AuthCramMD5(const BmString& username, const BmString& pwd)
+{
 	// CRAM-MD5-method: receive timestamp, then send
 	// md5-hash of this timestamp (with password used as key):
 	//
@@ -430,19 +431,17 @@ void BmNetJobModel::AuthCramMD5( const BmString& username,
 	if (BmNetJobModel::CheckForPositiveAnswer()) {
 		BmString base64, timestamp;
 		ExtractBase64(StatusText(), base64);
-		Decode( "base64", base64, timestamp);
-		BM_LOG2( mLogType, BmString("timestamp:\n") << timestamp);
+		Decode("base64", base64, timestamp);
+		BM_LOG2(mLogType, BmString("timestamp:\n") << timestamp);
 		char digest[33];
-		MD5_HMAC( (unsigned char*)timestamp.String(), timestamp.Length(),
-					 (unsigned char*)pwd.String(), pwd.Length(), 
-					 (unsigned char*)digest);
+		MD5_HMAC((unsigned char*)timestamp.String(), timestamp.Length(),
+			(unsigned char*)pwd.String(), pwd.Length(), (unsigned char*)digest);
 		BmString raw = username + " " + digest;
-		BM_LOG2( mLogType, BmString("response:\n") << raw);
-		Encode( "base64", raw, base64);
-		BmNetJobModel::SendCommand( base64);
+		BM_LOG2(mLogType, BmString("response:\n") << raw);
+		Encode("base64", raw, base64);
+		BmNetJobModel::SendCommand(base64);
 	}
 }
-
 
 
 /********************************************************************************\
@@ -454,38 +453,37 @@ void BmNetJobModel::AuthCramMD5( const BmString& username,
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmTrafficLogger::BmTrafficLogger( BmMemIBuf* input, BmNetJobModel* job,
-											 int32 logLimit, const char* prefix, 
-											 uint32 blockSize)
-	:	inherited( input, blockSize, nTagImmediatePassOn)
-	,	mLogLimit( logLimit)
-	,	mLoggedLength( 0)
-	,	mJob( job)
-	,	mPrefix( prefix)
+BmTrafficLogger::BmTrafficLogger(
+	BmMemIBuf* input, BmNetJobModel* job, int32 logLimit, const char* prefix, uint32 blockSize)
+	: inherited(input, blockSize, nTagImmediatePassOn),
+	  mLogLimit(logLimit),
+	  mLoggedLength(0),
+	  mJob(job),
+	  mPrefix(prefix)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmTrafficLogger::Reset( BmMemIBuf* input)
+void
+BmTrafficLogger::Reset(BmMemIBuf* input)
 {
-	inherited::Reset( input);
+	inherited::Reset(input);
 	mLoggedLength = 0;
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmTrafficLogger::Filter( const char* srcBuf, uint32& srcLen, 
-										char* destBuf, uint32& destLen)
+void
+BmTrafficLogger::Filter(const char* srcBuf, uint32& srcLen, char* destBuf, uint32& destLen)
 {
-	BM_LOG3( mJob->LogType(), 
-				BmString("starting to log traffic of ") << srcLen << " bytes");
+	BM_LOG3(mJob->LogType(), BmString("starting to log traffic of ") << srcLen << " bytes");
 
 	if (mLogLimit < 0 || mLoggedLength < mLogLimit) {
 		uint32 logLeft = mLogLimit < 0 ? srcLen : mLogLimit - mLoggedLength;
@@ -493,16 +491,15 @@ void BmTrafficLogger::Filter( const char* srcBuf, uint32& srcLen,
 		BmString logStr = mPrefix;
 		logStr.Append(srcBuf, logLen);
 		mLoggedLength += logLen;
-		BM_LOG( mJob->LogType(), logStr);
+		BM_LOG(mJob->LogType(), logStr);
 	}
 
 	// pass on the data:
-	uint32 size = std::min( destLen, srcLen);
-	memcpy( destBuf, srcBuf, size);
+	uint32 size = std::min(destLen, srcLen);
+	memcpy(destBuf, srcBuf, size);
 	srcLen = destLen = size;
-	BM_LOG3( mJob->LogType(), "traffic logger: done");
+	BM_LOG3(mJob->LogType(), "traffic logger: done");
 }
-
 
 
 /********************************************************************************\
@@ -514,34 +511,31 @@ void BmTrafficLogger::Filter( const char* srcBuf, uint32& srcLen,
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmDotstuffDecoder::BmDotstuffDecoder( BmMemIBuf* input, BmNetJobModel* job,
-												  uint32 blockSize)
-	:	inherited( input, blockSize, nTagImmediatePassOn)
-	,	mAtStartOfLine( true)
-	,	mHaveDotAtStartOfLine( false)
-	,	mJob( job)
+BmDotstuffDecoder::BmDotstuffDecoder(BmMemIBuf* input, BmNetJobModel* job, uint32 blockSize)
+	: inherited(input, blockSize, nTagImmediatePassOn),
+	  mAtStartOfLine(true),
+	  mHaveDotAtStartOfLine(false),
+	  mJob(job)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDotstuffDecoder::Filter( const char* srcBuf, uint32& srcLen, 
-											char* destBuf, uint32& destLen)
+void
+BmDotstuffDecoder::Filter(const char* srcBuf, uint32& srcLen, char* destBuf, uint32& destLen)
 {
-	BM_LOG3( mJob->LogType(), 
-				BmString("starting to decode dot-stuffing of ") 
-					<< srcLen << " bytes");
+	BM_LOG3(mJob->LogType(), BmString("starting to decode dot-stuffing of ") << srcLen << " bytes");
 	const char* src = srcBuf;
-	const char* srcEnd = srcBuf+srcLen;
+	const char* srcEnd = srcBuf + srcLen;
 	char* dest = destBuf;
-	char* destEnd = destBuf+destLen;
+	char* destEnd = destBuf + destLen;
 
 	char c;
-	for( ; src<srcEnd && dest<destEnd && !mEndReached; ++src) {
+	for (; src < srcEnd && dest < destEnd && !mEndReached; ++src) {
 		if (mHaveDotAtStartOfLine) {
 			if (*src != '.') {
 				mEndReached = true;
@@ -549,18 +543,17 @@ void BmDotstuffDecoder::Filter( const char* srcBuf, uint32& srcLen,
 			}
 			mHaveDotAtStartOfLine = false;
 		}
-		if ((c = *src)!='.' || !mAtStartOfLine)
+		if ((c = *src) != '.' || !mAtStartOfLine)
 			*dest++ = c;
 		else
 			mHaveDotAtStartOfLine = true;
-		mAtStartOfLine = (c=='\n');
+		mAtStartOfLine = (c == '\n');
 	}
 
 	srcLen = (uint32)(src - srcBuf);
 	destLen = (uint32)(dest - destBuf);
-	BM_LOG3( mJob->LogType(), "dotstuff-decode: done");
+	BM_LOG3(mJob->LogType(), "dotstuff-decode: done");
 }
-
 
 
 /********************************************************************************\
@@ -572,57 +565,55 @@ void BmDotstuffDecoder::Filter( const char* srcBuf, uint32& srcLen,
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmDotstuffEncoder::BmDotstuffEncoder( BmMemIBuf* input, BmNetJobModel* job,
-												  uint32 blockSize)
-	:	inherited( input, blockSize, nTagImmediatePassOn)
-	,	mAtStartOfLine( true)
-	,	mJob( job)
+BmDotstuffEncoder::BmDotstuffEncoder(BmMemIBuf* input, BmNetJobModel* job, uint32 blockSize)
+	: inherited(input, blockSize, nTagImmediatePassOn),
+	  mAtStartOfLine(true),
+	  mJob(job)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDotstuffEncoder::Filter( const char* srcBuf, uint32& srcLen, 
-										  char* destBuf, uint32& destLen)
+void
+BmDotstuffEncoder::Filter(const char* srcBuf, uint32& srcLen, char* destBuf, uint32& destLen)
 {
-	BM_LOG3( mJob->LogType(), 
-				BmString("starting to dot-stuff a string of ") 
-					<< srcLen << " bytes");
+	BM_LOG3(mJob->LogType(), BmString("starting to dot-stuff a string of ") << srcLen << " bytes");
 
 	const char* src = srcBuf;
-	const char* srcEnd = srcBuf+srcLen;
+	const char* srcEnd = srcBuf + srcLen;
 	char* dest = destBuf;
-	char* destEnd = destBuf+destLen;
+	char* destEnd = destBuf + destLen;
 
 	char c;
-	for( ; src<srcEnd && dest<destEnd; ++src) {
-		if ((c = *src)=='.' && mAtStartOfLine) {
-			if (dest>destEnd-2)
+	for (; src < srcEnd && dest < destEnd; ++src) {
+		if ((c = *src) == '.' && mAtStartOfLine) {
+			if (dest > destEnd - 2)
 				break;
 			*dest++ = c;
 		}
 		*dest++ = c;
-		mAtStartOfLine = (c=='\n');
+		mAtStartOfLine = (c == '\n');
 	}
 
 	srcLen = (uint32)(src - srcBuf);
 	destLen = (uint32)(dest - destBuf);
-	BM_LOG3( mJob->LogType(), "dotstuff-encode: done");
+	BM_LOG3(mJob->LogType(), "dotstuff-encode: done");
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDotstuffEncoder::Finalize( char* destBuf, uint32& destLen) 
+void
+BmDotstuffEncoder::Finalize(char* destBuf, uint32& destLen)
 {
 	char* dest = destBuf;
-	char* destEnd = destBuf+destLen;
-	if (dest <= destEnd-3) {
+	char* destEnd = destBuf + destLen;
+	if (dest <= destEnd - 3) {
 		// output a dot on an empty line:
 		*dest++ = '.';
 		*dest++ = '\r';
@@ -631,7 +622,6 @@ void BmDotstuffEncoder::Finalize( char* destBuf, uint32& destLen)
 	}
 	destLen = (uint32)(dest - destBuf);
 }
-
 
 
 /********************************************************************************\
@@ -645,34 +635,33 @@ void BmDotstuffEncoder::Finalize( char* destBuf, uint32& destLen)
 	NetIBuf()
 		-	constructor
 \*------------------------------------------------------------------------------*/
-BmNetIBuf::BmNetIBuf( BmNetJobModel* job)
-	:	mJob( job)
+BmNetIBuf::BmNetIBuf(BmNetJobModel* job)
+	: mJob(job)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	Read()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-uint32 BmNetIBuf::Read( char* dest, uint32 destLen)
+uint32
+BmNetIBuf::Read(char* dest, uint32 destLen)
 {
-	int32 feedbackTimeout = ThePrefs->GetInt("FeedbackTimeout", 200)*1000;
-	int32 timeout = ThePrefs->GetInt("ReceiveTimeout")*1000*1000;
+	int32 feedbackTimeout = ThePrefs->GetInt("FeedbackTimeout", 200) * 1000;
+	int32 timeout = ThePrefs->GetInt("ReceiveTimeout") * 1000 * 1000;
 	int32 timeWaiting = 0;
 	int32 numBytes = 0;
-	Connection()->SetTimeout( feedbackTimeout);
-	while( mJob->ShouldContinue() && !numBytes) {
-		BM_LOG3( mJob->LogType(), 
-					BmString("Trying to receive up to ") << destLen << " bytes...");
-		numBytes = Connection()->Receive( dest, destLen);
-		BM_LOG3( mJob->LogType(), 
-					BmString("...received ") << numBytes << " bytes");
+	Connection()->SetTimeout(feedbackTimeout);
+	while (mJob->ShouldContinue() && !numBytes) {
+		BM_LOG3(mJob->LogType(), BmString("Trying to receive up to ") << destLen << " bytes...");
+		numBytes = Connection()->Receive(dest, destLen);
+		BM_LOG3(mJob->LogType(), BmString("...received ") << numBytes << " bytes");
 		if (numBytes <= 0) {
 			timeWaiting += feedbackTimeout;
-	 		if (timeWaiting >= timeout)
-	 			throw BM_network_error( "no answer from server (timeout)");
+			if (timeWaiting >= timeout)
+				throw BM_network_error("no answer from server (timeout)");
 			if (numBytes < 0)
-				throw BM_network_error( Connection()->ErrorStr());
+				throw BM_network_error(Connection()->ErrorStr());
 		}
 	}
 	return numBytes;
@@ -680,13 +669,13 @@ uint32 BmNetIBuf::Read( char* dest, uint32 destLen)
 
 /*------------------------------------------------------------------------------*\
 	IsAtEnd()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmNetIBuf::IsAtEnd() 
+bool
+BmNetIBuf::IsAtEnd()
 {
 	return false;
 }
-
 
 
 /********************************************************************************\
@@ -700,9 +689,9 @@ bool BmNetIBuf::IsAtEnd()
 	NetOBuf()
 		-	constructor
 \*------------------------------------------------------------------------------*/
-BmNetOBuf::BmNetOBuf( BmNetJobModel* job)
-	:	mJob( job)
-	,	mUpdate( false)
+BmNetOBuf::BmNetOBuf(BmNetJobModel* job)
+	: mJob(job),
+	  mUpdate(false)
 {
 }
 
@@ -710,26 +699,25 @@ BmNetOBuf::BmNetOBuf( BmNetJobModel* job)
 	Write( data, len)
 		-	sends given data to the server
 \*------------------------------------------------------------------------------*/
-uint32 BmNetOBuf::Write( const char* data, uint32 len) 
+uint32
+BmNetOBuf::Write(const char* data, uint32 len)
 {
-	uint32 sentSize=0;
-	for( uint32 offs=0; mJob->ShouldContinue() && offs<len; ) {
-		int32 sz = len-offs;
-		BM_LOG3( mJob->LogType(), 
-					BmString("Trying to send ") << sz << " bytes...");
-		int32 sent = Connection()->Send( data+offs, sz);
-		BM_LOG3( mJob->LogType(), 
-					BmString("...sent ") << sent << " bytes");
+	uint32 sentSize = 0;
+	for (uint32 offs = 0; mJob->ShouldContinue() && offs < len;) {
+		int32 sz = len - offs;
+		BM_LOG3(mJob->LogType(), BmString("Trying to send ") << sz << " bytes...");
+		int32 sent = Connection()->Send(data + offs, sz);
+		BM_LOG3(mJob->LogType(), BmString("...sent ") << sent << " bytes");
 		if (sent < 0)
-			throw BM_network_error( strerror(sent));
+			throw BM_network_error(strerror(sent));
 		else {
 			offs += sent;
 			sentSize += (uint32)sent;
 			if (mUpdate)
-				mJob->UpdateProgress( sent);
+				mJob->UpdateProgress(sent);
 			if (sent != sz)
-				throw BM_network_error( BmString("error during send, sent only ") 
-													<< sent << " bytes instead of " << sz);
+				throw BM_network_error(BmString("error during send, sent only ")
+									   << sent << " bytes instead of " << sz);
 		}
 	}
 	return sentSize;
@@ -739,21 +727,22 @@ uint32 BmNetOBuf::Write( const char* data, uint32 len)
 	Write( input)
 		-	adds all data from given BmMemIBuf input to end of string
 \*------------------------------------------------------------------------------*/
-uint32 BmNetOBuf::Write( BmMemIBuf* input, uint32 blockSize) 
+uint32
+BmNetOBuf::Write(BmMemIBuf* input, uint32 blockSize)
 {
-	char* buf = new char [blockSize];
-	uint32 writeLen=0;
+	char* buf = new char[blockSize];
+	uint32 writeLen = 0;
 	try {
 		uint32 len;
-		while( mJob->ShouldContinue() && !input->IsAtEnd()) {
-			len = input->Read( buf, blockSize);
+		while (mJob->ShouldContinue() && !input->IsAtEnd()) {
+			len = input->Read(buf, blockSize);
 			if (len == 0)
 				break;
-			writeLen += Write( buf, len);
+			writeLen += Write(buf, len);
 		}
-		delete [] buf;
+		delete[] buf;
 	} catch (BM_error& err) {
-		delete [] buf;
+		delete[] buf;
 		throw;
 	}
 	return writeLen;

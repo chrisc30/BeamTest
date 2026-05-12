@@ -21,16 +21,16 @@
 /*------------------------------------------------------------------------------*\
 	BmMailQuery
 		-	implements the querying for mails
-		-	in general, each BmMailQuery is started as a thread which exits when 
+		-	in general, each BmMailQuery is started as a thread which exits when
 			the moving-operation has ended
 \*------------------------------------------------------------------------------*/
 struct IMPEXPBMMAILKIT BmMailQuery {
-	typedef std::vector< entry_ref > BmRefVect;
-	
-	BmMailQuery();
-	virtual ~BmMailQuery()					{}
+	typedef std::vector<entry_ref> BmRefVect;
 
-	void SetPredicate( const BmString& predicate);
+	BmMailQuery();
+	virtual ~BmMailQuery() {}
+
+	void SetPredicate(const BmString& predicate);
 	void Execute();
 
 	BmRefVect mRefVect;

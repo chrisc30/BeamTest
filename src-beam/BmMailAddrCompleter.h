@@ -11,31 +11,28 @@
 
 #include "BmTextControlCompleter.h"
 
-class BmMailAddressCompleter
-	: public BmTextControlCompleter
-{
-	class MailAddrChoiceModel : public ChoiceModel
-	{
+class BmMailAddressCompleter : public BmTextControlCompleter {
+	class MailAddrChoiceModel : public ChoiceModel {
 	public:
 		virtual void FetchChoicesFor(const BmString& pattern);
 		//
 		virtual int32 CountChoices() const;
 		virtual const Choice* ChoiceAt(int32 index) const;
+
 	private:
 		BList mChoicesList;
 	};
-	
 
-	class MailAddrPatternSelector : public BmAutoCompleter::PatternSelector
-	{
+
+	class MailAddrPatternSelector : public BmAutoCompleter::PatternSelector {
 	public:
-		virtual void SelectPatternBounds( const BmString& text, int32 caretPos,
-													 int32* start, int32* length);
+		virtual void SelectPatternBounds(
+			const BmString& text, int32 caretPos, int32* start, int32* length);
 	};
 
 public:
 	BmMailAddressCompleter(BTextControl* textControl);
 };
-	
+
 
 #endif

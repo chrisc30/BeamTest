@@ -6,7 +6,7 @@
  */
 
 #ifndef MD5GLOBAL_H__
-#define MD5GLOBAL_H__ 
+#define MD5GLOBAL_H__
 /* GLOBAL.H - RSAREF types and constants
  */
 
@@ -16,7 +16,7 @@
 #endif
 
 /* POINTER defines a generic pointer type */
-typedef unsigned char *POINTER;
+typedef unsigned char* POINTER;
 
 /* UINT2 defines a two byte word */
 typedef unsigned short int UINT2;
@@ -38,4 +38,4 @@ If using PROTOTYPES, then PROTO_LIST returns the list, otherwise it
 #define PROTO_LIST(list) ()
 #endif
 
-#endif  /* MD5GLOBAL_H__ */
+#endif /* MD5GLOBAL_H__ */

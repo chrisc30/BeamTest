@@ -29,7 +29,7 @@ LinebreakDecoderTest::setUp()
 {
 	inherited::setUp();
 }
-	
+
 // tearDown
 void
 LinebreakDecoderTest::tearDown()
@@ -37,46 +37,44 @@ LinebreakDecoderTest::tearDown()
 	inherited::tearDown();
 }
 
-static void DecodeLinebreaksAndCheck( BmString input, BmString result);
+static void DecodeLinebreaksAndCheck(BmString input, BmString result);
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-static void DecodeLinebreaksAndCheck( BmString input, BmString result) {
+static void
+DecodeLinebreaksAndCheck(BmString input, BmString result)
+{
 	BmString decodedStr;
 	int32 blockSize = 128;
-	BmStringIBuf srcBuf( input);
-	BmStringOBuf destBuf( blockSize);
-	BmLinebreakDecoder decoder( &srcBuf, blockSize);
-	destBuf.Write( &decoder, blockSize);
-	decodedStr.Adopt( destBuf.TheString());
+	BmStringIBuf srcBuf(input);
+	BmStringOBuf destBuf(blockSize);
+	BmLinebreakDecoder decoder(&srcBuf, blockSize);
+	destBuf.Write(&decoder, blockSize);
+	decodedStr.Adopt(destBuf.TheString());
 	try {
-		CPPUNIT_ASSERT( decodedStr.Compare( result)==0);
-	} catch( ...) {
-		DumpResult( decodedStr);
+		CPPUNIT_ASSERT(decodedStr.Compare(result) == 0);
+	} catch (...) {
+		DumpResult(decodedStr);
 		throw;
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 void
 LinebreakDecoderTest::SimpleTest()
 {
 	// empty run:
-	NextSubTest(); 
-	DecodeLinebreaksAndCheck( "",
-									  "");
+	NextSubTest();
+	DecodeLinebreaksAndCheck("", "");
 	// run with nothing to do:
-	NextSubTest(); 
-	DecodeLinebreaksAndCheck( "A simple text",
-									  "A simple text");
+	NextSubTest();
+	DecodeLinebreaksAndCheck("A simple text", "A simple text");
 	// check everything in one go:
-	NextSubTest(); 
-	DecodeLinebreaksAndCheck( 
-		"\nA simple text\r\n (which contains \rsome linebreaks)\r\n\r\n",
-		"\nA simple text\n (which contains some linebreaks)\n\n"
-	);
+	NextSubTest();
+	DecodeLinebreaksAndCheck("\nA simple text\r\n (which contains \rsome linebreaks)\r\n\r\n",
+		"\nA simple text\n (which contains some linebreaks)\n\n");
 }

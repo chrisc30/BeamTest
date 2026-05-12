@@ -15,16 +15,15 @@
 #ifndef _MailMonitorTest_h
 #define _MailMonitorTest_h
 
+#include <ThreadedTestCase.h>
 #include <cppunit/TestCaller.h>
 #include <cppunit/TestSuite.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <ThreadedTestCase.h>
 
-class MailMonitorTest : public BThreadedTestCase
-{
+class MailMonitorTest : public BThreadedTestCase {
 	typedef BThreadedTestCase inherited;
+
 public:
-	
 	static CppUnit::Test* suite();
 
 	MailMonitorTest();
@@ -32,7 +31,7 @@ public:
 
 	// This function called before *each* test added in Suite()
 	void setUp();
-	
+
 	// This function called after *each* test added in Suite()
 	void tearDown();
 
@@ -50,6 +49,7 @@ public:
 	void RefListAdder();
 	void RefListRemover();
 	void RefListStorageTest();
+
 private:
 	void SyncWithMailMonitor();
 };

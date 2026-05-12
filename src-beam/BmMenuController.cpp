@@ -23,34 +23,34 @@ using namespace regexx;
 
 /*------------------------------------------------------------------------------*\
 	BmMenuController()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmMenuController::BmMenuController( const char* label, BHandler* msgTarget,
-												BMessage* msgTemplate, 
-												BmRebuildMenuFunc func, int32 flags)
-	:	inherited( label, msgTarget, msgTemplate, func, flags)
+BmMenuController::BmMenuController(const char* label, BHandler* msgTarget, BMessage* msgTemplate,
+	BmRebuildMenuFunc func, int32 flags)
+	: inherited(label, msgTarget, msgTemplate, func, flags)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	~BmMenuController()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmMenuController::~BmMenuController() {
-}
+BmMenuController::~BmMenuController() {}
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMenuController::UpdateItemList( void) {
+void
+BmMenuController::UpdateItemList(void)
+{
 	// lock window first...
 	BLooper* win = Looper();
 	if (win)
 		win->Lock();
 	try {
 		inherited::UpdateItemList();
-	} catch(...) {
+	} catch (...) {
 		if (win)
 			win->Unlock();
 		throw;
@@ -61,14 +61,14 @@ void BmMenuController::UpdateItemList( void) {
 
 /*------------------------------------------------------------------------------*\
 	ClearMenu()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMenuController::Clear()
+void
+BmMenuController::Clear()
 {
 	inherited::Clear();
 	if (Flags() & BM_MC_ADD_NONE_ITEM) {
-		BMessage* msg = new BMessage( *(MsgTemplate()));
-		AddItemToMenu( this, CreateMenuItem( BM_NoItemLabel.String(), msg), 
-							MsgTarget());
+		BMessage* msg = new BMessage(*(MsgTemplate()));
+		AddItemToMenu(this, CreateMenuItem(BM_NoItemLabel.String(), msg), MsgTarget());
 	}
 }

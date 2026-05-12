@@ -18,11 +18,11 @@
 // #pragma mark - BmDefaultPatternSelector
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultPatternSelector
-::SelectPatternBounds( const BmString& text, int32 caretPos,
-							  int32* start, int32* length)
+void
+BmDefaultPatternSelector ::SelectPatternBounds(
+	const BmString& text, int32 caretPos, int32* start, int32* length)
 {
 	if (!start || !length)
 		return;
@@ -33,36 +33,33 @@ void BmDefaultPatternSelector
 // #pragma mark - BmDefaultCompletionStyle
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmDefaultCompletionStyle
-::BmDefaultCompletionStyle(BmAutoCompleter::EditView* editView, 
-									BmAutoCompleter::ChoiceModel* choiceModel,
-									BmAutoCompleter::ChoiceView* choiceView, 
-									BmAutoCompleter::PatternSelector* patternSelector)
-	:	CompletionStyle(editView, choiceModel, choiceView, patternSelector)
-	,	mSelectedIndex(-1)
-	,	mPatternStartPos(0)
-	,	mPatternLength(0)
+BmDefaultCompletionStyle ::BmDefaultCompletionStyle(BmAutoCompleter::EditView* editView,
+	BmAutoCompleter::ChoiceModel* choiceModel, BmAutoCompleter::ChoiceView* choiceView,
+	BmAutoCompleter::PatternSelector* patternSelector)
+	: CompletionStyle(editView, choiceModel, choiceView, patternSelector),
+	  mSelectedIndex(-1),
+	  mPatternStartPos(0),
+	  mPatternLength(0)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmDefaultCompletionStyle::~BmDefaultCompletionStyle()
-{
-}
+BmDefaultCompletionStyle::~BmDefaultCompletionStyle() {}
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmDefaultCompletionStyle::Select(int32 index)
+bool
+BmDefaultCompletionStyle::Select(int32 index)
 {
-	if (!mChoiceView || !mChoiceModel || index == mSelectedIndex
-	|| index < -1 || index >= mChoiceModel->CountChoices())
+	if (!mChoiceView || !mChoiceModel || index == mSelectedIndex || index < -1
+		|| index >= mChoiceModel->CountChoices())
 		return false;
 
 	mSelectedIndex = index;
@@ -72,9 +69,10 @@ bool BmDefaultCompletionStyle::Select(int32 index)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmDefaultCompletionStyle::SelectNext(bool wrap)
+bool
+BmDefaultCompletionStyle::SelectNext(bool wrap)
 {
 	if (!mChoiceModel || mChoiceModel->CountChoices() == 0)
 		return false;
@@ -91,9 +89,10 @@ bool BmDefaultCompletionStyle::SelectNext(bool wrap)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmDefaultCompletionStyle::SelectPrevious(bool wrap)
+bool
+BmDefaultCompletionStyle::SelectPrevious(bool wrap)
 {
 	if (!mChoiceModel || mChoiceModel->CountChoices() == 0)
 		return false;
@@ -101,7 +100,7 @@ bool BmDefaultCompletionStyle::SelectPrevious(bool wrap)
 	int32 newIndex = mSelectedIndex - 1;
 	if (newIndex < 0) {
 		if (wrap)
-			newIndex = mChoiceModel->CountChoices()-1;
+			newIndex = mChoiceModel->CountChoices() - 1;
 		else
 			newIndex = 0;
 	}
@@ -110,9 +109,10 @@ bool BmDefaultCompletionStyle::SelectPrevious(bool wrap)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultCompletionStyle::ApplyChoice(bool hideChoices)
+void
+BmDefaultCompletionStyle::ApplyChoice(bool hideChoices)
 {
 	if (!mChoiceModel || !mChoiceView || !mEditView || mSelectedIndex < 0)
 		return;
@@ -124,23 +124,22 @@ void BmDefaultCompletionStyle::ApplyChoice(bool hideChoices)
 
 	mFullEnteredText = completedText;
 	mPatternLength = choiceStr.Length();
-	mEditView->SetEditViewState(completedText, 
-										 mPatternStartPos+choiceStr.Length());
+	mEditView->SetEditViewState(completedText, mPatternStartPos + choiceStr.Length());
 	if (hideChoices)
 		mChoiceView->HideChoices();
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultCompletionStyle::CancelChoice()
+void
+BmDefaultCompletionStyle::CancelChoice()
 {
 	if (!mChoiceView || !mEditView)
 		return;
 	if (mChoiceView->ChoicesAreShown()) {
-		mEditView->SetEditViewState(mFullEnteredText, 
-											 mPatternStartPos+mPatternLength);
+		mEditView->SetEditViewState(mFullEnteredText, mPatternStartPos + mPatternLength);
 		mChoiceView->HideChoices();
 		Select(-1);
 	}
@@ -148,9 +147,10 @@ void BmDefaultCompletionStyle::CancelChoice()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultCompletionStyle::EditViewStateChanged()
+void
+BmDefaultCompletionStyle::EditViewStateChanged()
 {
 	if (!mChoiceModel || !mChoiceView || !mEditView)
 		return;
@@ -161,16 +161,15 @@ void BmDefaultCompletionStyle::EditViewStateChanged()
 	if (mFullEnteredText == text)
 		return;
 	mFullEnteredText = text;
-	mPatternSelector->SelectPatternBounds(text, caretPos, &mPatternStartPos, 
-													  &mPatternLength);
-	BmString pattern(text.String()+mPatternStartPos, mPatternLength);
+	mPatternSelector->SelectPatternBounds(text, caretPos, &mPatternStartPos, &mPatternLength);
+	BmString pattern(text.String() + mPatternStartPos, mPatternLength);
 	mChoiceModel->FetchChoicesFor(pattern);
 
 	Select(-1);
 	// show a single choice only if it doesn't match the pattern exactly:
 	if (mChoiceModel->CountChoices() > 1
-	|| (mChoiceModel->CountChoices() == 1
-		&& pattern.ICompare(mChoiceModel->ChoiceAt(0)->Text()) != 0)) {
+		|| (mChoiceModel->CountChoices() == 1
+			&& pattern.ICompare(mChoiceModel->ChoiceAt(0)->Text()) != 0)) {
 		mChoiceView->ShowChoices(this);
 		mChoiceView->SelectChoiceAt(mSelectedIndex);
 	} else
@@ -181,12 +180,11 @@ void BmDefaultCompletionStyle::EditViewStateChanged()
 static const int32 BM_INVOKED = 'bmin';
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmDefaultChoiceView::ListView
-::ListView(BmAutoCompleter::CompletionStyle* completer)
-	:	BListView(BRect(0,0,100,100), "ChoiceViewList")
-	,	mCompleter(completer)
+BmDefaultChoiceView::ListView ::ListView(BmAutoCompleter::CompletionStyle* completer)
+	: BListView(BRect(0, 0, 100, 100), "ChoiceViewList"),
+	  mCompleter(completer)
 {
 	// we need to check if user clicks outside of window-bounds:
 	SetEventMask(B_POINTER_EVENTS);
@@ -194,9 +192,10 @@ BmDefaultChoiceView::ListView
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultChoiceView::ListView::AttachedToWindow()
+void
+BmDefaultChoiceView::ListView::AttachedToWindow()
 {
 	SetTarget(this);
 	SetInvocationMessage(new BMessage(BM_INVOKED));
@@ -205,20 +204,22 @@ void BmDefaultChoiceView::ListView::AttachedToWindow()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultChoiceView::ListView::SelectionChanged()
+void
+BmDefaultChoiceView::ListView::SelectionChanged()
 {
 	mCompleter->Select(CurrentSelection(0));
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultChoiceView::ListView::MessageReceived(BMessage* msg)
+void
+BmDefaultChoiceView::ListView::MessageReceived(BMessage* msg)
 {
-	switch(msg->what) {
+	switch (msg->what) {
 		case BM_INVOKED:
 			mCompleter->ApplyChoice();
 			break;
@@ -229,9 +230,10 @@ void BmDefaultChoiceView::ListView::MessageReceived(BMessage* msg)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultChoiceView::ListView::MouseDown(BPoint point)
+void
+BmDefaultChoiceView::ListView::MouseDown(BPoint point)
 {
 	if (!Window()->Frame().Contains(ConvertToScreen(point)))
 		// click outside of window, so we close it:
@@ -243,10 +245,10 @@ void BmDefaultChoiceView::ListView::MouseDown(BPoint point)
 // #pragma mark - BmDefaultChoiceView::ListItem
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmDefaultChoiceView::ListItem::ListItem(const BmAutoCompleter::Choice* choice)
-	:	BListItem()
+	: BListItem()
 {
 	mPreText = choice->DisplayText();
 	if (choice->MatchLen() > 0) {
@@ -257,10 +259,10 @@ BmDefaultChoiceView::ListItem::ListItem(const BmAutoCompleter::Choice* choice)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultChoiceView::ListItem
-::DrawItem(BView* owner, BRect frame, bool complete)
+void
+BmDefaultChoiceView::ListItem ::DrawItem(BView* owner, BRect frame, bool complete)
 {
 	rgb_color textCol, backCol, matchCol;
 	if (IsSelected()) {
@@ -276,14 +278,13 @@ void BmDefaultChoiceView::ListItem
 	font_height fontHeight;
 	owner->GetFont(&font);
 	font.GetHeight(&fontHeight);
-	float xPos = frame.left+1;
-	float yPos = frame.top+fontHeight.ascent;
+	float xPos = frame.left + 1;
+	float yPos = frame.top + fontHeight.ascent;
 	float w;
 	if (mPreText.Length()) {
 		w = owner->StringWidth(mPreText.String());
 		owner->SetLowColor(backCol);
-		owner->FillRect(BRect(xPos, frame.top, xPos+w-1, frame.bottom), 
-							 B_SOLID_LOW);
+		owner->FillRect(BRect(xPos, frame.top, xPos + w - 1, frame.bottom), B_SOLID_LOW);
 		owner->SetHighColor(textCol);
 		owner->DrawString(mPreText.String(), BPoint(xPos, yPos));
 		xPos += w;
@@ -291,16 +292,14 @@ void BmDefaultChoiceView::ListItem
 	if (mMatchText.Length()) {
 		w = owner->StringWidth(mMatchText.String());
 		owner->SetLowColor(matchCol);
-		owner->FillRect(BRect(xPos, frame.top, xPos+w-1, frame.bottom), 
-							 B_SOLID_LOW);
+		owner->FillRect(BRect(xPos, frame.top, xPos + w - 1, frame.bottom), B_SOLID_LOW);
 		owner->DrawString(mMatchText.String(), BPoint(xPos, yPos));
 		xPos += w;
 	}
 	if (mPostText.Length()) {
 		w = owner->StringWidth(mPostText.String());
 		owner->SetLowColor(backCol);
-		owner->FillRect(BRect(xPos, frame.top, xPos+w-1, frame.bottom), 
-							 B_SOLID_LOW);
+		owner->FillRect(BRect(xPos, frame.top, xPos + w - 1, frame.bottom), B_SOLID_LOW);
 		owner->DrawString(mPostText.String(), BPoint(xPos, yPos));
 	}
 }
@@ -308,29 +307,29 @@ void BmDefaultChoiceView::ListItem
 // #pragma mark - BmDefaultChoiceView
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmDefaultChoiceView::BmDefaultChoiceView()
-	:	mWindow(NULL)
-	,	mListView(NULL)
+	: mWindow(NULL),
+	  mListView(NULL)
 {
-	
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmDefaultChoiceView::~BmDefaultChoiceView()
 {
 	HideChoices();
 }
-	
+
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultChoiceView::SelectChoiceAt(int32 index)
+void
+BmDefaultChoiceView::SelectChoiceAt(int32 index)
 {
 	if (mListView && mListView->LockLooper()) {
 		if (index < 0)
@@ -345,9 +344,10 @@ void BmDefaultChoiceView::SelectChoiceAt(int32 index)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultChoiceView::ShowChoices(BmAutoCompleter::CompletionStyle* completer)
+void
+BmDefaultChoiceView::ShowChoices(BmAutoCompleter::CompletionStyle* completer)
 {
 	if (!completer)
 		return;
@@ -362,29 +362,25 @@ void BmDefaultChoiceView::ShowChoices(BmAutoCompleter::CompletionStyle* complete
 
 	mListView = new ListView(completer);
 	int32 count = choiceModel->CountChoices();
-	for(int32 i=0; i<count; ++i) {
-		mListView->AddItem(
-			new ListItem(choiceModel->ChoiceAt(i))
-		);
+	for (int32 i = 0; i < count; ++i) {
+		mListView->AddItem(new ListItem(choiceModel->ChoiceAt(i)));
 	}
 
-	mWindow = new BWindow(BRect(0,0,100,100), "", B_BORDERED_WINDOW_LOOK, 
-								 B_NORMAL_WINDOW_FEEL,
-								 B_NOT_MOVABLE | B_WILL_ACCEPT_FIRST_CLICK 
-								 | B_AVOID_FOCUS | B_ASYNCHRONOUS_CONTROLS);
+	mWindow = new BWindow(BRect(0, 0, 100, 100), "", B_BORDERED_WINDOW_LOOK, B_NORMAL_WINDOW_FEEL,
+		B_NOT_MOVABLE | B_WILL_ACCEPT_FIRST_CLICK | B_AVOID_FOCUS | B_ASYNCHRONOUS_CONTROLS);
 	mWindow->AddChild(mListView);
 
 	int32 visibleCount = MIN(count, 5);
-	float listHeight = mListView->ItemFrame(visibleCount-1).bottom+1;
+	float listHeight = mListView->ItemFrame(visibleCount - 1).bottom + 1;
 
 	BRect pvRect = editView->GetAdjustmentFrame();
 	BRect listRect = pvRect;
 	listRect.bottom = listRect.top + listHeight - 1;
 	BRect screenRect = BScreen().Frame();
-	if (listRect.bottom+1+listHeight <= screenRect.bottom)
-		listRect.OffsetTo(pvRect.left, pvRect.bottom+1);
+	if (listRect.bottom + 1 + listHeight <= screenRect.bottom)
+		listRect.OffsetTo(pvRect.left, pvRect.bottom + 1);
 	else
-		listRect.OffsetTo(pvRect.left, pvRect.top-listHeight);
+		listRect.OffsetTo(pvRect.left, pvRect.top - listHeight);
 
 	mListView->MoveTo(0, 0);
 	mListView->ResizeTo(listRect.Width(), listRect.Height());
@@ -395,9 +391,10 @@ void BmDefaultChoiceView::ShowChoices(BmAutoCompleter::CompletionStyle* complete
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmDefaultChoiceView::HideChoices()
+void
+BmDefaultChoiceView::HideChoices()
 {
 	if (mWindow && mWindow->Lock()) {
 		mWindow->Quit();
@@ -408,10 +405,10 @@ void BmDefaultChoiceView::HideChoices()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmDefaultChoiceView::ChoicesAreShown()
+bool
+BmDefaultChoiceView::ChoicesAreShown()
 {
 	return (mWindow != NULL);
 }
-

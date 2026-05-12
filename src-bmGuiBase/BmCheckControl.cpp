@@ -7,11 +7,11 @@
  */
 #include <BeBuild.h>
 #ifdef B_BEOS_VERSION_DANO
-	class BFont;
-	class BMessage;
-	class BMessageRunner;
-	class BRect;
-	class BStatusBar;
+class BFont;
+class BMessage;
+class BMessageRunner;
+class BRect;
+class BStatusBar;
 #endif
 
 #include <HGroup.h>
@@ -20,50 +20,51 @@
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmCheckControl::BmCheckControl( const char* label, ulong id, bool state) 
-	:	inherited( label, id, state)
+BmCheckControl::BmCheckControl(const char* label, ulong id, bool state)
+	: inherited(label, id, state)
 {
 	_InitSize();
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmCheckControl::BmCheckControl( const char* label, BMessage* msg, 
-										  BHandler* target, bool state)
-	:	inherited( label, msg, target, state)
+BmCheckControl::BmCheckControl(const char* label, BMessage* msg, BHandler* target, bool state)
+	: inherited(label, msg, target, state)
 {
 	_InitSize();
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmCheckControl::~BmCheckControl() {
-}
+BmCheckControl::~BmCheckControl() {}
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-float BmCheckControl::LabelWidth() {
+float
+BmCheckControl::LabelWidth()
+{
 	const char* label = Label();
 	if (!label)
 		return 0;
 	BFont font;
-	GetFont( &font);
-	return font.StringWidth( label);
+	GetFont(&font);
+	return font.StringWidth(label);
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmCheckControl::_InitSize()
+void
+BmCheckControl::_InitSize()
 {
 	ResizeToPreferred();
 	float width, height;
@@ -77,29 +78,34 @@ void BmCheckControl::_InitSize()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmCheckControl::AdjustToMaxLabelWidth( float maxWidth) {
+void
+BmCheckControl::AdjustToMaxLabelWidth(float maxWidth)
+{
 	ct_mpm.maxi.x = ct_mpm.mini.x = mpm.maxi.x = mpm.mini.x = maxWidth;
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmCheckControl::SetValueSilently( bool val) {
+void
+BmCheckControl::SetValueSilently(bool val)
+{
 	BMessenger msnger = Messenger();
-	SetTarget( NULL);
-	SetValue( val);
-	SetTarget( msnger);
+	SetTarget(NULL);
+	SetValue(val);
+	SetTarget(msnger);
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-minimax BmCheckControl::layoutprefs() {
+minimax
+BmCheckControl::layoutprefs()
+{
 	inherited::layoutprefs();
 	return mpm = ct_mpm;
 }
-

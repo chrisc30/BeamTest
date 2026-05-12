@@ -1,7 +1,7 @@
-//Name:		ImageAboutWindow.h
-//Author:	Brian Tietz
-//Copyright 1999
-//Conventions:
+// Name:		ImageAboutWindow.h
+// Author:	Brian Tietz
+// Copyright 1999
+// Conventions:
 //	Global constants (declared with const) and #defines - begin with "c_" followed by lowercase
 //		words separated by underscores.
 //		(E.G., #define c_my_constant 5).
@@ -33,8 +33,8 @@
 //******************************************************************************************************
 //**** System header files
 //******************************************************************************************************
-#include <Window.h>
 #include <View.h>
+#include <Window.h>
 
 
 #include "BmGuiBase.h"
@@ -58,75 +58,73 @@ const uint32 c_about_window_url_invoked = 'AbUr';
 //******************************************************************************************************
 //**** ImageAboutWindow
 //******************************************************************************************************
-class IMPEXPBMGUIBASE ImageAboutWindow : public BWindow
-{
-	public:
-		//Constructor and destructor
-		ImageAboutWindow(const char* window_title, const char* app_title, const BBitmap* bmap,
-			float icon_sidebar_offset, const char* body_text, const char* email=NULL, 
-			const char* web=NULL, const char* credits=NULL);
-			//icon_resource_name specifies the name of a 'bits' resource holding a logo image file for
-			//loading by BTranslationUtils.   The image should have dark grey (R184,G184,B184) on the
-			//left hand side, and light grey (R216,G216,B216) on the right hand side of the center of
-			//the logo image.  The icon_sidebar_offset is the offset into this image of the first
-			//column of the lighter color.  The short version string from the application version
-			//resource is loaded and displayed in the about window.
- 		virtual ~ImageAboutWindow();
-		void MouseDown(BPoint point);
-		void ScrollCredits( void);
+class IMPEXPBMGUIBASE ImageAboutWindow : public BWindow {
+public:
+	// Constructor and destructor
+	ImageAboutWindow(const char* window_title, const char* app_title, const BBitmap* bmap,
+		float icon_sidebar_offset, const char* body_text, const char* email = NULL,
+		const char* web = NULL, const char* credits = NULL);
+	// icon_resource_name specifies the name of a 'bits' resource holding a logo image file for
+	// loading by BTranslationUtils.   The image should have dark grey (R184,G184,B184) on the
+	// left hand side, and light grey (R216,G216,B216) on the right hand side of the center of
+	// the logo image.  The icon_sidebar_offset is the offset into this image of the first
+	// column of the lighter color.  The short version string from the application version
+	// resource is loaded and displayed in the about window.
+	virtual ~ImageAboutWindow();
+	void MouseDown(BPoint point);
+	void ScrollCredits(void);
 
-		//BWindow overrides
-		virtual void MessageReceived(BMessage *message);
-		
-	private:
-		//Draw method
-		friend class AboutView;
-		void DrawContent(BView* view, BRect update_rect);
+	// BWindow overrides
+	virtual void MessageReceived(BMessage* message);
 
-		BBitmap* m_bitmap;
-		char* m_title;
-		char* m_version;
-		char* m_email;
-		char* m_web;
-		int32 m_num_lines;
-		char** m_lines;
+private:
+	// Draw method
+	friend class AboutView;
+	void DrawContent(BView* view, BRect update_rect);
 
-		BRect m_title_rect;
-		BRect m_version_rect;
-		BRect m_email_rect;
-		BRect m_web_rect;
-		BRect* m_text_rects;
+	BBitmap* m_bitmap;
+	char* m_title;
+	char* m_version;
+	char* m_email;
+	char* m_web;
+	int32 m_num_lines;
+	char** m_lines;
 
-		BRect m_logo_rect;
-		BRect m_left_of_logo;
+	BRect m_title_rect;
+	BRect m_version_rect;
+	BRect m_email_rect;
+	BRect m_web_rect;
+	BRect* m_text_rects;
 
-		BStringView* m_credits_label;
-		BTextView* m_credits_view;
-		float m_credits_pos;
-		
-		float m_bold_font_ascent;
-		float m_plain_font_ascent;
+	BRect m_logo_rect;
+	BRect m_left_of_logo;
+
+	BStringView* m_credits_label;
+	BTextView* m_credits_view;
+	float m_credits_pos;
+
+	float m_bold_font_ascent;
+	float m_plain_font_ascent;
 };
 
 
 //******************************************************************************************************
 //**** AboutView
 //******************************************************************************************************
-class AboutView : public BView
-{
-	private:
-		AboutView(BRect rect, ImageAboutWindow* parent);
+class AboutView : public BView {
+private:
+	AboutView(BRect rect, ImageAboutWindow* parent);
 
-		ImageAboutWindow* m_parent;
+	ImageAboutWindow* m_parent;
 
-		friend class ImageAboutWindow;
+	friend class ImageAboutWindow;
 
-	public:
-		//BView override
-		void Draw(BRect update_rect);
-		void MouseDown(BPoint point);
-		void Pulse( void);
+public:
+	// BView override
+	void Draw(BRect update_rect);
+	void MouseDown(BPoint point);
+	void Pulse(void);
 };
 
 
-#endif //_ABOUT_WINDOW_H_
+#endif	//_ABOUT_WINDOW_H_

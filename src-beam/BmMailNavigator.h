@@ -14,22 +14,22 @@ class BmMailRefView;
 class BmMailView;
 
 struct BmMailRefSelector {
-	virtual ~BmMailRefSelector()			{}
-	virtual bool operator() (BmMailRef* mailRef) const;
+	virtual ~BmMailRefSelector() {}
+	virtual bool operator()(BmMailRef* mailRef) const;
 };
 
 struct BmNewMailRefSelector : public BmMailRefSelector {
-	virtual ~BmNewMailRefSelector()		{}
-	virtual bool operator() (BmMailRef* mailRef) const;
+	virtual ~BmNewMailRefSelector() {}
+	virtual bool operator()(BmMailRef* mailRef) const;
 };
 
 class BmMailNavigator {
 public:
-	BmMailNavigator(BmMailRefView* refView, 
-						 BmMailView* mailView,
-						 const BmMailRefSelector& selector);
+	BmMailNavigator(
+		BmMailRefView* refView, BmMailView* mailView, const BmMailRefSelector& selector);
 	void MoveBackward();
 	void MoveForward();
+
 private:
 	bool _MoveMailView();
 	bool _MoveRefView(bool backward);

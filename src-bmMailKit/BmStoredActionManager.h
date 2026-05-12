@@ -24,25 +24,25 @@ class BmListModel;
 	BmStoredActionFlusher
 \*------------------------------------------------------------------------------*/
 class IMPEXPBMMAILKIT BmStoredActionFlusher {
-
 public:
 	static BmStoredActionFlusher* CreateInstance();
 
 	void Run();
 	void Quit();
 	//
-	void AddList( BmRef<BmListModel> list);
+	void AddList(BmRef<BmListModel> list);
 
 	static BmStoredActionFlusher* theInstance;
+
 private:
 	//	native methods:
 	BmStoredActionFlusher();
 	void _Loop();
-	void _FlushList( BmRef<BmListModel>& list);
+	void _FlushList(BmRef<BmListModel>& list);
 	//
 	static int32 _ThreadEntry(void* data);
 
-	typedef set< BmRef< BmListModel> > ListSet;
+	typedef set<BmRef<BmListModel> > ListSet;
 	ListSet mListSet;
 
 	BLocker mLocker;
@@ -50,8 +50,8 @@ private:
 	thread_id mThreadId;
 
 	// Hide copy-constructor and assignment:
-	BmStoredActionFlusher( const BmStoredActionFlusher&);
-	BmStoredActionFlusher operator=( const BmStoredActionFlusher&);
+	BmStoredActionFlusher(const BmStoredActionFlusher&);
+	BmStoredActionFlusher operator=(const BmStoredActionFlusher&);
 };
 
 #define TheStoredActionFlusher BmStoredActionFlusher::theInstance
@@ -61,6 +61,7 @@ private:
 \*------------------------------------------------------------------------------*/
 class IMPEXPBMMAILKIT BmStoredActionManager {
 	typedef vector<BMessage*> ActionVect;
+
 public:
 	BmStoredActionManager(BmListModel* list);
 	~BmStoredActionManager();
@@ -68,12 +69,12 @@ public:
 	bool StoreAction(BMessage* action);
 	bool Flush();
 	//
-	void MaxCacheSize(uint32 maxCacheSize)
-													{ mMaxCacheSize = maxCacheSize; }
+	void MaxCacheSize(uint32 maxCacheSize) { mMaxCacheSize = maxCacheSize; }
+
 private:
 	ActionVect mActionVect;
 	BmListModel* mList;
 	uint32 mMaxCacheSize;
 };
-	
+
 #endif

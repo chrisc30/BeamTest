@@ -24,7 +24,7 @@ class BmMailFolderList;
 
 /*------------------------------------------------------------------------------*\
 	BmMailFolder
-		-	class 
+		-	class
 \*------------------------------------------------------------------------------*/
 class IMPEXPBMMAILKIT BmMailFolder : public BmListModelItem {
 	typedef BmListModelItem inherited;
@@ -34,73 +34,74 @@ class IMPEXPBMMAILKIT BmMailFolder : public BmListModelItem {
 	typedef set<BmString> SpecialMailRefSet;
 
 public:
-	BmMailFolder( BmMailFolderList* model, entry_ref &eref, ino_t node,
-					  BmMailFolder* parent, time_t &modified);
-	BmMailFolder( BMessage* archive, BmMailFolderList* model, 
-					  BmMailFolder* parent);
+	BmMailFolder(BmMailFolderList* model, entry_ref& eref, ino_t node, BmMailFolder* parent,
+		time_t& modified);
+	BmMailFolder(BMessage* archive, BmMailFolderList* model, BmMailFolder* parent);
 	virtual ~BmMailFolder();
-	
+
 	// native methods:
-	void AddSpecialFlagForMailRef( const BmString& key);
-	void RemoveSpecialFlagForMailRef( const BmString& key);
-	void BumpMailCount( int32 offset=1);
-	void BumpSpecialMailCountForSubfolders( int32 offset=1);
-	bool HasSpecialMail() const			{ return mSpecialMailRefSet.size()>0 
-															|| mSpecialMailCountForSubfolders>0; }
-	bool HasSpecialMailInSubfolders() const	
-													{ return mSpecialMailCountForSubfolders>0; }
+	void AddSpecialFlagForMailRef(const BmString& key);
+	void RemoveSpecialFlagForMailRef(const BmString& key);
+	void BumpMailCount(int32 offset = 1);
+	void BumpSpecialMailCountForSubfolders(int32 offset = 1);
+	bool HasSpecialMail() const
+	{
+		return mSpecialMailRefSet.size() > 0 || mSpecialMailCountForSubfolders > 0;
+	}
+	bool HasSpecialMailInSubfolders() const { return mSpecialMailCountForSubfolders > 0; }
 	bool CheckIfModifiedSinceLastTime();
-	bool CheckIfModifiedSince( time_t when, time_t* storeNewModTime=NULL);
+	bool CheckIfModifiedSince(time_t when, time_t* storeNewModTime = NULL);
 	void RecreateCache();
-	void AddMailRef( entry_ref& eref, struct stat& st);
-	void RemoveMailRef( const node_ref& nref);
-	void UpdateMailRef( const node_ref& nref);
-	void UpdateName( const entry_ref &eref);
-	void CreateSubFolder( BmString name);
-	void Rename( BmString newName);
+	void AddMailRef(entry_ref& eref, struct stat& st);
+	void RemoveMailRef(const node_ref& nref);
+	void UpdateMailRef(const node_ref& nref);
+	void UpdateName(const entry_ref& eref);
+	void CreateSubFolder(BmString name);
+	void Rename(BmString newName);
 	void MoveToTrash();
 	bool IsOutbound();
 	bool Exists() const;
 
 	// overrides of listmodel-item base:
-	const BmString& DisplayKey() const	{ return mName; }
+	const BmString& DisplayKey() const { return mName; }
 
 	// overrides of archivable base:
-	status_t Archive( BMessage* archive, bool deep = true) const;
-	int16 ArchiveVersion() const			{ return nArchiveVersion; }
+	status_t Archive(BMessage* archive, bool deep = true) const;
+	int16 ArchiveVersion() const { return nArchiveVersion; }
 
 	// getters:
-	inline const entry_ref& EntryRef() const
-											 		{ return mEntryRef; }
-	inline const entry_ref* EntryRefPtr() const
-													{ return &mEntryRef; }
-	inline const node_ref& NodeRef() const
-													{ return mNodeRef; }
-	inline const size_t SpecialMailCount() const
-													{ return mSpecialMailRefSet.size(); }
+	inline const entry_ref& EntryRef() const { return mEntryRef; }
+	inline const entry_ref* EntryRefPtr() const { return &mEntryRef; }
+	inline const node_ref& NodeRef() const { return mNodeRef; }
+	inline const size_t SpecialMailCount() const { return mSpecialMailRefSet.size(); }
 	inline const int32 SpecialMailCountForSubfolders() const
-													{ return mSpecialMailCountForSubfolders; }
-	inline const int32 MailCount() const	
-													{ return mMailCount; }
-	inline const time_t LastModified() const
-													{ return mLastModified; }
+	{
+		return mSpecialMailCountForSubfolders;
+	}
+	inline const int32 MailCount() const { return mMailCount; }
+	inline const time_t LastModified() const { return mLastModified; }
 	BmRef<BmMailRefList> MailRefList();
-	inline const BmString& Name() const	{ return mName; }
-	inline const BmString& SelectedRefKey() const
-													{ return mSelectedRefKey; }
-	inline bool RefListStateInfoConnectedToParent() const 
-													{ return mRefListStateInfoConnectedToParent; }
+	inline const BmString& Name() const { return mName; }
+	inline const BmString& SelectedRefKey() const { return mSelectedRefKey; }
+	inline bool RefListStateInfoConnectedToParent() const
+	{
+		return mRefListStateInfoConnectedToParent;
+	}
 
 	// setters:
-	inline void EntryRef( const entry_ref &e)
-												 	{ mEntryRef = e; mName = e.name; }
-	inline void SelectedRefKey( const BmString& key)
-													{ mSelectedRefKey = key; }
-	void MailCount( int32 count);
-	inline void RefListStateInfoConnectedToParent( bool b)
-													{ mRefListStateInfoConnectedToParent = b; }
+	inline void EntryRef(const entry_ref& e)
+	{
+		mEntryRef = e;
+		mName = e.name;
+	}
+	inline void SelectedRefKey(const BmString& key) { mSelectedRefKey = key; }
+	void MailCount(int32 count);
+	inline void RefListStateInfoConnectedToParent(bool b)
+	{
+		mRefListStateInfoConnectedToParent = b;
+	}
 
-	static bool IsSystemFolderSubPath( const BmString& subPath);
+	static bool IsSystemFolderSubPath(const BmString& subPath);
 
 	// archival-fieldnames:
 	static const char* const MSG_ENTRYREF;
@@ -137,7 +138,7 @@ protected:
 	bool mRefListStateInfoConnectedToParent;
 
 	// the following members will be archived into their own files:
-	BmRef< BmMailRefList> mMailRefList;
+	BmRef<BmMailRefList> mMailRefList;
 
 	// the following members will NOT be archived at all:
 	SpecialMailRefSet mSpecialMailRefSet;
@@ -147,8 +148,8 @@ protected:
 	static BLocker nRefListLocker;
 
 	// Hide copy-constructor and assignment:
-	BmMailFolder( const BmMailFolder&);
-	BmMailFolder operator=( const BmMailFolder&);
+	BmMailFolder(const BmMailFolder&);
+	BmMailFolder operator=(const BmMailFolder&);
 };
 
 #endif

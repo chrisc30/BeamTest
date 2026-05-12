@@ -7,10 +7,10 @@
  */
 #include <BeBuild.h>
 #ifdef B_BEOS_VERSION_DANO
-	class BFont;
-	class BMessage;
-	class BPopUpMenu;
-	class BRect;
+class BFont;
+class BMessage;
+class BPopUpMenu;
+class BRect;
 #endif
 
 #include <LayeredGroup.h>
@@ -32,85 +32,84 @@
 	BmPrefsView
 \********************************************************************************/
 
-const char* const BmPrefsView::MSG_ITEM = 		"bm:item";
+const char* const BmPrefsView::MSG_ITEM = "bm:item";
 const char* const BmPrefsView::MSG_FIELD_NAME = "bm:fname";
-const char* const BmPrefsView::MSG_COMPLAINT = 	"bm:compl";
+const char* const BmPrefsView::MSG_COMPLAINT = "bm:compl";
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmPrefsView::BmPrefsView( BmString label) 
-	:	inherited( M_NO_BORDER, 0, (char*)label.String())
-	,	mInitDone( false)
-	,	mLabelView( NULL)
-	,	mChanged( false)
+BmPrefsView::BmPrefsView(BmString label)
+	: inherited(M_NO_BORDER, 0, (char*)label.String()),
+	  mInitDone(false),
+	  mLabelView(NULL),
+	  mChanged(false)
 {
 	MView* view;
 	if (label.Length()) {
-		view = 
-			new VGroup( 
-				minimax(100,100),
-				new MBorder( M_DEPRESSED_BORDER, 2, NULL, 
-					mLabelView = new MStringView( label.String(), B_ALIGN_CENTER)
-				),
-				new Space( minimax(0,2,0,2)),
-				0
-			);
+		view = new VGroup(minimax(100, 100),
+			new MBorder(M_DEPRESSED_BORDER, 2, NULL,
+				mLabelView = new MStringView(label.String(), B_ALIGN_CENTER)),
+			new Space(minimax(0, 2, 0, 2)), 0);
 	} else {
 		view = new Space();
 	}
-	mGroupView = dynamic_cast<BView*>( view);
-	AddChild( mGroupView);
+	mGroupView = dynamic_cast<BView*>(view);
+	AddChild(mGroupView);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmPrefsView::~BmPrefsView() {
-}
+BmPrefsView::~BmPrefsView() {}
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsView::Activated() {
+void
+BmPrefsView::Activated()
+{
 	if (!mInitDone)
 		Initialize();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsView::Initialize() {
+void
+BmPrefsView::Initialize()
+{
 	if (mLabelView) {
 		BFont font = *be_bold_font;
-		mLabelView->SetFont( &font);
-		mLabelView->SetViewUIColor( B_CONTROL_HIGHLIGHT_COLOR);
-		mLabelView->SetLowUIColor( B_CONTROL_HIGHLIGHT_COLOR);
-		mLabelView->SetHighUIColor( B_CONTROL_BACKGROUND_COLOR);
+		mLabelView->SetFont(&font);
+		mLabelView->SetViewUIColor(B_CONTROL_HIGHLIGHT_COLOR);
+		mLabelView->SetLowUIColor(B_CONTROL_HIGHLIGHT_COLOR);
+		mLabelView->SetHighUIColor(B_CONTROL_BACKGROUND_COLOR);
 	}
 	layoutprefs();
-	layout( Bounds());
+	layout(Bounds());
 	mInitDone = true;
 }
 
 /*------------------------------------------------------------------------------*\
 	MessageReceived( msg)
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsView::MessageReceived( BMessage* msg) {
+void
+BmPrefsView::MessageReceived(BMessage* msg)
+{
 	try {
-		switch( msg->what) {
+		switch (msg->what) {
 			default:
-				inherited::MessageReceived( msg);
+				inherited::MessageReceived(msg);
 		}
-	}
-	catch( BM_error &err) {
+	} catch (BM_error& err) {
 		// a problem occurred, we tell the user:
-		BM_SHOWERR( BmString("PrefsView_") << mLabelView->Text() << ":\n\t" << err.what());
+		BM_SHOWERR(BmString("PrefsView_") << mLabelView->Text() << ":\n\t" << err.what());
 	}
 }
 
@@ -118,51 +117,53 @@ void BmPrefsView::MessageReceived( BMessage* msg) {
 	Name()
 		-	returns name of label (not 'MBorder', as MBorder does...)
 \*------------------------------------------------------------------------------*/
-const char* BmPrefsView::Name() {
-	return mLabelView ? mLabelView->Text() : ""; 
+const char*
+BmPrefsView::Name()
+{
+	return mLabelView ? mLabelView->Text() : "";
 }
 
 /*------------------------------------------------------------------------------*\
 	NoticeChange()
 		-	propagates change-message to prefs-window
 \*------------------------------------------------------------------------------*/
-void BmPrefsView::NoticeChange() {
+void
+BmPrefsView::NoticeChange()
+{
 	if (!mChanged) {
-		Window()->PostMessage( BM_PREFS_CHANGED);
+		Window()->PostMessage(BM_PREFS_CHANGED);
 		mChanged = true;
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmPrefsView::DoSanityCheck( BmListModel* list, const BmString& viewName) 
+bool
+BmPrefsView::DoSanityCheck(BmListModel* list, const BmString& viewName)
 {
 	if (!InitDone())
 		return true;
 	BmString complaint, fieldName;
-	BMessage msg( BM_COMPLAIN_ABOUT_FIELD);
-	BmAutolockCheckGlobal lock( list->ModelLocker());
+	BMessage msg(BM_COMPLAIN_ABOUT_FIELD);
+	BmAutolockCheckGlobal lock(list->ModelLocker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			list->ModelNameNC() << ": Unable to get lock"
-		);
+		BM_THROW_RUNTIME(list->ModelNameNC() << ": Unable to get lock");
 	BmModelItemMap::const_iterator iter;
-	for( iter = list->begin(); iter != list->end(); ++iter) {
+	for (iter = list->begin(); iter != list->end(); ++iter) {
 		BmListModelItem* item = iter->second.Get();
-		if (!item->SanityCheck( complaint, fieldName)) {
-			msg.AddPointer( MSG_ITEM, (void*)item);
-			msg.AddString( MSG_COMPLAINT, complaint.String());
+		if (!item->SanityCheck(complaint, fieldName)) {
+			msg.AddPointer(MSG_ITEM, (void*)item);
+			msg.AddString(MSG_COMPLAINT, complaint.String());
 			if (fieldName.Length())
-				msg.AddString( MSG_FIELD_NAME, fieldName.String());
-			ThePrefsWin->SendMsgToSubView( viewName, &msg);
+				msg.AddString(MSG_FIELD_NAME, fieldName.String());
+			ThePrefsWin->SendMsgToSubView(viewName, &msg);
 			return false;
 		}
 	}
 	return true;
 }
-
 
 
 /********************************************************************************\
@@ -171,30 +172,31 @@ bool BmPrefsView::DoSanityCheck( BmListModel* list, const BmString& viewName)
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmPrefsViewContainer::BmPrefsViewContainer( LayeredGroup* group)
-	:	MBorder( M_NO_BORDER, 0, (char*)"PrefsViewContainer", group)
-	,	mLayeredGroup( group)
+BmPrefsViewContainer::BmPrefsViewContainer(LayeredGroup* group)
+	: MBorder(M_NO_BORDER, 0, (char*)"PrefsViewContainer", group),
+	  mLayeredGroup(group)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmPrefsView* BmPrefsViewContainer::ShowPrefsByName( const BmString name,
-																	 int32& indexOut) {
+BmPrefsView*
+BmPrefsViewContainer::ShowPrefsByName(const BmString name, int32& indexOut)
+{
 	if (!mLayeredGroup)
 		return NULL;
 	int32 count = mLayeredGroup->CountChildren();
-	for( int32 i=0; i<count; ++i) {
-		BmPrefsView* pv = dynamic_cast< BmPrefsView*>( mLayeredGroup->ChildAt( i));
+	for (int32 i = 0; i < count; ++i) {
+		BmPrefsView* pv = dynamic_cast<BmPrefsView*>(mLayeredGroup->ChildAt(i));
 		if (pv) {
 			BmString pvName = pv->Name();
-			if (!name.ICompare( pvName)) {
-				ShowPrefs( i);
-				indexOut = i-1;
+			if (!name.ICompare(pvName)) {
+				ShowPrefs(i);
+				indexOut = i - 1;
 				return pv;
 			}
 		}
@@ -204,26 +206,30 @@ BmPrefsView* BmPrefsViewContainer::ShowPrefsByName( const BmString name,
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsViewContainer::ShowPrefs( int index) {
+void
+BmPrefsViewContainer::ShowPrefs(int index)
+{
 	if (!mLayeredGroup || index < 0 || index >= mLayeredGroup->CountChildren())
 		return;
-	mLayeredGroup->ActivateLayer( index);
-	BmPrefsView* pv = dynamic_cast<BmPrefsView*>( mLayeredGroup->ChildAt( index));
+	mLayeredGroup->ActivateLayer(index);
+	BmPrefsView* pv = dynamic_cast<BmPrefsView*>(mLayeredGroup->ChildAt(index));
 	if (pv)
 		pv->Activated();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsViewContainer::WriteStateInfo() {
+void
+BmPrefsViewContainer::WriteStateInfo()
+{
 	if (!mLayeredGroup)
 		return;
-	for( int i=0; i<mLayeredGroup->CountChildren(); ++i) {
-		BmPrefsView* pv = dynamic_cast<BmPrefsView*>( mLayeredGroup->ChildAt( i));
+	for (int i = 0; i < mLayeredGroup->CountChildren(); ++i) {
+		BmPrefsView* pv = dynamic_cast<BmPrefsView*>(mLayeredGroup->ChildAt(i));
 		if (pv)
 			pv->WriteStateInfo();
 	}
@@ -231,22 +237,24 @@ void BmPrefsViewContainer::WriteStateInfo() {
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmPrefsViewContainer::SaveChanges() {
+bool
+BmPrefsViewContainer::SaveChanges()
+{
 	if (!mLayeredGroup)
 		return false;
-	if (!ThePrefs->GetBool( "AvoidPrefsSanityChecks", false)) {
-		for( int i=0; i<mLayeredGroup->CountChildren(); ++i) {
-			BmPrefsView* pv = dynamic_cast<BmPrefsView*>( mLayeredGroup->ChildAt( i));
+	if (!ThePrefs->GetBool("AvoidPrefsSanityChecks", false)) {
+		for (int i = 0; i < mLayeredGroup->CountChildren(); ++i) {
+			BmPrefsView* pv = dynamic_cast<BmPrefsView*>(mLayeredGroup->ChildAt(i));
 			if (pv && !pv->SanityCheck()) {
-				ShowPrefs( i);
+				ShowPrefs(i);
 				return false;
 			}
 		}
 	}
-	for( int i=0; i<mLayeredGroup->CountChildren(); ++i) {
-		BmPrefsView* pv = dynamic_cast<BmPrefsView*>( mLayeredGroup->ChildAt( i));
+	for (int i = 0; i < mLayeredGroup->CountChildren(); ++i) {
+		BmPrefsView* pv = dynamic_cast<BmPrefsView*>(mLayeredGroup->ChildAt(i));
 		if (pv) {
 			pv->SaveData();
 			pv->ResetChanged();
@@ -257,13 +265,15 @@ bool BmPrefsViewContainer::SaveChanges() {
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsViewContainer::RevertChanges() {
+void
+BmPrefsViewContainer::RevertChanges()
+{
 	if (!mLayeredGroup)
 		return;
-	for( int i=0; i<mLayeredGroup->CountChildren(); ++i) {
-		BmPrefsView* pv = dynamic_cast<BmPrefsView*>( mLayeredGroup->ChildAt( i));
+	for (int i = 0; i < mLayeredGroup->CountChildren(); ++i) {
+		BmPrefsView* pv = dynamic_cast<BmPrefsView*>(mLayeredGroup->ChildAt(i));
 		if (pv) {
 			pv->UndoChanges();
 			pv->ResetChanged();
@@ -274,13 +284,15 @@ void BmPrefsViewContainer::RevertChanges() {
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsViewContainer::SetDefaults() {
+void
+BmPrefsViewContainer::SetDefaults()
+{
 	if (!mLayeredGroup)
 		return;
-	for( int i=0; i<mLayeredGroup->CountChildren(); ++i) {
-		BmPrefsView* pv = dynamic_cast<BmPrefsView*>( mLayeredGroup->ChildAt( i));
+	for (int i = 0; i < mLayeredGroup->CountChildren(); ++i) {
+		BmPrefsView* pv = dynamic_cast<BmPrefsView*>(mLayeredGroup->ChildAt(i));
 		if (pv) {
 			pv->SetDefaults();
 			pv->Update();

@@ -18,16 +18,18 @@ class BmNetEndpoint;
 class IMPEXPBMDAEMON BmNetEndpointRoster {
 	typedef BmNetEndpoint* (*BmInstantiateNetEndpointFunc)();
 	typedef status_t (*BmGetEncryptionInfoFunc)(BMessage*);
+
 public:
 	BmNetEndpointRoster();
 	~BmNetEndpointRoster();
 
 	BmNetEndpoint* CreateEndpoint();
 	//
- 	bool SupportsEncryption();
- 	bool SupportsEncryptionType(const char* encType);
+	bool SupportsEncryption();
+	bool SupportsEncryptionType(const char* encType);
 	status_t GetEncryptionInfo(BMessage* encryptionInfo);
 	BmString GetCertPath();
+
 private:
 	void _InitializeIfNeeded();
 	void _Cleanup();

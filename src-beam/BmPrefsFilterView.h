@@ -9,67 +9,60 @@
 #ifndef _BmPrefsFilterView_h
 #define _BmPrefsFilterView_h
 
-#include "BmListController.h"
 #include "BmFilter.h"
+#include "BmListController.h"
 #include "BmPrefsView.h"
 
 /*------------------------------------------------------------------------------*\
 	BmFilterItem
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-class BmFilterItem : public BmListViewItem
-{
+class BmFilterItem : public BmListViewItem {
 	typedef BmListViewItem inherited;
 
 public:
 	// c'tors and d'tor:
-	BmFilterItem( ColumnListView* lv, BmListModelItem* item);
+	BmFilterItem(ColumnListView* lv, BmListModelItem* item);
 	~BmFilterItem();
 
 	// overrides of listitem base:
-	void UpdateView( BmUpdFlags flags, bool redraw = true, 
-						  uint32 updColBitmap = 0);
+	void UpdateView(BmUpdFlags flags, bool redraw = true, uint32 updColBitmap = 0);
 
 private:
 	// Hide copy-constructor and assignment:
-	BmFilterItem( const BmFilterItem&);
-	BmFilterItem operator=( const BmFilterItem&);
+	BmFilterItem(const BmFilterItem&);
+	BmFilterItem operator=(const BmFilterItem&);
 };
-
 
 
 /*------------------------------------------------------------------------------*\
 	BmFilterView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-class BmFilterView : public BmListViewController
-{
+class BmFilterView : public BmListViewController {
 	typedef BmListViewController inherited;
-	
+
 public:
 	// c'tors and d'tor:
-	BmFilterView( int32 width, int32 height);
+	BmFilterView(int32 width, int32 height);
 	~BmFilterView();
 
 	// native methods:
-	BmListViewItem* CreateListViewItem( BmListModelItem* item, 
-													BMessage* archive=NULL);
-	
+	BmListViewItem* CreateListViewItem(BmListModelItem* item, BMessage* archive = NULL);
+
 	// overrides of controller base:
-	BmString StateInfoBasename()			{ return "FilterView"; }
-	BmListViewItem* AddModelItem( BmListModelItem* item);
-	const char* ItemNameForCaption()		{ return "filter"; }
+	BmString StateInfoBasename() { return "FilterView"; }
+	BmListViewItem* AddModelItem(BmListModelItem* item);
+	const char* ItemNameForCaption() { return "filter"; }
 
 	// overrides of listview base:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 private:
-
 	// Hide copy-constructor and assignment:
-	BmFilterView( const BmFilterView&);
-	BmFilterView operator=( const BmFilterView&);
+	BmFilterView(const BmFilterView&);
+	BmFilterView operator=(const BmFilterView&);
 };
-
 
 
 class MButton;
@@ -83,24 +76,24 @@ class BmMenuControl;
 
 /*------------------------------------------------------------------------------*\
 	BmPrefsFilterView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmPrefsFilterView : public BmPrefsView {
 	typedef BmPrefsView inherited;
 
 	enum {
-		BM_ADD_FILTER			   = 'bmAF',
-		BM_REMOVE_FILTER		   = 'bmRF',
-		BM_ADD_TO_CHAIN_CHANGED	= 'bmAC'
+		BM_ADD_FILTER = 'bmAF',
+		BM_REMOVE_FILTER = 'bmRF',
+		BM_ADD_TO_CHAIN_CHANGED = 'bmAC'
 	};
 
 public:
 	// c'tors and d'tor:
 	BmPrefsFilterView();
 	virtual ~BmPrefsFilterView();
-	
+
 	// native methods:
-	void ShowFilter( int32 selection);
+	void ShowFilter(int32 selection);
 
 	// overrides of BmPrefsView base:
 	void Initialize();
@@ -111,7 +104,7 @@ public:
 	bool SanityCheck();
 
 	// overrides of BView base:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 	// getters:
 
@@ -130,10 +123,10 @@ private:
 
 	BmRef<BmFilter> mCurrFilter;
 	BmFilterAddonPrefsView* mCurrAddonView;
-	
+
 	// Hide copy-constructor and assignment:
-	BmPrefsFilterView( const BmPrefsFilterView&);
-	BmPrefsFilterView operator=( const BmPrefsFilterView&);
+	BmPrefsFilterView(const BmPrefsFilterView&);
+	BmPrefsFilterView operator=(const BmPrefsFilterView&);
 };
 
 #endif

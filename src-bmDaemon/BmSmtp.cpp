@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 #ifdef BEAM_FOR_BONE
-# include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #include <NetAddress.h>
 #include <NetEndpoint.h>
@@ -21,7 +21,7 @@ using namespace regexx;
 
 #include "BmBasics.h"
 #include "BmEncoding.h"
-	using namespace BmEncoding;
+using namespace BmEncoding;
 #include "BmFilter.h"
 #include "BmIdentity.h"
 #include "BmLogHandler.h"
@@ -34,12 +34,9 @@ using namespace regexx;
 #include "BmPopper.h"
 #include "BmPrefs.h"
 #include "BmRosterBase.h"
-#include "BmSmtpAccount.h"
 #include "BmSmtp.h"
+#include "BmSmtpAccount.h"
 #include "BmUtil.h"
-
-
-
 
 
 /********************************************************************************\
@@ -50,11 +47,11 @@ using namespace regexx;
 	()
 		-
 \*------------------------------------------------------------------------------*/
-BmSmtpStatusFilter::BmSmtpStatusFilter( BmMemIBuf* input, uint32 blockSize)
-	:	inherited( input, blockSize)
-	,	mAtStartOfLine( true)
-	,	mDigitCount( 0)
-	,	mIncludeUpToNewline( false)
+BmSmtpStatusFilter::BmSmtpStatusFilter(BmMemIBuf* input, uint32 blockSize)
+	: inherited(input, blockSize),
+	  mAtStartOfLine(true),
+	  mDigitCount(0),
+	  mIncludeUpToNewline(false)
 {
 }
 
@@ -62,8 +59,10 @@ BmSmtpStatusFilter::BmSmtpStatusFilter( BmMemIBuf* input, uint32 blockSize)
 	()
 		-
 \*------------------------------------------------------------------------------*/
-void BmSmtpStatusFilter::Reset( BmMemIBuf* input) {
-	inherited::Reset( input);
+void
+BmSmtpStatusFilter::Reset(BmMemIBuf* input)
+{
+	inherited::Reset(input);
 	mAtStartOfLine = true;
 	mDigitCount = 0;
 	mIncludeUpToNewline = false;
@@ -73,41 +72,42 @@ void BmSmtpStatusFilter::Reset( BmMemIBuf* input) {
 	()
 		-
 \*------------------------------------------------------------------------------*/
-void BmSmtpStatusFilter::Filter( const char* srcBuf, uint32& srcLen,
-											char* destBuf, uint32& destLen) {
+void
+BmSmtpStatusFilter::Filter(const char* srcBuf, uint32& srcLen, char* destBuf, uint32& destLen)
+{
 	const char* src = srcBuf;
-	const char* srcEnd = srcBuf+srcLen;
+	const char* srcEnd = srcBuf + srcLen;
 
 	bool needData = false;
 	if (mInfoMsg)
 		mInfoMsg->FindBool(BmPopper::IMSG_NEED_DATA, &needData);
 
 	if (mHaveStatus) {
-		uint32 size = std::min( destLen, srcLen);
-		memcpy( destBuf, srcBuf, size);
+		uint32 size = std::min(destLen, srcLen);
+		memcpy(destBuf, srcBuf, size);
 		srcLen = destLen = size;
 	} else {
-		for( ;src<srcEnd; ++src) {
+		for (; src < srcEnd; ++src) {
 			if (mIncludeUpToNewline) {
-				if (*src=='\n') {
+				if (*src == '\n') {
 					mHaveStatus = true;
 					break;
 				} else
 					continue;
 			} else if (mAtStartOfLine || mDigitCount) {
-				if (mDigitCount==3 && *src!='-') {
+				if (mDigitCount == 3 && *src != '-') {
 					mIncludeUpToNewline = true;
-				} else if (mDigitCount<3 && isdigit( *src))
+				} else if (mDigitCount < 3 && isdigit(*src))
 					mDigitCount++;
 				else
 					mDigitCount = 0;
 			}
-			mAtStartOfLine = (*src=='\n');
+			mAtStartOfLine = (*src == '\n');
 		}
 		uint32 statusSize = (uint32)(src - srcBuf);
-		mStatusText.Append( srcBuf, statusSize);
+		mStatusText.Append(srcBuf, statusSize);
 		if (mHaveStatus) {
-			src++;								// skip newline
+			src++;	// skip newline
 			if (!needData)
 				mEndReached = true;
 		}
@@ -120,16 +120,17 @@ void BmSmtpStatusFilter::Filter( const char* srcBuf, uint32& srcLen,
 	()
 		-
 \*------------------------------------------------------------------------------*/
-bool BmSmtpStatusFilter::CheckForPositiveAnswer() {
+bool
+BmSmtpStatusFilter::CheckForPositiveAnswer()
+{
 	if (mStatusText.Length() && mStatusText.ByteAt(0) > '3') {
 		BmString err("Server answers: \n");
 		err += mStatusText;
-		err.RemoveAll( "\r");
-		throw BM_network_error( err);
+		err.RemoveAll("\r");
+		throw BM_network_error(err);
 	}
 	return true;
 }
-
 
 
 /********************************************************************************\
@@ -141,7 +142,7 @@ bool BmSmtpStatusFilter::CheckForPositiveAnswer() {
 #define BM_LOGNAME Name()
 
 // message component definitions for additional info:
-const char* const BmSmtp::MSG_PWD = 	"bm:pwd";
+const char* const BmSmtp::MSG_PWD = "bm:pwd";
 
 // job-specifier for checking server capabilities:
 const int32 BmSmtp::BM_CHECK_CAPABILITIES_JOB = 1;
@@ -150,33 +151,28 @@ const int32 BmSmtp::BM_CHECK_CAPABILITIES_JOB = 1;
 	SmtpStates[]
 		-	array of SMTP-states, each with title and corresponding handler-method
 \*------------------------------------------------------------------------------*/
-BmSmtp::SmtpState BmSmtp::SmtpStates[BmSmtp::SMTP_FINAL] = {
-	SmtpState( "auth via pop...", &BmSmtp::StateAuthViaPopServer),
-	SmtpState( "connect...", &BmSmtp::StateConnect),
-	SmtpState( "helo...", &BmSmtp::StateHelo),
-	SmtpState( "starttls...", &BmSmtp::StateStartTLS),
-	SmtpState( "auth...", &BmSmtp::StateAuth),
-	SmtpState( "send...", &BmSmtp::StateSendMails),
-	SmtpState( "quit...", &BmSmtp::StateDisconnect),
-	SmtpState( "done", NULL)
-};
+BmSmtp::SmtpState BmSmtp::SmtpStates[BmSmtp::SMTP_FINAL]
+	= {SmtpState("auth via pop...", &BmSmtp::StateAuthViaPopServer),
+		SmtpState("connect...", &BmSmtp::StateConnect), SmtpState("helo...", &BmSmtp::StateHelo),
+		SmtpState("starttls...", &BmSmtp::StateStartTLS), SmtpState("auth...", &BmSmtp::StateAuth),
+		SmtpState("send...", &BmSmtp::StateSendMails),
+		SmtpState("quit...", &BmSmtp::StateDisconnect), SmtpState("done", NULL)};
 
 /*------------------------------------------------------------------------------*\
 	BmSmtp( info)
 		-	contructor
 \*------------------------------------------------------------------------------*/
-BmSmtp::BmSmtp( const BmString& name, BmSmtpAccount* account)
-	:	inherited( BmString("SMTP_")<<name, BM_LogSmtp,
-					  new BmSmtpStatusFilter( NULL))
-	,	mSmtpAccount( account)
-	,	mMailCount( 0)
-	,	mMsgTotalSize( 0)
-	,	mCurrMailNr( 0)
-	,	mCurrMailSize( 0)
-	,	mState( 0)
-	,	mServerMayHaveSizeLimit( false)
-	,	mServerSupportsDSN( false)
-	,	mServerSupportsTLS( false)
+BmSmtp::BmSmtp(const BmString& name, BmSmtpAccount* account)
+	: inherited(BmString("SMTP_") << name, BM_LogSmtp, new BmSmtpStatusFilter(NULL)),
+	  mSmtpAccount(account),
+	  mMailCount(0),
+	  mMsgTotalSize(0),
+	  mCurrMailNr(0),
+	  mCurrMailSize(0),
+	  mState(0),
+	  mServerMayHaveSizeLimit(false),
+	  mServerSupportsDSN(false),
+	  mServerSupportsTLS(false)
 {
 }
 
@@ -185,8 +181,9 @@ BmSmtp::BmSmtp( const BmString& name, BmSmtpAccount* account)
 		-	destructor
 		-	frees all associated memory (hopefully)
 \*------------------------------------------------------------------------------*/
-BmSmtp::~BmSmtp() {
-	TheLogHandler->FinishLog( BM_LOGNAME);
+BmSmtp::~BmSmtp()
+{
+	TheLogHandler->FinishLog(BM_LOGNAME);
 }
 
 /*------------------------------------------------------------------------------*\
@@ -196,25 +193,26 @@ BmSmtp::~BmSmtp() {
 			when it executes special jobs (not BM_DEFAULT_JOB), since in that
 			case there are no controllers present.
 \*------------------------------------------------------------------------------*/
-bool BmSmtp::ShouldContinue() {
+bool
+BmSmtp::ShouldContinue()
+{
 	if (mConnection && mConnection->IsStopRequested())
 		return false;
-	return CurrentJobSpecifier() == BM_CHECK_CAPABILITIES_JOB
-			 || inherited::ShouldContinue() ;
+	return CurrentJobSpecifier() == BM_CHECK_CAPABILITIES_JOB || inherited::ShouldContinue();
 }
 
 /*------------------------------------------------------------------------------*\
 	SetupAdditionalInfo()
 		-
 \*------------------------------------------------------------------------------*/
-void BmSmtp::SetupAdditionalInfo( BMessage* additionalInfo)
+void
+BmSmtp::SetupAdditionalInfo(BMessage* additionalInfo)
 {
-	additionalInfo->AddString(BmNetEndpoint::MSG_CLIENT_CERT_NAME,
-									  mSmtpAccount->ClientCertificate().String());
-	additionalInfo->AddString(BmNetEndpoint::MSG_SERVER_NAME,
-									  mSmtpAccount->SMTPServer().String());
-	additionalInfo->AddString(BmNetEndpoint::MSG_ACCEPTED_CERT_ID,
-									  mSmtpAccount->AcceptedCertID().String());
+	additionalInfo->AddString(
+		BmNetEndpoint::MSG_CLIENT_CERT_NAME, mSmtpAccount->ClientCertificate().String());
+	additionalInfo->AddString(BmNetEndpoint::MSG_SERVER_NAME, mSmtpAccount->SMTPServer().String());
+	additionalInfo->AddString(
+		BmNetEndpoint::MSG_ACCEPTED_CERT_ID, mSmtpAccount->AcceptedCertID().String());
 }
 
 /*------------------------------------------------------------------------------*\
@@ -222,14 +220,15 @@ void BmSmtp::SetupAdditionalInfo( BMessage* additionalInfo)
 		-	the mainloop, steps through all SMTP-stages and calls the
 			corresponding handlers
 \*------------------------------------------------------------------------------*/
-bool BmSmtp::StartJob() {
+bool
+BmSmtp::StartJob()
+{
 	int32 startState = SMTP_CONNECT;
-	if (mSmtpAccount->NeedsAuthViaPopServer()
-	&& CurrentJobSpecifier() != BM_CHECK_CAPABILITIES_JOB)
+	if (mSmtpAccount->NeedsAuthViaPopServer() && CurrentJobSpecifier() != BM_CHECK_CAPABILITIES_JOB)
 		// authentication through pop-server takes place before anything else:
 		startState = SMTP_AUTH_VIA_POP;
 
-	for( int32 state = startState; state<SMTP_DONE; ++state)
+	for (int32 state = startState; state < SMTP_DONE; ++state)
 		SmtpStates[state].skip = false;
 
 	if (mSmtpAccount->NeedsAuthViaPopServer()) {
@@ -246,22 +245,21 @@ bool BmSmtp::StartJob() {
 	}
 
 	int32 skipped = 0;
-	for( int32 state = startState; state<SMTP_DONE; ++state) {
+	for (int32 state = startState; state < SMTP_DONE; ++state) {
 		if (SmtpStates[state].skip)
 			skipped++;
 	}
 
 	SmtpStates[SMTP_STARTTLS].skip = mSmtpAccount->NeedsAuthViaPopServer();
 
-	const float delta = 100.0f / float(SMTP_DONE-startState-skipped);
-	const bool failed=true;
+	const float delta = 100.0f / float(SMTP_DONE - startState - skipped);
+	const bool failed = true;
 	try {
-		for( 	mState = startState;
-				ShouldContinue() && mState<SMTP_DONE; ++mState) {
+		for (mState = startState; ShouldContinue() && mState < SMTP_DONE; ++mState) {
 			if (SmtpStates[mState].skip)
 				continue;
 			TStateMethod stateFunc = SmtpStates[mState].func;
-			UpdateSMTPStatus( (mState==startState ? 0.0f : delta), NULL);
+			UpdateSMTPStatus((mState == startState ? 0.0f : delta), NULL);
 			(this->*stateFunc)();
 			if (!ShouldContinue()) {
 				Disconnect();
@@ -269,31 +267,28 @@ bool BmSmtp::StartJob() {
 			}
 		}
 		if (!ShouldContinue())
-			UpdateSMTPStatus( 0.0, NULL, false, true);
+			UpdateSMTPStatus(0.0, NULL, false, true);
 		else
-			UpdateSMTPStatus( delta, NULL);
-	}
-	catch( BM_runtime_error &err) {
+			UpdateSMTPStatus(delta, NULL);
+	} catch (BM_runtime_error& err) {
 		// a problem occurred, we tell the user:
 		BmString errstr = err.what();
 		int e;
-		if (mConnection && (e = mConnection->Error())!=B_OK)
+		if (mConnection && (e = mConnection->Error()) != B_OK)
 			errstr << "\nerror: " << e << ", " << mConnection->ErrorStr();
-		UpdateSMTPStatus( 0.0, NULL, failed);
+		UpdateSMTPStatus(0.0, NULL, failed);
 		BmString text = Name() << ":\n\n" << errstr;
-		HandleError( text);
+		HandleError(text);
 		return false;
-	}
-	catch( std::exception &err) {
+	} catch (std::exception& err) {
 		BmString errMsg;
 		errMsg << err.what() << " (" << typeid(err).name() << ")";
-		HandleError( errMsg);
+		HandleError(errMsg);
 		return false;
-	}
-	catch( ...) {
+	} catch (...) {
 		BmString errMsg;
 		errMsg << "The job for account " << mSmtpAccount->Name()
-				 << "received an unknown exception and died!";
+			   << "received an unknown exception and died!";
 		HandleError(errMsg);
 		return false;
 	}
@@ -306,80 +301,79 @@ bool BmSmtp::StartJob() {
 		-	failed==true means that we only want to indicate the failure of the
 			current stage (the BmString "FAILED!" will be shown)
 \*------------------------------------------------------------------------------*/
-void BmSmtp::UpdateSMTPStatus( const float delta, const char* detailText,
-										  bool failed, bool stopped) {
-	std::auto_ptr<BMessage> msg( new BMessage( BM_JOB_UPDATE_STATE));
-	msg->AddString( MSG_MODEL, Name().String());
-	msg->AddString( MSG_DOMAIN, "statbar");
-	msg->AddFloat( MSG_DELTA, delta);
+void
+BmSmtp::UpdateSMTPStatus(const float delta, const char* detailText, bool failed, bool stopped)
+{
+	std::auto_ptr<BMessage> msg(new BMessage(BM_JOB_UPDATE_STATE));
+	msg->AddString(MSG_MODEL, Name().String());
+	msg->AddString(MSG_DOMAIN, "statbar");
+	msg->AddFloat(MSG_DELTA, delta);
 	if (failed) {
-		msg->AddString( MSG_TRAILING,
-							 (BmString(SmtpStates[mState].text)
-								<< " FAILED!").String());
-		msg->AddBool( MSG_FAILED, true);
+		msg->AddString(MSG_TRAILING, (BmString(SmtpStates[mState].text) << " FAILED!").String());
+		msg->AddBool(MSG_FAILED, true);
 	} else if (stopped)
-		msg->AddString( MSG_TRAILING,
-							 (BmString(SmtpStates[mState].text)
-							 	<< " Stopped!").String());
+		msg->AddString(MSG_TRAILING, (BmString(SmtpStates[mState].text) << " Stopped!").String());
 	else
-		msg->AddString( MSG_TRAILING, SmtpStates[mState].text);
+		msg->AddString(MSG_TRAILING, SmtpStates[mState].text);
 	if (detailText)
-		msg->AddString( MSG_LEADING, detailText);
+		msg->AddString(MSG_LEADING, detailText);
 	if (mConnection && mConnection->EncryptionIsActive())
-		msg->AddBool( MSG_ENCRYPTED, true);
-	TellControllers( msg.get());
+		msg->AddBool(MSG_ENCRYPTED, true);
+	TellControllers(msg.get());
 }
 
 /*------------------------------------------------------------------------------*\
 	UpdateMailStatus( delta, detailText)
 		- informs the interested party about the message currently dealt with
 \*------------------------------------------------------------------------------*/
-void BmSmtp::UpdateMailStatus( const float delta, const char* detailText,
-										 int32 currMsg) {
+void
+BmSmtp::UpdateMailStatus(const float delta, const char* detailText, int32 currMsg)
+{
 	BmString text = BmString() << currMsg << " of " << mMailCount;
-	std::auto_ptr<BMessage> msg( new BMessage( BM_JOB_UPDATE_STATE));
-	msg->AddString( MSG_MODEL, Name().String());
-	msg->AddString( MSG_DOMAIN, "mailbar");
-	msg->AddFloat( MSG_DELTA, delta);
-	msg->AddString( MSG_LEADING, text.String());
+	std::auto_ptr<BMessage> msg(new BMessage(BM_JOB_UPDATE_STATE));
+	msg->AddString(MSG_MODEL, Name().String());
+	msg->AddString(MSG_DOMAIN, "mailbar");
+	msg->AddFloat(MSG_DELTA, delta);
+	msg->AddString(MSG_LEADING, text.String());
 	if (detailText)
-		msg->AddString( MSG_TRAILING, detailText);
-	TellControllers( msg.get());
+		msg->AddString(MSG_TRAILING, detailText);
+	TellControllers(msg.get());
 }
 
 /*------------------------------------------------------------------------------*\
 	UpdateProgress( numBytes)
 		-
 \*------------------------------------------------------------------------------*/
-void BmSmtp::UpdateProgress( uint32 numBytes) {
-	float delta
-		= (100.0f * float(numBytes)) / float(mMsgTotalSize ? mMsgTotalSize : 1);
-	BmString detailText = BmString("size: ") << BytesToString( mCurrMailSize);
-	UpdateMailStatus( delta, detailText.String(), mCurrMailNr);
+void
+BmSmtp::UpdateProgress(uint32 numBytes)
+{
+	float delta = (100.0f * float(numBytes)) / float(mMsgTotalSize ? mMsgTotalSize : 1);
+	BmString detailText = BmString("size: ") << BytesToString(mCurrMailSize);
+	UpdateMailStatus(delta, detailText.String(), mCurrMailNr);
 }
 
 /*------------------------------------------------------------------------------*\
 	StateConnect()
 		-	Initiates network-connection to SMTP-server
 \*------------------------------------------------------------------------------*/
-void BmSmtp::StateConnect() {
+void
+BmSmtp::StateConnect()
+{
 	BNetAddress addr;
-	if (addr.SetTo( mSmtpAccount->SMTPServer().String(),
-						 mSmtpAccount->PortNr()) != B_OK) {
+	if (addr.SetTo(mSmtpAccount->SMTPServer().String(), mSmtpAccount->PortNr()) != B_OK) {
 		BmString s = BmString("Could not determine address of SMTP-Server ")
-							<< mSmtpAccount->SMTPServer();
-		throw BM_network_error( s);
+					 << mSmtpAccount->SMTPServer();
+		throw BM_network_error(s);
 	}
-	if (!Connect( &addr)) {
+	if (!Connect(&addr)) {
 		BmString s = BmString("Could not connect to SMTP-Server ")
-							<< mSmtpAccount->SMTPServer()
-						 	<< "\n\bError:\n\t"<< mErrorString;
-		throw BM_network_error( s);
+					 << mSmtpAccount->SMTPServer() << "\n\bError:\n\t" << mErrorString;
+		throw BM_network_error(s);
 	}
 	BmString encryptionType = mSmtpAccount->EncryptionType();
 	if (TheNetEndpointRoster->SupportsEncryption()
-	&& (encryptionType.ICompare(BmSmtpAccount::ENCR_TLS) == 0
-		|| encryptionType.ICompare(BmSmtpAccount::ENCR_SSL) == 0)) {
+		&& (encryptionType.ICompare(BmSmtpAccount::ENCR_TLS) == 0
+			|| encryptionType.ICompare(BmSmtpAccount::ENCR_SSL) == 0)) {
 		// straight TLS or SSL, we start the encryption layer:
 		if (!StartEncryption(encryptionType.String()))
 			return;
@@ -396,36 +390,34 @@ void BmSmtp::StateConnect() {
 		-	if EHLO succeeds, info about the server-capabilities are extracted
 			from the answer
 \*------------------------------------------------------------------------------*/
-void BmSmtp::StateHelo() {
+void
+BmSmtp::StateHelo()
+{
 	BmString domain = mSmtpAccount->DomainToAnnounce();
 	if (!domain.Length())
 		domain = BeamRoster->OwnFQDN();
 	BmString cmd = BmString("EHLO ") << domain;
-	SendCommand( cmd);
+	SendCommand(cmd);
 	try {
 		CheckForPositiveAnswer();
 		Regexx rx;
-		if (rx.exec( StatusText(), "^\\d\\d\\d.SIZE\\b", Regexx::newline)) {
+		if (rx.exec(StatusText(), "^\\d\\d\\d.SIZE\\b", Regexx::newline)) {
 			mServerMayHaveSizeLimit = true;
 		}
-		if (rx.exec( StatusText(), "^\\d\\d\\d.DSN\\b", Regexx::newline)) {
+		if (rx.exec(StatusText(), "^\\d\\d\\d.DSN\\b", Regexx::newline)) {
 			mServerSupportsDSN = true;
 		}
-		if (rx.exec(
-			StatusText(), "^\\d\\d\\d.AUTH\\s+(.*?)$", Regexx::newline
-		)) {
+		if (rx.exec(StatusText(), "^\\d\\d\\d.AUTH\\s+(.*?)$", Regexx::newline)) {
 			mSupportedAuthTypes = rx.match[0].atom[0];
-		} else if (rx.exec(
-			StatusText(), "^\\d\\d\\d.AUTH\\s*=\\s*(.*?)$", Regexx::newline
-		)) {
+		} else if (rx.exec(StatusText(), "^\\d\\d\\d.AUTH\\s*=\\s*(.*?)$", Regexx::newline)) {
 			mSupportedAuthTypes = rx.match[0].atom[0];
 		}
-		if (rx.exec( StatusText(), "^\\d\\d\\d.STARTTLS\\b", Regexx::newline)) {
+		if (rx.exec(StatusText(), "^\\d\\d\\d.STARTTLS\\b", Regexx::newline)) {
 			mServerSupportsTLS = true;
 		}
-	} catch(...) {
+	} catch (...) {
 		cmd = BmString("HELO ") << domain;
-		SendCommand( cmd);
+		SendCommand(cmd);
 		CheckForPositiveAnswer();
 	}
 }
@@ -434,22 +426,23 @@ void BmSmtp::StateHelo() {
 	StateStartTLS()
 		-	starts TLS encryption if required
 \*------------------------------------------------------------------------------*/
-void BmSmtp::StateStartTLS() {
+void
+BmSmtp::StateStartTLS()
+{
 	// check if encryption via STARTTLS is requested (and possible):
 	BmString encryptionType = mSmtpAccount->EncryptionType();
 
 	// automatic means: use STARTTLS if available:
-	if (encryptionType.ICompare(BmSmtpAccount::ENCR_AUTO) == 0
-	&& mServerSupportsTLS) {
+	if (encryptionType.ICompare(BmSmtpAccount::ENCR_AUTO) == 0 && mServerSupportsTLS) {
 		encryptionType = BmSmtpAccount::ENCR_STARTTLS;
 	}
 
 	if (!TheNetEndpointRoster->SupportsEncryption()
-	|| encryptionType.ICompare(BmSmtpAccount::ENCR_STARTTLS) != 0)
+		|| encryptionType.ICompare(BmSmtpAccount::ENCR_STARTTLS) != 0)
 		return;
 
 	// let's try to initiate TLS...
-	SendCommand( "STARTTLS");
+	SendCommand("STARTTLS");
 	CheckForPositiveAnswer();
 
 	if (!StartEncryption(BmSmtpAccount::ENCR_TLS))
@@ -465,7 +458,8 @@ void BmSmtp::StateStartTLS() {
 		-	extends activation of SSL/TLS encryption layer with automatic
 			updating of newly accepted certificate ID.
 \*------------------------------------------------------------------------------*/
-bool BmSmtp::StartEncryption(const char* encType)
+bool
+BmSmtp::StartEncryption(const char* encType)
 {
 	bool ok = inherited::StartEncryption(encType);
 	if (ok) {
@@ -482,24 +476,26 @@ bool BmSmtp::StartEncryption(const char* encType)
 	StateAuthViaPopServer()
 		-	authenticates through pop-server (SMTP_AFTER_POP)
 \*------------------------------------------------------------------------------*/
-void BmSmtp::StateAuthViaPopServer() {
+void
+BmSmtp::StateAuthViaPopServer()
+{
 	BmString accName = mSmtpAccount->AccForSmtpAfterPop();
-	BmRef<BmPopAccount> sendingAcc = dynamic_cast<BmPopAccount*>(
-		TheRecvAccountList->FindItemByKey( accName).Get()
-	);
+	BmRef<BmPopAccount> sendingAcc
+		= dynamic_cast<BmPopAccount*>(TheRecvAccountList->FindItemByKey(accName).Get());
 	if (!sendingAcc)
-		BM_THROW_RUNTIME( BmString("Sorry, could not determine pop-account")
-									<< "'\n\n Smtp-after-Pop authentication failed, "
-										"giving up.");
+		BM_THROW_RUNTIME(BmString("Sorry, could not determine pop-account")
+						 << "'\n\n Smtp-after-Pop authentication failed, "
+							"giving up.");
 	BmRef<BmPopper> popper = new BmPopper(sendingAcc->Name(), sendingAcc.Get());
-	popper->StartJobInThisThread( BmPopper::BM_AUTH_ONLY_JOB);
+	popper->StartJobInThisThread(BmPopper::BM_AUTH_ONLY_JOB);
 }
 
 /*------------------------------------------------------------------------------*\
 	ExtractBase64()
 		-
 \*------------------------------------------------------------------------------*/
-void BmSmtp::ExtractBase64(const BmString& text, BmString& base64)
+void
+BmSmtp::ExtractBase64(const BmString& text, BmString& base64)
 {
 	text.CopyInto(base64, 4, text.Length());
 }
@@ -509,7 +505,9 @@ void BmSmtp::ExtractBase64(const BmString& text, BmString& base64)
 		-	Sends user/passwd combination and checks result
 		-	currently supports PLAIN- and LOGIN-authentication
 \*------------------------------------------------------------------------------*/
-void BmSmtp::StateAuth() {
+void
+BmSmtp::StateAuth()
+{
 	BmString pwd;
 	bool pwdOK = false;
 	bool first = true;
@@ -517,14 +515,14 @@ void BmSmtp::StateAuth() {
 	if (authMethod == BmSmtpAccount::AUTH_AUTO)
 		authMethod = SuggestAuthType();
 	if (!authMethod.Length() || authMethod == BmSmtpAccount::AUTH_NONE)
-		return;			// no authentication needed...
-	while(!pwdOK) {
+		return;	 // no authentication needed...
+	while (!pwdOK) {
 		if (first && mSmtpAccount->PwdStoredOnDisk()) {
 			pwd = mSmtpAccount->Password();
 		} else {
-			BmString text( "Please enter password for SMTP-Account <");
+			BmString text("Please enter password for SMTP-Account <");
 			text << Name() << ">:";
-			if (!ShouldContinue() || !BeamGuiRoster->AskUserForPwd( text, pwd)) {
+			if (!ShouldContinue() || !BeamGuiRoster->AskUserForPwd(text, pwd)) {
 				Disconnect();
 				StopJob();
 				return;
@@ -538,54 +536,54 @@ void BmSmtp::StateAuth() {
 			// authenticateID + \0 + username + \0 + password
 			// (where authenticateID is currently always empty)
 			BmString cmd = BmString("AUTH PLAIN");
-			SendCommand( cmd);
+			SendCommand(cmd);
 			if (CheckForPositiveAnswer()) {
 				BmString base64;
 				cmd = BmString("_") << mSmtpAccount->Username() << "_" << pwd;
-				int32 len=cmd.Length();
-				char* buf = cmd.LockBuffer( len);
+				int32 len = cmd.Length();
+				char* buf = cmd.LockBuffer(len);
 				buf[0] = '\0';
-				buf[mSmtpAccount->Username().Length()+1] = '\0';
-				cmd.UnlockBuffer( len);
-				Encode( "base64", cmd, base64);
-				SendCommand( "", base64);
+				buf[mSmtpAccount->Username().Length() + 1] = '\0';
+				cmd.UnlockBuffer(len);
+				Encode("base64", cmd, base64);
+				SendCommand("", base64);
 			}
 		} else if (authMethod == BmSmtpAccount::AUTH_LOGIN) {
 			// LOGIN-method: send base64-encoded username, then send
 			// base64-encoded password:
 			BmString cmd = BmString("AUTH LOGIN");
-			SendCommand( cmd);
+			SendCommand(cmd);
 			if (CheckForPositiveAnswer()) {
 				BmString base64;
-				Encode( "base64", mSmtpAccount->Username(), base64);
-				SendCommand( base64);
+				Encode("base64", mSmtpAccount->Username(), base64);
+				SendCommand(base64);
 				CheckForPositiveAnswer();
-				Encode( "base64", pwd, base64);
-				SendCommand( "", base64);
+				Encode("base64", pwd, base64);
+				SendCommand("", base64);
 			}
 		} else if (authMethod == BmSmtpAccount::AUTH_CRAM_MD5) {
 			BmString cmd = BmString("AUTH CRAM-MD5");
-			SendCommand( cmd);
+			SendCommand(cmd);
 			AuthCramMD5(mSmtpAccount->Username(), pwd);
 		} else if (authMethod == BmSmtpAccount::AUTH_DIGEST_MD5) {
 			BmString cmd = BmString("AUTH DIGEST-MD5");
-			SendCommand( cmd);
+			SendCommand(cmd);
 			BmString serviceUri = BmString("smtp/") << mSmtpAccount->SMTPServer();
 			AuthDigestMD5(mSmtpAccount->Username(), pwd, serviceUri);
 		} else {
-			throw BM_runtime_error( BmString("Unknown authentication type '")
-										   << authMethod << "' found!?! Skipping!");
+			throw BM_runtime_error(
+				BmString("Unknown authentication type '") << authMethod << "' found!?! Skipping!");
 		}
 		try {
 			pwdOK = CheckForPositiveAnswer();
-		} catch( BM_network_error &err) {
+		} catch (BM_network_error& err) {
 			// most probably a wrong password...
 			BmString errstr = err.what();
 			int e;
-			if (mConnection && (e = mConnection->Error())!=B_OK)
+			if (mConnection && (e = mConnection->Error()) != B_OK)
 				errstr << "\nerror: " << e << ", " << mConnection->ErrorStr();
 			BmString text = Name() << ":\n\n" << errstr;
-			HandleError( text);
+			HandleError(text);
 		}
 	}
 }
@@ -599,33 +597,35 @@ void BmSmtp::StateAuth() {
 			sent once for the standard recipients (To, Cc) plus a personalized
 			version for each Bcc-recipient (SpecialHeaderForEachBcc=true)
 \*------------------------------------------------------------------------------*/
-void BmSmtp::StateSendMails() {
+void
+BmSmtp::StateSendMails()
+{
 	mMailCount = (int32)mQueuedRefVect.size();
 
 	mMsgTotalSize = 0;
 	vector<BmRef<BmMailRef> > mailRefs;
 	BmRef<BmMail> mail;
-	for( int32 i=0; i<mMailCount; ++i) {
-		mailRefs.push_back(BmMailRef::CreateInstance( mQueuedRefVect[i]));
+	for (int32 i = 0; i < mMailCount; ++i) {
+		mailRefs.push_back(BmMailRef::CreateInstance(mQueuedRefVect[i]));
 		if (mailRefs[i] && mailRefs[i]->IsValid())
 			mMsgTotalSize += int32(mailRefs[i]->Size());
 	}
 
 	Regexx rx;
 	mCurrMailNr = 1;
-	for( int32 i=0; i<mMailCount; ++i, ++mCurrMailNr) {
+	for (int32 i = 0; i < mMailCount; ++i, ++mCurrMailNr) {
 		if (!mailRefs[i] || !mailRefs[i]->IsValid()) {
-			BM_LOGERR( BmString("SendMails(): mail no. ") << i+1
-								<< " can't be found, skipping it.");
+			BM_LOGERR(
+				BmString("SendMails(): mail no. ") << i + 1 << " can't be found, skipping it.");
 			continue;
 		}
-		BmRef<BmMail> mail = BmMail::CreateInstance( mailRefs[i].Get());
+		BmRef<BmMail> mail = BmMail::CreateInstance(mailRefs[i].Get());
 		if (mail) {
 			if (mail->InitCheck() != B_OK)
-				mail->StartJobInThisThread( BmMail::BM_READ_MAIL_JOB);
+				mail->StartJobInThisThread(BmMail::BM_READ_MAIL_JOB);
 			if (mail->InitCheck() != B_OK) {
-				BM_LOGERR( BmString("SendMails(): mail no. ") << i+1
-									<< " can't be read, skipping it.");
+				BM_LOGERR(
+					BmString("SendMails(): mail no. ") << i + 1 << " can't be read, skipping it.");
 				continue;
 			}
 		}
@@ -635,49 +635,44 @@ void BmSmtp::StateSendMails() {
 		if (!mail->Header()->IsFieldEmpty(BM_FIELD_RESENT_BCC)) {
 			// remove RESENT-BCC-header from mailtext...
 			headerText = rx.replace(
-				headerText,
-				"^Resent-Bcc:\\s*.+?\\r\\n(\\s+.*?\\r\\n)*",
-				"", Regexx::newline
-			);
+				headerText, "^Resent-Bcc:\\s*.+?\\r\\n(\\s+.*?\\r\\n)*", "", Regexx::newline);
 		}
 		if (!mail->Header()->IsFieldEmpty(BM_FIELD_BCC)) {
 			// remove BCC-header from mailtext...
-			headerText = rx.replace(
-				headerText,
-				"^Bcc:\\s*.+?\\r\\n(\\s+.*?\\r\\n)*",
-				"", Regexx::newline
-			);
+			headerText
+				= rx.replace(headerText, "^Bcc:\\s*.+?\\r\\n(\\s+.*?\\r\\n)*", "", Regexx::newline);
 		}
 
 		try {
 			BmRcptSet rcptSet;
 			if (ThePrefs->GetBool("SpecialHeaderForEachBcc")) {
-				if (HasStdRcpts( mail.Get(), rcptSet)) {
-					Mail( mail.Get());
-					Rcpt( rcptSet);
-					Data( mail.Get(), headerText);
+				if (HasStdRcpts(mail.Get(), rcptSet)) {
+					Mail(mail.Get());
+					Rcpt(rcptSet);
+					Data(mail.Get(), headerText);
 				}
-				BccRcpt( mail.Get(), true, headerText);
+				BccRcpt(mail.Get(), true, headerText);
 			} else {
-				Mail( mail.Get());
-				if (HasStdRcpts( mail.Get(), rcptSet))
-					Rcpt( rcptSet);
-				BccRcpt( mail.Get(), false, headerText);
-				Data( mail.Get(), headerText);
+				Mail(mail.Get());
+				if (HasStdRcpts(mail.Get(), rcptSet))
+					Rcpt(rcptSet);
+				BccRcpt(mail.Get(), false, headerText);
+				Data(mail.Get(), headerText);
 			}
 			if (ShouldContinue()) {
-				mail->MarkAs( BM_MAIL_STATUS_SENT);
+				mail->MarkAs(BM_MAIL_STATUS_SENT);
 				mail->ApplyOutboundFilters();
-					// give filters a chance that check for 'Sent'-status...
+				// give filters a chance that check for 'Sent'-status...
 			}
-		} catch( BM_runtime_error &err) {
+		} catch (BM_runtime_error& err) {
 			// a problem occurred, we tell the user:
-			BM_LOGERR( BmString("SendMails(): mail no. ") << i+1
-								<< " couldn't be sent.\n\nError:\n" << err.what());
-			mail->MarkAs( BM_MAIL_STATUS_ERROR);
-				// mark mail as ERROR since it couldn't be sent
+			BM_LOGERR(BmString("SendMails(): mail no. ")
+					  << i + 1 << " couldn't be sent.\n\nError:\n"
+					  << err.what());
+			mail->MarkAs(BM_MAIL_STATUS_ERROR);
+			// mark mail as ERROR since it couldn't be sent
 			SendCommand("RSET");
-				// reset SMTP-state in order to start afresh with next mail
+			// reset SMTP-state in order to start afresh with next mail
 		}
 	}
 	mCurrMailSize = 0;
@@ -688,30 +683,34 @@ void BmSmtp::StateSendMails() {
 	StateDisconnect()
 		-	tells the server that we are finished
 \*------------------------------------------------------------------------------*/
-void BmSmtp::StateDisconnect() {
-	Quit( true);
+void
+BmSmtp::StateDisconnect()
+{
+	Quit(true);
 }
 
 /*------------------------------------------------------------------------------*\
 	Mail( mail)
 		-	announces the given mail to the server
 \*------------------------------------------------------------------------------*/
-void BmSmtp::Mail( BmMail* mail) {
+void
+BmSmtp::Mail(BmMail* mail)
+{
 	BmString sender = mail->Header()->DetermineSender();
 	Regexx rx;
-	if (!rx.exec( sender, "@\\w+")) {
+	if (!rx.exec(sender, "@\\w+")) {
 		// no domain part within sender-address, we add our current domain:
 		if (sender.FindFirst("@") == B_ERROR)
 			sender << "@";
 		BmString fqdn = mSmtpAccount->DomainToAnnounce();
-		sender << OwnDomain( fqdn);
+		sender << OwnDomain(fqdn);
 	}
-	BmString cmd = BmString("MAIL from:<") << sender <<">";
+	BmString cmd = BmString("MAIL from:<") << sender << ">";
 	if (mServerMayHaveSizeLimit) {
 		int32 mailSize = mail->RawText().Length();
 		cmd << " SIZE=" << mailSize;
 	}
-	SendCommand( cmd);
+	SendCommand(cmd);
 	CheckForPositiveAnswer();
 }
 
@@ -721,29 +720,29 @@ void BmSmtp::Mail( BmMail* mail) {
 		-	returns true if at least one recipient has been set, false otherwise
 			(the latter case might occur if a mail only contains BCCs)
 \*------------------------------------------------------------------------------*/
-bool BmSmtp::HasStdRcpts( BmMail* mail, BmRcptSet& rcptSet) {
+bool
+BmSmtp::HasStdRcpts(BmMail* mail, BmRcptSet& rcptSet)
+{
 	BmAddrList::const_iterator iter;
-	const BmAddressList& toList
-		= mail->IsRedirect()
-			? mail->Header()->GetAddressList( BM_FIELD_RESENT_TO)
-			: mail->Header()->GetAddressList( BM_FIELD_TO);
-	for( iter=toList.begin(); iter != toList.end(); ++iter) {
+	const BmAddressList& toList = mail->IsRedirect()
+									  ? mail->Header()->GetAddressList(BM_FIELD_RESENT_TO)
+									  : mail->Header()->GetAddressList(BM_FIELD_TO);
+	for (iter = toList.begin(); iter != toList.end(); ++iter) {
 		if (!iter->HasAddrSpec())
 			// empty group-addresses have no real address-specification
 			// (like 'Undisclosed-Recipients: ;'), we filter those:
 			continue;
-		rcptSet.insert( iter->AddrSpec());
+		rcptSet.insert(iter->AddrSpec());
 	}
-	const BmAddressList& ccList
-		= mail->IsRedirect()
-			? mail->Header()->GetAddressList( BM_FIELD_RESENT_CC)
-			: mail->Header()->GetAddressList( BM_FIELD_CC);
-	for( iter=ccList.begin(); iter != ccList.end(); ++iter) {
+	const BmAddressList& ccList = mail->IsRedirect()
+									  ? mail->Header()->GetAddressList(BM_FIELD_RESENT_CC)
+									  : mail->Header()->GetAddressList(BM_FIELD_CC);
+	for (iter = ccList.begin(); iter != ccList.end(); ++iter) {
 		if (!iter->HasAddrSpec())
 			// empty group-addresses have no real address-specification
 			// (like 'Undisclosed-Recipients: ;'), we filter those:
 			continue;
-		rcptSet.insert( iter->AddrSpec());
+		rcptSet.insert(iter->AddrSpec());
 	}
 	return rcptSet.size() > 0;
 }
@@ -752,11 +751,13 @@ bool BmSmtp::HasStdRcpts( BmMail* mail, BmRcptSet& rcptSet) {
 	bool Rcpt( rcptSet)
 		-	announces all given recipients to the server
 \*------------------------------------------------------------------------------*/
-void BmSmtp::Rcpt( const BmRcptSet& rcptSet) {
+void
+BmSmtp::Rcpt(const BmRcptSet& rcptSet)
+{
 	BmRcptSet::const_iterator rcptIter;
-	for( rcptIter = rcptSet.begin(); rcptIter != rcptSet.end(); ++rcptIter) {
+	for (rcptIter = rcptSet.begin(); rcptIter != rcptSet.end(); ++rcptIter) {
 		BmString cmd = BmString("RCPT to:<") << (*rcptIter) << ">";
-		SendCommand( cmd);
+		SendCommand(cmd);
 		CheckForPositiveAnswer();
 	}
 }
@@ -767,21 +768,21 @@ void BmSmtp::Rcpt( const BmRcptSet& rcptSet) {
 		-	if param sendDataForEachBcc is set, a new mail will be created for each
 			Bcc-recipient, containing only it inside the Bcc-header
 \*------------------------------------------------------------------------------*/
-void BmSmtp::BccRcpt( BmMail* mail, bool sendDataForEachBcc,
-							 const BmString& headerText) {
+void
+BmSmtp::BccRcpt(BmMail* mail, bool sendDataForEachBcc, const BmString& headerText)
+{
 	BmAddrList::const_iterator iter;
-	const BmAddressList& bccList
-		= mail->IsRedirect()
-			? mail->Header()->GetAddressList( BM_FIELD_RESENT_BCC)
-			: mail->Header()->GetAddressList( BM_FIELD_BCC);
-	for( iter=bccList.begin(); iter != bccList.end(); ++iter) {
+	const BmAddressList& bccList = mail->IsRedirect()
+									   ? mail->Header()->GetAddressList(BM_FIELD_RESENT_BCC)
+									   : mail->Header()->GetAddressList(BM_FIELD_BCC);
+	for (iter = bccList.begin(); iter != bccList.end(); ++iter) {
 		if (sendDataForEachBcc)
-			Mail( mail);
-		BmString cmd = BmString("RCPT to:<") << iter->AddrSpec() <<">";
-		SendCommand( cmd);
+			Mail(mail);
+		BmString cmd = BmString("RCPT to:<") << iter->AddrSpec() << ">";
+		SendCommand(cmd);
 		CheckForPositiveAnswer();
 		if (sendDataForEachBcc)
-			Data( mail, headerText, iter->AddrSpec());
+			Data(mail, headerText, iter->AddrSpec());
 	}
 }
 
@@ -791,17 +792,18 @@ void BmSmtp::BccRcpt( BmMail* mail, bool sendDataForEachBcc,
 		-	if param forBcc is set, the contained address is set as the mail's
 			Bcc-header (only this address)
 \*------------------------------------------------------------------------------*/
-void BmSmtp::Data( BmMail* mail, const BmString& headerText, BmString forBcc) {
-	BmString cmd( "DATA");
-	SendCommand( cmd);
+void
+BmSmtp::Data(BmMail* mail, const BmString& headerText, BmString forBcc)
+{
+	BmString cmd("DATA");
+	SendCommand(cmd);
 	CheckForPositiveAnswer();
 	BmString completeHeader;
 	if (forBcc.Length()) {
 		if (mail->IsRedirect()) {
 			// include BCC for current recipient within header so he/she/it can
 			// see how this mail got sent to him/her/it:
-			completeHeader = BmString("Resent-Bcc: ") << forBcc << "\r\n"
-										<< headerText;
+			completeHeader = BmString("Resent-Bcc: ") << forBcc << "\r\n" << headerText;
 		} else {
 			// include BCC for current recipient within header so he/she/it can
 			// see how this mail got sent to him/her/it:
@@ -809,19 +811,18 @@ void BmSmtp::Data( BmMail* mail, const BmString& headerText, BmString forBcc) {
 		}
 	} else
 		completeHeader = headerText;
-	BmStringIBuf sendBuf( completeHeader);
-	sendBuf.AddBuffer( mail->RawText().String()+mail->HeaderLength());
+	BmStringIBuf sendBuf(completeHeader);
+	sendBuf.AddBuffer(mail->RawText().String() + mail->HeaderLength());
 	time_t before = time(NULL);
-	SendCommandBuf( sendBuf, "", true, true);
+	SendCommandBuf(sendBuf, "", true, true);
 	int32 len = mail->RawText().Length();
-	if (len > ThePrefs->GetInt("LogSpeedThreshold", 100*1024)) {
+	if (len > ThePrefs->GetInt("LogSpeedThreshold", 100 * 1024)) {
 		time_t after = time(NULL);
-		time_t duration = after-before > 0 ? after-before : 1;
+		time_t duration = after - before > 0 ? after - before : 1;
 		// log speed for mails that exceed a certain size:
-		BM_LOG( BM_LogSmtp,
-				  BmString("Sent mail of size ") << len
-						<< " bytes in " << duration << " seconds => "
-						<< len/(int32)duration/1024.0 << "KB/s");
+		BM_LOG(BM_LogSmtp, BmString("Sent mail of size ")
+							   << len << " bytes in " << duration << " seconds => "
+							   << len / (int32)duration / 1024.0 << "KB/s");
 	}
 	CheckForPositiveAnswer();
 }
@@ -834,13 +835,16 @@ void BmSmtp::Data( BmMail* mail, const BmString& headerText, BmString forBcc) {
 			because of an error we ignore any answer.
 		-	the network-connection is always closed
 \*------------------------------------------------------------------------------*/
-void BmSmtp::Quit( bool WaitForAnswer) {
+void
+BmSmtp::Quit(bool WaitForAnswer)
+{
 	BmString cmd("QUIT");
 	try {
-		SendCommand( cmd);
+		SendCommand(cmd);
 		if (WaitForAnswer)
 			GetAnswer();
-	} catch(...) {	}
+	} catch (...) {
+	}
 	Disconnect();
 }
 
@@ -848,9 +852,10 @@ void BmSmtp::Quit( bool WaitForAnswer) {
 	QueueMail()
 		-	adds given entry_ref to the queue of mails that shall be send
 \*------------------------------------------------------------------------------*/
-void BmSmtp::QueueMail( entry_ref eref)
+void
+BmSmtp::QueueMail(entry_ref eref)
 {
-	mQueuedRefVect.push_back( eref);
+	mQueuedRefVect.push_back(eref);
 }
 
 /*------------------------------------------------------------------------------*\
@@ -858,7 +863,8 @@ void BmSmtp::QueueMail( entry_ref eref)
 		-	returns whether or not the server has indicated that it supports
 			the STARTTLS command
 \*------------------------------------------------------------------------------*/
-bool BmSmtp::SupportsTLS() const
+bool
+BmSmtp::SupportsTLS() const
 {
 	return mServerSupportsTLS;
 }
@@ -868,16 +874,16 @@ bool BmSmtp::SupportsTLS() const
 		-	looks at the auth-types supported by the server and selects the most
 			secure of those that is supported by Beam.
 \*------------------------------------------------------------------------------*/
-BmString BmSmtp::SuggestAuthType() const {
-	if (mSupportedAuthTypes.IFindFirst( BmSmtpAccount::AUTH_DIGEST_MD5) >= 0)
+BmString
+BmSmtp::SuggestAuthType() const
+{
+	if (mSupportedAuthTypes.IFindFirst(BmSmtpAccount::AUTH_DIGEST_MD5) >= 0)
 		return BmSmtpAccount::AUTH_DIGEST_MD5;
-	else if (mSupportedAuthTypes.IFindFirst( BmSmtpAccount::AUTH_CRAM_MD5) >= 0)
+	else if (mSupportedAuthTypes.IFindFirst(BmSmtpAccount::AUTH_CRAM_MD5) >= 0)
 		return BmSmtpAccount::AUTH_CRAM_MD5;
-	else if (mSupportedAuthTypes.IFindFirst( BmSmtpAccount::AUTH_LOGIN) >= 0)
+	else if (mSupportedAuthTypes.IFindFirst(BmSmtpAccount::AUTH_LOGIN) >= 0)
 		return BmSmtpAccount::AUTH_LOGIN;
-	else if (mSupportedAuthTypes.IFindFirst(
-		BmSmtpAccount::AUTH_PLAIN
-	) != B_ERROR)
+	else if (mSupportedAuthTypes.IFindFirst(BmSmtpAccount::AUTH_PLAIN) != B_ERROR)
 		return BmSmtpAccount::AUTH_PLAIN;
 	else
 		return "";

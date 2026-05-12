@@ -11,14 +11,17 @@
 
 #include <Bitmap.h>
 
-struct BmBitmapHandle
-{
+struct BmBitmapHandle {
 	BmBitmapHandle()
-		:	bitmap(NULL)						{}
+		: bitmap(NULL)
+	{
+	}
 	BmBitmapHandle(BBitmap* b)
-		:	bitmap(b)							{}
+		: bitmap(b)
+	{
+	}
 	BBitmap* bitmap;
-	BBitmap* operator-> () const			{ return bitmap; }
+	BBitmap* operator->() const { return bitmap; }
 };
 
 

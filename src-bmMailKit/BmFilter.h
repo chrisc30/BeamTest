@@ -14,15 +14,15 @@
 #include <Archivable.h>
 #include <Message.h>
 
-#include "BmFilterAddon.h"
 #include "BmDataModel.h"
+#include "BmFilterAddon.h"
 #include "BmString.h"
 
 class BmFilterList;
 
 enum {
-	BM_JOBWIN_FILTER 				= 'bmed'
-						// sent to JobMetaController in order to start filter-job
+	BM_JOBWIN_FILTER = 'bmed'
+	// sent to JobMetaController in order to start filter-job
 };
 
 class BmFilterAddonPrefsView;
@@ -33,10 +33,12 @@ class BmFilterAddonPrefsView;
 \*------------------------------------------------------------------------------*/
 struct IMPEXPBMMAILKIT BmFilterAddonDescr {
 	BmFilterAddonDescr()
-		:	image( 0)
-		,	instantiateFilterFunc( NULL)
-		,	instantiateFilterPrefsFunc( NULL)
-		,	addonPrefsView( NULL)			{}
+		: image(0),
+		  instantiateFilterFunc(NULL),
+		  instantiateFilterPrefsFunc(NULL),
+		  addonPrefsView(NULL)
+	{
+	}
 
 	image_id image;
 	BmString name;
@@ -47,35 +49,34 @@ struct IMPEXPBMMAILKIT BmFilterAddonDescr {
 };
 
 /*------------------------------------------------------------------------------*\
-	BmFilter 
+	BmFilter
 		-	base class for all filters
 \*------------------------------------------------------------------------------*/
 class IMPEXPBMMAILKIT BmFilter : public BmListModelItem {
 	typedef BmListModelItem inherited;
 
 public:
-	BmFilter( const char* name, const BmString& kind, BmFilterList* model);
-	BmFilter( BMessage* archive, BmFilterList* model);
+	BmFilter(const char* name, const BmString& kind, BmFilterList* model);
+	BmFilter(BMessage* archive, BmFilterList* model);
 	virtual ~BmFilter();
-	
+
 	// native methods:
-	bool SanityCheck( BmString& complaint, BmString& fieldName) const;
-	bool Execute( BmMsgContext* msgContext);
+	bool SanityCheck(BmString& complaint, BmString& fieldName) const;
+	bool Execute(BmMsgContext* msgContext);
 
 	// stuff needed for Archival:
-	status_t Archive( BMessage* archive, bool deep = true) const;
-	int16 ArchiveVersion() const			{ return nArchiveVersion; }
+	status_t Archive(BMessage* archive, bool deep = true) const;
+	int16 ArchiveVersion() const { return nArchiveVersion; }
 
 	// getters:
-	inline bool IsDisabled() const		{ return mAddon == NULL; }
-	inline const BmString &Name() const	{ return Key(); }
-	inline const BmString &Kind() const	{ return mKind; }
+	inline bool IsDisabled() const { return mAddon == NULL; }
+	inline const BmString& Name() const { return Key(); }
+	inline const BmString& Kind() const { return mKind; }
 
-	inline BmFilterAddon* Addon()			{ return mAddon; }
-	
+	inline BmFilterAddon* Addon() { return mAddon; }
+
 	// setters
-	void JobSpecifier(BMessage& jobSpecs)
-													{ mJobSpecifier = jobSpecs; }
+	void JobSpecifier(BMessage& jobSpecs) { mJobSpecifier = jobSpecs; }
 
 	// archivable components:
 	static const char* const MSG_NAME;
@@ -85,33 +86,32 @@ public:
 
 protected:
 	void SetupAddonPart();
-							// instantiates addon-part of filter
+	// instantiates addon-part of filter
 	BmFilterAddon* mAddon;
-							// the addon-part that implements this filter.
-							// This is NULL if addon could not be loaded
+	// the addon-part that implements this filter.
+	// This is NULL if addon could not be loaded
 	mutable BMessage mAddonArchive;
-							// the last archived state of the addon (this is used to 
-							// save the data when the addon can not be loaded)
+	// the last archived state of the addon (this is used to
+	// save the data when the addon can not be loaded)
 	BmString mKind;
-							// type of filter (name of addon)
+	// type of filter (name of addon)
 	BMessage mJobSpecifier;
-							// specific job-types (learnAsSpam) can be specified here
-							// normally, this is empty
+	// specific job-types (learnAsSpam) can be specified here
+	// normally, this is empty
 private:
-	BmFilter();									// hide default constructor
-	
+	BmFilter();	 // hide default constructor
+
 	// Hide copy-constructor and assignment:
-	BmFilter( const BmFilter&);
-	BmFilter operator=( const BmFilter&);
+	BmFilter(const BmFilter&);
+	BmFilter operator=(const BmFilter&);
 };
 
 
-
-typedef map< BmString, BmFilterAddonDescr> BmFilterAddonMap;
+typedef map<BmString, BmFilterAddonDescr> BmFilterAddonMap;
 extern IMPEXPBMMAILKIT BmFilterAddonMap FilterAddonMap;
 
 /*------------------------------------------------------------------------------*\
-	BmFilterList 
+	BmFilterList
 		-	holds list of all Filters
 \*------------------------------------------------------------------------------*/
 class IMPEXPBMMAILKIT BmFilterList : public BmListModel {
@@ -122,39 +122,35 @@ class IMPEXPBMMAILKIT BmFilterList : public BmListModel {
 public:
 	// creator-func, c'tors and d'tor:
 	static BmFilterList* CreateInstance();
-	BmFilterList( const char* name);
+	BmFilterList(const char* name);
 	~BmFilterList();
-	
+
 	// native methods:
 	void LoadAddons();
 	void UnloadAddons();
-	BmString DefaultNameForFilterKind( const BmString& filterKind);
+	BmString DefaultNameForFilterKind(const BmString& filterKind);
 	bool HaveSpamFilter() const;
-	BmRef<BmFilter>& LearnAsSpamFilter()
-													{ return mLearnAsSpamFilter; }
-	BmRef<BmFilter>& LearnAsTofuFilter()
-													{ return mLearnAsTofuFilter; }
+	BmRef<BmFilter>& LearnAsSpamFilter() { return mLearnAsSpamFilter; }
+	BmRef<BmFilter>& LearnAsTofuFilter() { return mLearnAsTofuFilter; }
 
 	// overrides of listmodel base:
-	void ForeignKeyChanged( const BmString& key, 
-									const BmString& oldVal, const BmString& newVal);
+	void ForeignKeyChanged(const BmString& key, const BmString& oldVal, const BmString& newVal);
 	const BmString SettingsFileName();
-	void InstantiateItem( BMessage* archive);
-	int16 ArchiveVersion() const			{ return nArchiveVersion; }
+	void InstantiateItem(BMessage* archive);
+	int16 ArchiveVersion() const { return nArchiveVersion; }
 
-	static BmRef< BmFilterList> theInstance;
+	static BmRef<BmFilterList> theInstance;
 
 	static const char* const LEARN_AS_SPAM_NAME;
 	static const char* const LEARN_AS_TOFU_NAME;
 
 private:
-
-	BmRef< BmFilter> mLearnAsSpamFilter;
-	BmRef< BmFilter> mLearnAsTofuFilter;
+	BmRef<BmFilter> mLearnAsSpamFilter;
+	BmRef<BmFilter> mLearnAsTofuFilter;
 
 	// Hide copy-constructor and assignment:
-	BmFilterList( const BmFilterList&);
-	BmFilterList operator=( const BmFilterList&);
+	BmFilterList(const BmFilterList&);
+	BmFilterList operator=(const BmFilterList&);
 };
 
 #define TheFilterList BmFilterList::theInstance

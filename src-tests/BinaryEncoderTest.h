@@ -15,23 +15,23 @@
 #ifndef _BinaryEncoderTest_h
 #define _BinaryEncoderTest_h
 
+#include <TestCase.h>
 #include <cppunit/TestCaller.h>
 #include <cppunit/TestSuite.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <TestCase.h>
 
-class BinaryEncoderTest : public BTestCase
-{
+class BinaryEncoderTest : public BTestCase {
 	typedef TestCase inherited;
-	CPPUNIT_TEST_SUITE( BinaryEncoderTest );
-	CPPUNIT_TEST( SimpleTest);
+	CPPUNIT_TEST_SUITE(BinaryEncoderTest);
+	CPPUNIT_TEST(SimpleTest);
 	CPPUNIT_TEST_SUITE_END();
+
 public:
-//	static CppUnit::Test* Suite();
-	
+	//	static CppUnit::Test* Suite();
+
 	// This function called before *each* test added in Suite()
 	void setUp();
-	
+
 	// This function called after *each* test added in Suite()
 	void tearDown();
 

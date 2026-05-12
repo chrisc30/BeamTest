@@ -5,9 +5,9 @@
  * Authors:
  *		Oliver Tappe <beam@hirschkaefer.de>
  */
+#include <parsedate.h>
 #include <stdio.h>
 #include <ctime>
-#include <parsedate.h>
 
 #include <Alert.h>
 
@@ -18,7 +18,9 @@ using namespace regexx;
 #include "BmLogHandler.h"
 #include "BmUtil.h"
 
-BmString BM_SPACES("                                                                                                                                                                                    ");
+BmString BM_SPACES(
+	"                                                                                              "
+	"                                                                                      ");
 BmString BM_WHITESPACE = " \t\n\r\f";
 
 /*------------------------------------------------------------------------------*\
@@ -27,11 +29,13 @@ BmString BM_WHITESPACE = " \t\n\r\f";
 			and returns it.
 		-	throws BM_invalid_argument if field is not contained within archive
 \*------------------------------------------------------------------------------*/
-const char* FindMsgString( BMessage* archive, const char* name, int32 index) {
+const char*
+FindMsgString(BMessage* archive, const char* name, int32 index)
+{
 	const char* str;
 	BM_ASSERT(archive && name);
-	if (archive->FindString( name, index, &str) != B_OK)
-		throw BM_invalid_argument( BmString( "unknown message-field: ") << name);
+	if (archive->FindString(name, index, &str) != B_OK)
+		throw BM_invalid_argument(BmString("unknown message-field: ") << name);
 	return str;
 }
 
@@ -41,11 +45,13 @@ const char* FindMsgString( BMessage* archive, const char* name, int32 index) {
 			and returns it.
 		-	throws BM_invalid_argument if field is not contained within archive
 \*------------------------------------------------------------------------------*/
-bool FindMsgBool( BMessage* archive, const char* name, int32 index) {
+bool
+FindMsgBool(BMessage* archive, const char* name, int32 index)
+{
 	bool b;
 	BM_ASSERT(archive && name);
-	if (archive->FindBool( name, index, &b) != B_OK)
-		throw BM_invalid_argument( BmString( "unknown message-field: ") << name);
+	if (archive->FindBool(name, index, &b) != B_OK)
+		throw BM_invalid_argument(BmString("unknown message-field: ") << name);
 	return b;
 }
 
@@ -55,11 +61,13 @@ bool FindMsgBool( BMessage* archive, const char* name, int32 index) {
 			and returns it.
 		-	throws BM_invalid_argument if field is not contained within archive
 \*------------------------------------------------------------------------------*/
-int64 FindMsgInt64( BMessage* archive, const char* name, int32 index) {
+int64
+FindMsgInt64(BMessage* archive, const char* name, int32 index)
+{
 	int64 i;
 	BM_ASSERT(archive && name);
-	if (archive->FindInt64( name, index, &i) != B_OK)
-		throw BM_invalid_argument( BmString( "unknown message-field: ") << name);
+	if (archive->FindInt64(name, index, &i) != B_OK)
+		throw BM_invalid_argument(BmString("unknown message-field: ") << name);
 	return i;
 }
 
@@ -69,11 +77,13 @@ int64 FindMsgInt64( BMessage* archive, const char* name, int32 index) {
 			and returns it.
 		-	throws BM_invalid_argument if field is not contained within archive
 \*------------------------------------------------------------------------------*/
-int32 FindMsgInt32( BMessage* archive, const char* name, int32 index) {
+int32
+FindMsgInt32(BMessage* archive, const char* name, int32 index)
+{
 	int32 i;
 	BM_ASSERT(archive && name);
-	if (archive->FindInt32( name, index, &i) != B_OK)
-		throw BM_invalid_argument( BmString( "unknown message-field: ") << name);
+	if (archive->FindInt32(name, index, &i) != B_OK)
+		throw BM_invalid_argument(BmString("unknown message-field: ") << name);
 	return i;
 }
 
@@ -83,11 +93,13 @@ int32 FindMsgInt32( BMessage* archive, const char* name, int32 index) {
 			and returns it.
 		-	throws BM_invalid_argument if field is not contained within archive
 \*------------------------------------------------------------------------------*/
-int16 FindMsgInt16( BMessage* archive, const char* name, int32 index) {
+int16
+FindMsgInt16(BMessage* archive, const char* name, int32 index)
+{
 	int16 i;
 	BM_ASSERT(archive && name);
-	if (archive->FindInt16( name, index, &i) != B_OK)
-		throw BM_invalid_argument( BmString( "unknown message-field: ") << name);
+	if (archive->FindInt16(name, index, &i) != B_OK)
+		throw BM_invalid_argument(BmString("unknown message-field: ") << name);
 	return i;
 }
 
@@ -97,13 +109,14 @@ int16 FindMsgInt16( BMessage* archive, const char* name, int32 index) {
 			and returns it.
 		-	throws BM_invalid_argument if field is not contained within archive
 \*------------------------------------------------------------------------------*/
-BMessage* FindMsgMsg( BMessage* archive, const char* name, BMessage* msg, 
-							 int32 index) {
+BMessage*
+FindMsgMsg(BMessage* archive, const char* name, BMessage* msg, int32 index)
+{
 	BM_ASSERT(archive && name);
 	if (!msg)
 		msg = new BMessage;
-	if (archive->FindMessage( name, index, msg) != B_OK)
-		throw BM_invalid_argument( BmString( "unknown message-field: ") << name);
+	if (archive->FindMessage(name, index, msg) != B_OK)
+		throw BM_invalid_argument(BmString("unknown message-field: ") << name);
 	return msg;
 }
 
@@ -113,13 +126,15 @@ BMessage* FindMsgMsg( BMessage* archive, const char* name, BMessage* msg,
 			and returns it.
 		-	throws BM_invalid_argument if field is not contained within archive
 \*------------------------------------------------------------------------------*/
-float FindMsgFloat( BMessage* archive, const char* name, int32 index) {
+float
+FindMsgFloat(BMessage* archive, const char* name, int32 index)
+{
 	float f;
 	BM_ASSERT(archive && name);
-	if (archive->FindFloat( name, index, &f) != B_OK) {
-		BmString s( "unknown message-field: ");
+	if (archive->FindFloat(name, index, &f) != B_OK) {
+		BmString s("unknown message-field: ");
 		s += name;
-		throw BM_invalid_argument( s.String());
+		throw BM_invalid_argument(s.String());
 	}
 	return f;
 }
@@ -130,11 +145,13 @@ float FindMsgFloat( BMessage* archive, const char* name, int32 index) {
 			and returns it.
 		-	throws BM_invalid_argument if field is not contained within archive
 \*------------------------------------------------------------------------------*/
-void* FindMsgPointer( BMessage* archive, const char* name, int32 index) {
+void*
+FindMsgPointer(BMessage* archive, const char* name, int32 index)
+{
 	void* ptr;
 	BM_ASSERT(archive && name);
-	if (archive->FindPointer( name, index, &ptr) != B_OK)
-		throw BM_invalid_argument( BmString( "unknown message-field: ") << name);
+	if (archive->FindPointer(name, index, &ptr) != B_OK)
+		throw BM_invalid_argument(BmString("unknown message-field: ") << name);
 	return ptr;
 }
 
@@ -146,27 +163,31 @@ void* FindMsgPointer( BMessage* archive, const char* name, int32 index) {
 			* 1048576 < bytes 			-> "X.xx MB"
 		-	we define a Mega-Byte as 1024**2 bytes (as Tracker does)
 \*------------------------------------------------------------------------------*/
-BmString BytesToString( int32 bytes, bool mini) {
+BmString
+BytesToString(int32 bytes, bool mini)
+{
 	char buf[20];
 	if (bytes >= 1048576) {
-		sprintf( buf, "%6.2f MB", bytes/1048576.0);
+		sprintf(buf, "%6.2f MB", bytes / 1048576.0);
 	} else if (bytes >= 1024) {
-		sprintf( buf, "%6.2f KB", bytes/1024.0);
+		sprintf(buf, "%6.2f KB", bytes / 1024.0);
 	} else {
-		sprintf( buf, "%" B_PRId32 " %s", bytes, mini ? "b" : "bytes");
+		sprintf(buf, "%" B_PRId32 " %s", bytes, mini ? "b" : "bytes");
 	}
 	return BmString(buf);
 }
 
 /*------------------------------------------------------------------------------*\
 	TimeToSwatchString( time, format)
-		-	converts the given (utc) time into a string representing 
+		-	converts the given (utc) time into a string representing
 			swatch internet time
 \*------------------------------------------------------------------------------*/
-BmString TimeToSwatchString( time_t utc, const char* format) {
-	time_t swatch = utc+3600;	// add one hour
+BmString
+TimeToSwatchString(time_t utc, const char* format)
+{
+	time_t swatch = utc + 3600;	 // add one hour
 	int64 beats = ((swatch % 86400) * 1000) / 86400;
-	BmString timeStr = TimeToString( utc, format);
+	BmString timeStr = TimeToString(utc, format);
 	if (strchr(format, '@'))
 		timeStr << beats;
 	return timeStr;
@@ -176,41 +197,43 @@ BmString TimeToSwatchString( time_t utc, const char* format) {
 	ParseDateTime()
 		-	parses the given string for a legal date
 \*------------------------------------------------------------------------------*/
-bool ParseDateTime( const BmString& str, time_t& dateTime) {
-	if (!str.Length()) return false;
+bool
+ParseDateTime(const BmString& str, time_t& dateTime)
+{
+	if (!str.Length())
+		return false;
 	// some mail-clients (notably BeMail!) generate date-formats with doubled
 	// time-zone information which confuses parsedate().
 	// N.B. Some other mailers enclose the same textual representation in
-	// ()-comments, which is perfectly legal and will be handled by the 
+	// ()-comments, which is perfectly legal and will be handled by the
 	// mail-header parsing code (those comments will not be present
 	// in the string handled here).
 	Regexx rx;
 	// remove superfluous timezone information, i.e. convert something
 	// like '12:11:10 +0200 CEST' to '12:11:10 +0200':
-	BmString s = rx.replace( str, "([+-]\\d{4})[\\D]+$", "$1");
+	BmString s = rx.replace(str, "([+-]\\d{4})[\\D]+$", "$1");
 	// convert datetime-string into time_t:
-	dateTime = parsedate( s.String(), -1);
+	dateTime = parsedate(s.String(), -1);
 	if (dateTime == -1) {
 		// direct parsing wasn't successful, so we remove any textual timezone
 		// and try again:
-		s = rx.replace( s, "^(.+?)[a-zA-Z\\s]+$", "$1");
-		dateTime = parsedate( s.String(), -1);
+		s = rx.replace(s, "^(.+?)[a-zA-Z\\s]+$", "$1");
+		dateTime = parsedate(s.String(), -1);
 
 		if (dateTime == -1 && rx.exec(s, "\\s([+-])(\\d\\d)(\\d\\d)\\s*$")) {
-			// Still no success, probably because the implementation of 
+			// Still no success, probably because the implementation of
 			// parsedate() does not understand numerical timezones, either.
-			// We remove the numerical timezone info and adjust the time 
+			// We remove the numerical timezone info and adjust the time
 			// accordingly:
 			BmString sign = rx.match[0].atom[0];
 			BmString hours = rx.match[0].atom[1];
 			BmString minutes = rx.match[0].atom[2];
-			time_t timezoneOffset
-				= atol(hours.String()) * 60 * 60 + atol(minutes.String()) * 60;
+			time_t timezoneOffset = atol(hours.String()) * 60 * 60 + atol(minutes.String()) * 60;
 			if (sign == "+")
 				timezoneOffset *= -1;
-			s = rx.replace( s, "^(.+?)\\s*[+-]\\d\\d\\d\\d\\s*$", "$1 GMT");
-			dateTime = parsedate( s.String(), -1);
-			if  (dateTime != -1)
+			s = rx.replace(s, "^(.+?)\\s*[+-]\\d\\d\\d\\d\\s*$", "$1 GMT");
+			dateTime = parsedate(s.String(), -1);
+			if (dateTime != -1)
 				dateTime += timezoneOffset;
 		}
 	}
@@ -222,16 +245,17 @@ bool ParseDateTime( const BmString& str, time_t& dateTime) {
 	GenerateSortkeyFor( name))
 		-	returns the sortkey for the given name
 \*------------------------------------------------------------------------------*/
-BmString GenerateSortkeyFor( const BmString& name) {
-	BmString skey( name);
-	if (!skey.Length()) 
+BmString
+GenerateSortkeyFor(const BmString& name)
+{
+	BmString skey(name);
+	if (!skey.Length())
 		return skey;
 	skey.ToLower();
-	skey.IReplaceAll( "ä", "ae");
-	skey.IReplaceAll( "ö", "oe");
-	skey.IReplaceAll( "ü", "ue");
-	skey.ReplaceAll( "ß", "ss");
+	skey.IReplaceAll("ä", "ae");
+	skey.IReplaceAll("ö", "oe");
+	skey.IReplaceAll("ü", "ue");
+	skey.ReplaceAll("ß", "ss");
 	// that's it for now, decomposition for other chars later...
 	return skey;
 }
-

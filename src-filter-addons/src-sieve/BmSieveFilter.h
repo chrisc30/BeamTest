@@ -13,7 +13,7 @@
 #include <Autolock.h>
 
 extern "C" {
-	#include "sieve_interface.h"
+#include "sieve_interface.h"
 }
 
 #include "BmFilterAddon.h"
@@ -22,75 +22,63 @@ extern "C" {
 const int BM_MAX_MATCH_COUNT = 20;
 
 /*------------------------------------------------------------------------------*\
-	BmSieveFilter 
+	BmSieveFilter
 		-	implements filtering through SIEVE
 \*------------------------------------------------------------------------------*/
 class BmSieveFilter : public BmFilterAddon {
 	typedef BmFilterAddon inherited;
-	
+
 	friend class SieveTest;
 
 public:
-	BmSieveFilter( const BmString& name, const BMessage* archive);
+	BmSieveFilter(const BmString& name, const BMessage* archive);
 	virtual ~BmSieveFilter();
-	
+
 	// native methods:
 	bool CompileScript();
 	BLocker* SieveLock();
-	virtual bool AskBeforeFileInto()		{ return false; }
+	virtual bool AskBeforeFileInto() { return false; }
 
 	// implementations for abstract BmFilterAddon-methods:
-	bool Execute( BmMsgContext* msgContext, 
-					  const BMessage* jobSpecs = NULL);
+	bool Execute(BmMsgContext* msgContext, const BMessage* jobSpecs = NULL);
 	virtual void Initialize();
-	bool SanityCheck( BmString& complaint, BmString& fieldName);
-	status_t Archive( BMessage* archive, bool deep = true) const;
+	bool SanityCheck(BmString& complaint, BmString& fieldName);
+	status_t Archive(BMessage* archive, bool deep = true) const;
 	BmString ErrorString() const;
 
 	// SIEVE-callbacks:
-	static int sieve_redirect( void* action_context, void* interp_context, 
-			   						void* script_context, void* message_context, 
-			   						const char** errmsg);
-	static int sieve_keep( void* action_context, void* interp_context, 
-			   				  void* script_context, void* message_context, 
-			   				  const char** errmsg);
-	static int sieve_discard( void* action_context, void* interp_context, 
-			   				     void* script_context, void* message_context, 
-			   				     const char** errmsg);
-	static int sieve_fileinto( void* action_context, void* interp_context, 
-			   				  		void* script_context, void* message_context, 
-			   				  		const char** errmsg);
-	static int sieve_reject( void* action_context, void* interp_context, 
-			   					 void* script_context, void* message_context, 
-			   					 const char** errmsg);
-	static int sieve_notify( void* action_context, void*, 
-			   				  	 void*, void* message_context, 
-			   				  	 const char**);
-	static int sieve_get_size( void* message_context, int* size);
-	static int sieve_get_header( void* message_context, const char* header,
-			  							  const char*** contents);
-	static int sieve_parse_error( int lineno, const char *msg, 
-											void *interp_context, void *script_context);
+	static int sieve_redirect(void* action_context, void* interp_context, void* script_context,
+		void* message_context, const char** errmsg);
+	static int sieve_keep(void* action_context, void* interp_context, void* script_context,
+		void* message_context, const char** errmsg);
+	static int sieve_discard(void* action_context, void* interp_context, void* script_context,
+		void* message_context, const char** errmsg);
+	static int sieve_fileinto(void* action_context, void* interp_context, void* script_context,
+		void* message_context, const char** errmsg);
+	static int sieve_reject(void* action_context, void* interp_context, void* script_context,
+		void* message_context, const char** errmsg);
+	static int sieve_notify(
+		void* action_context, void*, void*, void* message_context, const char**);
+	static int sieve_get_size(void* message_context, int* size);
+	static int sieve_get_header(void* message_context, const char* header, const char*** contents);
+	static int sieve_parse_error(
+		int lineno, const char* msg, void* interp_context, void* script_context);
 	// SIEVE-helpers:
-	static void SetMailFlags( sieve_imapflags_t* flags, 
-									  BmMsgContext* msgContext);
+	static void SetMailFlags(sieve_imapflags_t* flags, BmMsgContext* msgContext);
 
-	static int sieve_execute_error( const char* msg, void* interp_context,
-											  void* script_context, void* message_context);
+	static int sieve_execute_error(
+		const char* msg, void* interp_context, void* script_context, void* message_context);
 
 	// getters:
-	inline const BmString &Content() const	
-													{ return mContent; }
-	inline const BmString &Name() const	{ return mName; }
+	inline const BmString& Content() const { return mContent; }
+	inline const BmString& Name() const { return mName; }
 
-	inline int LastErrVal() const			{ return mLastErrVal; }
-	inline const BmString &LastErr() const	
-													{ return mLastErr; }
-	inline const BmString &LastSieveErr() const 
-													{ return mLastSieveErr; }
+	inline int LastErrVal() const { return mLastErrVal; }
+	inline const BmString& LastErr() const { return mLastErr; }
+	inline const BmString& LastSieveErr() const { return mLastSieveErr; }
 
 	// setters:
-	void Content( const BmString &s);
+	void Content(const BmString& s);
 
 	// archivable components:
 	static const char* const MSG_VERSION;
@@ -98,36 +86,34 @@ public:
 	static const int16 nArchiveVersion;
 
 protected:
-	void RegisterCallbacks( sieve_interp_t* interp);
+	void RegisterCallbacks(sieve_interp_t* interp);
 
 	BmString mName;
-							// the name of this filter-implementation
+	// the name of this filter-implementation
 	BmString mContent;
-							// the SIEVE-script represented by this filter
+	// the SIEVE-script represented by this filter
 	sieve_script_t* mCompiledScript;
-							// the compiled SIEVE-script, ready to be thrown at mails
+	// the compiled SIEVE-script, ready to be thrown at mails
 	sieve_interp_t* mSieveInterp;
-							// the interpreter that compiled the SIEVE-script
+	// the interpreter that compiled the SIEVE-script
 	int mLastErrVal;
-							// last error-value we got
+	// last error-value we got
 	BmString mLastErr;
-							// the last (general) error that occurred
+	// the last (general) error that occurred
 	BmString mLastSieveErr;
-							// the last SIEVE-error that occurred
+	// the last SIEVE-error that occurred
 	static BLocker* nSieveLock;
 
 private:
-	BmSieveFilter();									// hide default constructor
+	BmSieveFilter();  // hide default constructor
 	// Hide copy-constructor and assignment:
-	BmSieveFilter( const BmSieveFilter&);
-	BmSieveFilter operator=( const BmSieveFilter&);
-
+	BmSieveFilter(const BmSieveFilter&);
+	BmSieveFilter operator=(const BmSieveFilter&);
 };
 
 
-
 /*------------------------------------------------------------------------------*\
-	BmGraphicalSieveFilter 
+	BmGraphicalSieveFilter
 		-	additionally supports graphical editing of the filter
 \*------------------------------------------------------------------------------*/
 class BmGraphicalSieveFilter : public BmSieveFilter {
@@ -158,25 +144,20 @@ class BmGraphicalSieveFilter : public BmSieveFilter {
 	static const char* const MSG_SET_LIST_ID_VALUE;
 
 public:
-	BmGraphicalSieveFilter( const BmString& name, const BMessage* archive);
-	
+	BmGraphicalSieveFilter(const BmString& name, const BMessage* archive);
+
 	// native methods:
 	bool BuildScriptFromStrings();
-	bool IsAddrField( const BmString& addrField);
+	bool IsAddrField(const BmString& addrField);
 
 	// overrides of BmSieve-base:
-	void ForeignKeyChanged( const BmString& key, 
-									const BmString& oldVal, 
-									const BmString& newVal);
-	bool SanityCheck( BmString& complaint, BmString& fieldName);
-	status_t Archive( BMessage* archive, bool deep = true) const;
-	void SetupFromMailData( const BmString& subject, 
-									const BmString& from, 
-									const BmString& To);
-	bool AskBeforeFileInto()				{ return mActionFileIntoAsk; }
+	void ForeignKeyChanged(const BmString& key, const BmString& oldVal, const BmString& newVal);
+	bool SanityCheck(BmString& complaint, BmString& fieldName);
+	status_t Archive(BMessage* archive, bool deep = true) const;
+	void SetupFromMailData(const BmString& subject, const BmString& from, const BmString& To);
+	bool AskBeforeFileInto() { return mActionFileIntoAsk; }
 
 private:
-
 	// stuff used by graphical editor:
 	int16 mMatchCount;
 	BmString mMatchAnyAll;
@@ -199,18 +180,16 @@ private:
 	bool mActionSetListId;
 	BmString mActionSetListIdValue;
 
-	BmGraphicalSieveFilter();				// hide default constructor
+	BmGraphicalSieveFilter();  // hide default constructor
 	// Hide copy-constructor and assignment:
-	BmGraphicalSieveFilter( const BmGraphicalSieveFilter&);
-	BmGraphicalSieveFilter operator=( const BmGraphicalSieveFilter&);
-
+	BmGraphicalSieveFilter(const BmGraphicalSieveFilter&);
+	BmGraphicalSieveFilter operator=(const BmGraphicalSieveFilter&);
 };
-
 
 
 /*------------------------------------------------------------------------------*\
 	BmSieveFilterPrefs
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 
 class BmCheckControl;
@@ -225,29 +204,29 @@ class MButton;
 class HGroup;
 
 enum {
-	BM_ANY_ALL_SELECTED			= 'bmTa',
-	BM_ACTION_SELECTED			= 'bmTb',
-	BM_MAILPART_SELECTED			= 'bmTc',
-	BM_OPERATOR_SELECTED			= 'bmTd',
-	BM_SELECT_FILTER_VALUE		= 'bmTe',
-	BM_SELECT_ACTION_VALUE		= 'bmTf',
-	BM_ADD_FILTER_LINE			= 'bmTg',
-	BM_REMOVE_FILTER_LINE		= 'bmTh',
+	BM_ANY_ALL_SELECTED = 'bmTa',
+	BM_ACTION_SELECTED = 'bmTb',
+	BM_MAILPART_SELECTED = 'bmTc',
+	BM_OPERATOR_SELECTED = 'bmTd',
+	BM_SELECT_FILTER_VALUE = 'bmTe',
+	BM_SELECT_ACTION_VALUE = 'bmTf',
+	BM_ADD_FILTER_LINE = 'bmTg',
+	BM_REMOVE_FILTER_LINE = 'bmTh',
 
-	BM_FILEINTO_CHANGED			= 'bmTi',
-	BM_FILEINTO_SELECTED			= 'bmTj',
-	BM_DISCARD_CHANGED			= 'bmTk',
-	BM_SET_STATUS_CHANGED		= 'bmTl',
-	BM_SET_STATUS_SELECTED		= 'bmTm',
-	BM_SET_IDENTITY_CHANGED		= 'bmTn',
-	BM_SET_IDENTITY_SELECTED	= 'bmTo',
-	BM_STOP_PROCESSING_CHANGED	= 'bmTp',
-	BM_SET_SPAM_TOFU_CHANGED	= 'bmTq',
-	BM_SET_SPAM_TOFU_SELECTED	= 'bmTr',
-	BM_SET_LIST_ID_CHANGED		= 'bmTs',
+	BM_FILEINTO_CHANGED = 'bmTi',
+	BM_FILEINTO_SELECTED = 'bmTj',
+	BM_DISCARD_CHANGED = 'bmTk',
+	BM_SET_STATUS_CHANGED = 'bmTl',
+	BM_SET_STATUS_SELECTED = 'bmTm',
+	BM_SET_IDENTITY_CHANGED = 'bmTn',
+	BM_SET_IDENTITY_SELECTED = 'bmTo',
+	BM_STOP_PROCESSING_CHANGED = 'bmTp',
+	BM_SET_SPAM_TOFU_CHANGED = 'bmTq',
+	BM_SET_SPAM_TOFU_SELECTED = 'bmTr',
+	BM_SET_LIST_ID_CHANGED = 'bmTs',
 
-	BM_ADDRPART_SELECTED			= 'bmTu',
-	BM_FILEINTO_ASK_CHANGED		= 'bmTv'
+	BM_ADDRPART_SELECTED = 'bmTu',
+	BM_FILEINTO_ASK_CHANGED = 'bmTv'
 };
 
 
@@ -255,24 +234,23 @@ class BmSieveFilterPrefs : public BmFilterAddonPrefsView {
 	typedef BmFilterAddonPrefsView inherited;
 
 public:
-	BmSieveFilterPrefs( minimax minmax);
+	BmSieveFilterPrefs(minimax minmax);
 	virtual ~BmSieveFilterPrefs();
-	
+
 	// native methods:
 	void AdjustScrollView();
-	void AdjustSizeOfValueControl( BmMultiLineTextControl* control);
+	void AdjustSizeOfValueControl(BmMultiLineTextControl* control);
 
 	// implementations for abstract base-class methods:
-	const char *Kind() const;
-	void ShowFilter( BmFilterAddon* addon);
+	const char* Kind() const;
+	void ShowFilter(BmFilterAddon* addon);
 	void Initialize();
 	void Activate();
 
 	// BView overrides:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 private:
-
 	static const char* const MSG_IDX;
 
 	void AddFilterLine();
@@ -283,7 +261,7 @@ private:
 	VGroup* mActionGroup;
 	BmFilterScrollView* mFilterScrollView;
 	Space* mSpaceAtBottom;
-	
+
 	BmMenuControl* mAnyAllControl;
 	MButton* mAddButton;
 	MButton* mRemoveButton;
@@ -296,7 +274,7 @@ private:
 	BmMultiLineTextControl* mValueControl[BM_MAX_MATCH_COUNT];
 	BmCheckControl* mMarkControl[BM_MAX_MATCH_COUNT];
 	int32 mVisibleLines;
-	
+
 	BmCheckControl* mFileIntoControl;
 	BmMenuControl* mFileIntoValueControl;
 	BmCheckControl* mFileIntoAskControl;
@@ -314,50 +292,48 @@ private:
 	BmGraphicalSieveFilter* mCurrFilterAddon;
 
 	// Hide copy-constructor and assignment:
-	BmSieveFilterPrefs( const BmSieveFilterPrefs&);
-	BmSieveFilterPrefs operator=( const BmSieveFilterPrefs&);
+	BmSieveFilterPrefs(const BmSieveFilterPrefs&);
+	BmSieveFilterPrefs operator=(const BmSieveFilterPrefs&);
 };
-
 
 
 /*------------------------------------------------------------------------------*\
 	BmSieveScriptFilterPrefs
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 
 class BmMultiLineTextControl;
 
 enum {
-	BM_TEST_FILTER			= 'bmTz'
+	BM_TEST_FILTER = 'bmTz'
 };
 
 class BmSieveScriptFilterPrefs : public BmFilterAddonPrefsView {
 	typedef BmFilterAddonPrefsView inherited;
 
 public:
-	BmSieveScriptFilterPrefs( minimax minmax);
+	BmSieveScriptFilterPrefs(minimax minmax);
 	virtual ~BmSieveScriptFilterPrefs();
-	
+
 	// native methods:
 
 	// implementations for abstract base-class methods:
-	const char *Kind() const;
-	void ShowFilter( BmFilterAddon* addon);
+	const char* Kind() const;
+	void ShowFilter(BmFilterAddon* addon);
 	void Initialize();
 
 	// BView overrides:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 private:
-
 	BmMultiLineTextControl* mContentControl;
 	MButton* mTestButton;
 
 	BmSieveFilter* mCurrFilterAddon;
 
 	// Hide copy-constructor and assignment:
-	BmSieveScriptFilterPrefs( const BmSieveScriptFilterPrefs&);
-	BmSieveScriptFilterPrefs operator=( const BmSieveScriptFilterPrefs&);
+	BmSieveScriptFilterPrefs(const BmSieveScriptFilterPrefs&);
+	BmSieveScriptFilterPrefs operator=(const BmSieveScriptFilterPrefs&);
 };
 
 #endif

@@ -17,37 +17,33 @@
 
 /*------------------------------------------------------------------------------*\
 	BmShortcutControl
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-class BmShortcutControl : public BmTextControl
-{
+class BmShortcutControl : public BmTextControl {
 	typedef BmTextControl inherited;
 
 public:
 	// creator-func, c'tors and d'tor:
-	BmShortcutControl( const char* label);
-	~BmShortcutControl()						{ }
-	
-	// overrides of BmTextControl:
-	void KeyDown(const char *bytes, int32 numBytes);
+	BmShortcutControl(const char* label);
+	~BmShortcutControl() {}
 
-	static filter_result FilterHook( BMessage* msg, BHandler** handler,
-												BMessageFilter* filter);
+	// overrides of BmTextControl:
+	void KeyDown(const char* bytes, int32 numBytes);
+
+	static filter_result FilterHook(BMessage* msg, BHandler** handler, BMessageFilter* filter);
 
 private:
 	static BmShortcutControl* nTheInstance;
 
 	// Hide copy-constructor and assignment:
-	BmShortcutControl( const BmShortcutControl&);
-	BmShortcutControl operator=( const BmShortcutControl&);
+	BmShortcutControl(const BmShortcutControl&);
+	BmShortcutControl operator=(const BmShortcutControl&);
 };
-
-
 
 
 /*------------------------------------------------------------------------------*\
 	BmPrefsShortcutsView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmPrefsShortcutsView : public BmPrefsView {
 	typedef BmPrefsView inherited;
@@ -56,9 +52,9 @@ public:
 	// c'tors and d'tor:
 	BmPrefsShortcutsView();
 	virtual ~BmPrefsShortcutsView();
-	
+
 	// native methods:
-	void ShowShortcut( int32 selection);
+	void ShowShortcut(int32 selection);
 
 	// overrides of BmPrefsView base:
 	void Initialize();
@@ -67,22 +63,22 @@ public:
 	void UndoChanges();
 
 	// overrides of BView base:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 	// getters:
 
 	// setters:
 
 private:
-	ColumnListView* CreateListView( int32 width, int32 height);
+	ColumnListView* CreateListView(int32 width, int32 height);
 
 	ColumnListView* mListView;
 	BmTextControl* mNameControl;
 	BmShortcutControl* mShortcutControl;
 
 	// Hide copy-constructor and assignment:
-	BmPrefsShortcutsView( const BmPrefsShortcutsView&);
-	BmPrefsShortcutsView operator=( const BmPrefsShortcutsView&);
+	BmPrefsShortcutsView(const BmPrefsShortcutsView&);
+	BmPrefsShortcutsView operator=(const BmPrefsShortcutsView&);
 };
 
 #endif

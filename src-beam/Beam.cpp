@@ -8,10 +8,10 @@
 
 #include "BeamApp.h"
 
-int main()
+int
+main()
 {
-	BeamApplication* app = new BeamApplication( BM_APP_SIG);
+	BeamApplication* app = new BeamApplication(BM_APP_SIG);
 	app->Run();
 	delete app;
 }
-

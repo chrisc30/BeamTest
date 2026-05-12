@@ -15,29 +15,28 @@
 
 class HGroup;
 
-class IMPEXPBMGUIBASE BmCheckControl : public MCheckBox
-{
+class IMPEXPBMGUIBASE BmCheckControl : public MCheckBox {
 	typedef MCheckBox inherited;
 
 public:
 	// creator-func, c'tors and d'tor:
-	BmCheckControl( const char* label, ulong id=0, bool state=false);
-	BmCheckControl( const char* label, BMessage* msg, BHandler* target=NULL, bool state=false);
+	BmCheckControl(const char* label, ulong id = 0, bool state = false);
+	BmCheckControl(const char* label, BMessage* msg, BHandler* target = NULL, bool state = false);
 	~BmCheckControl();
-	
+
 	// native methods:
 	float LabelWidth();
-	void AdjustToMaxLabelWidth( float maxWidth);
-	void SetValueSilently( bool val);
-	
+	void AdjustToMaxLabelWidth(float maxWidth);
+	void SetValueSilently(bool val);
+
 	minimax layoutprefs();
 
 private:
 	void _InitSize();
 
 	// Hide copy-constructor and assignment:
-	BmCheckControl( const BmCheckControl&);
-	BmCheckControl operator=( const BmCheckControl&);
+	BmCheckControl(const BmCheckControl&);
+	BmCheckControl operator=(const BmCheckControl&);
 };
 
 

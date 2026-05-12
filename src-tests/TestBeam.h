@@ -17,17 +17,21 @@
 
 #include "BmString.h"
 
-void SlurpFile( const char* filename, BmString& str);
+void SlurpFile(const char* filename, BmString& str);
 
-void DumpResult( const BmString& str);
+void DumpResult(const BmString& str);
 
 extern BmString AsciiAlphabet[16];
 extern bool HaveTestdata;
 extern bool LargeDataMode;
 
 struct Activator {
-	Activator( bool& f) : flag( f) 		{ flag = true; }
-	~Activator()								{ flag = false; }
+	Activator(bool& f)
+		: flag(f)
+	{
+		flag = true;
+	}
+	~Activator() { flag = false; }
 	bool& flag;
 };
 

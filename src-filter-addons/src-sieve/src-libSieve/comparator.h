@@ -2,9 +2,9 @@
  * Larry Greenfield
  */
 /***********************************************************
-        Copyright 1999 by Carnegie Mellon University
+		Copyright 1999 by Carnegie Mellon University
 
-                      All Rights Reserved
+					  All Rights Reserved
 
 Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted,
@@ -32,11 +32,11 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "pcreposix.h"
 #endif
 
-/* compares pat to text; returns 1 if it's true, 0 otherwise 
+/* compares pat to text; returns 1 if it's true, 0 otherwise
    first arg is pat, second arg is text */
-typedef int comparator_t(const char *, const char *);
+typedef int comparator_t(const char*, const char*);
 
 /* returns a pointer to a comparator function given it's name */
-comparator_t *lookup_comp(const char *comp, int mode, int relation);
+comparator_t* lookup_comp(const char* comp, int mode, int relation);
 
 #endif

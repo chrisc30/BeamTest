@@ -26,7 +26,7 @@ class BmMailMonitor;
 class BmMailRef;
 /*------------------------------------------------------------------------------*\
 	BmMailFolderList
-		-	class 
+		-	class
 \*------------------------------------------------------------------------------*/
 class IMPEXPBMMAILKIT BmMailFolderList : public BmListModel {
 	typedef BmListModel inherited;
@@ -40,52 +40,50 @@ public:
 	static BmMailFolderList* CreateInstance();
 	BmMailFolderList();
 	virtual ~BmMailFolderList();
-	
+
 	// native methods:
-	BmMailFolder* AddSpecialFlag( const node_ref& pnref, const node_ref& nref);
-	void RemoveSpecialFlag( const node_ref& pnref, const node_ref& nref);
+	BmMailFolder* AddSpecialFlag(const node_ref& pnref, const node_ref& nref);
+	void RemoveSpecialFlag(const node_ref& pnref, const node_ref& nref);
 	void QueryForSpecialMails();
-	BmRef<BmMailRef> FindMailRefByKey( const node_ref& nref);
-	BmRef<BmMailFolder> FindMailFolderBySubPath( const BmString& subPath);
+	BmRef<BmMailRef> FindMailRefByKey(const node_ref& nref);
+	BmRef<BmMailFolder> FindMailFolderBySubPath(const BmString& subPath);
 	//
 	void InitializeItems();
-	int InitializeSubFolders( BmMailFolder* folder, int level);
-	void InstantiateItems( BMessage* archive);
-	int InstantiateSubFolders( BmMailFolder* folder, BMessage* archive, 
-										int level);
+	int InitializeSubFolders(BmMailFolder* folder, int level);
+	void InstantiateItems(BMessage* archive);
+	int InstantiateSubFolders(BmMailFolder* folder, BMessage* archive, int level);
 	//
-	BmMailFolder* AddMailFolder( entry_ref& eref, int64 node, 
-										  BmMailFolder* parent, time_t mtime);
-	
+	BmMailFolder* AddMailFolder(entry_ref& eref, int64 node, BmMailFolder* parent, time_t mtime);
+
 	// overrides of list-model base:
 	bool StartJob();
-	void RemoveController( BmController* controller);
+	void RemoveController(BmController* controller);
 	const BmString SettingsFileName();
 
 	// setters:
-	void MailboxPathHasChanged( bool b) { mMailboxPathHasChanged = b; }
-	
-	// getters:
-	BmMailFolder* TopFolder() const		{ return mTopFolder.Get(); }
+	void MailboxPathHasChanged(bool b) { mMailboxPathHasChanged = b; }
 
-	static BmRef< BmMailFolderList> theInstance;
-	
+	// getters:
+	BmMailFolder* TopFolder() const { return mTopFolder.Get(); }
+
+	static BmRef<BmMailFolderList> theInstance;
+
 private:
 	// native methods:
 
 	// overrides of listmodel base:
-	int16 ArchiveVersion() const			{ return nArchiveVersion; }
+	int16 ArchiveVersion() const { return nArchiveVersion; }
 
 	// the following members will be archived as part of BmFolderList:
 	BmRef<BmMailFolder> mTopFolder;
-	
+
 	// the following members will NOT be archived at all:
 	BQuery mSpecialMailQuery;
 	bool mMailboxPathHasChanged;
 
 	// Hide copy-constructor and assignment:
-	BmMailFolderList( const BmMailFolderList&);
-	BmMailFolderList operator=( const BmMailFolderList&);
+	BmMailFolderList(const BmMailFolderList&);
+	BmMailFolderList operator=(const BmMailFolderList&);
 };
 
 #define TheMailFolderList BmMailFolderList::theInstance

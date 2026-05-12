@@ -1,7 +1,7 @@
-//Name:		MultiLineTextControl.h
-//Author:	Brian Tietz
-//Copyright 1999
-//Conventions:
+// Name:		MultiLineTextControl.h
+// Author:	Brian Tietz
+// Copyright 1999
+// Conventions:
 //	Global constants (declared with const) and #defines - begin with "c_" followed by lowercase
 //		words separated by underscores.
 //		(E.G., #define c_my_constant 5).
@@ -29,15 +29,15 @@
 //******************************************************************************************************
 //**** System header files
 //******************************************************************************************************
-#include <string.h>
 #include <OS.h>
+#include <string.h>
 
 
 //******************************************************************************************************
 //**** Project header files
 //******************************************************************************************************
-#include "MultiLineTextControl.h"
 #include "Colors.h"
+#include "MultiLineTextControl.h"
 #include "NewStrings.h"
 
 
@@ -46,30 +46,28 @@
 //******************************************************************************************************
 MultiLineTextControl::MultiLineTextControl(BRect frame, const char* name, const char* label,
 	bool inline_label, const char* text, BMessage* message, uint32 resizing_mode, uint32 flags)
-: BControl(frame,name,label,message,resizing_mode,B_WILL_DRAW|B_FRAME_EVENTS)
+	: BControl(frame, name, label, message, resizing_mode, B_WILL_DRAW | B_FRAME_EVENTS)
 {
 	m_enabled = true;
 	m_modification_message = NULL;
 	m_inline_label = inline_label;
-	if(m_inline_label)
-		m_divider = floorf((frame.right-frame.left)/2.0f);
+	if (m_inline_label)
+		m_divider = floorf((frame.right - frame.left) / 2.0f);
 	else
 		m_divider = 0;
 	ReevaluateLabelRect();
 
-	if(m_inline_label)
-	{
+	if (m_inline_label) {
 		m_entry_text_rect = Bounds();
 		m_entry_text_rect.left = m_divider;
-	}
-	else
-	{
+	} else {
 		m_entry_text_rect = Bounds();
-		m_entry_text_rect.top = m_label_text_rect.bottom+3;
+		m_entry_text_rect.top = m_label_text_rect.bottom + 3;
 	}
-	SetViewUIColor( B_PANEL_BACKGROUND_COLOR);
-	m_text_view = new MultiLineTextControlTextView(m_entry_text_rect.InsetByCopy(2,2),flags, resizing_mode);
-	if(text)
+	SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
+	m_text_view = new MultiLineTextControlTextView(
+		m_entry_text_rect.InsetByCopy(2, 2), flags, resizing_mode);
+	if (text)
 		m_text_view->SetText(text);
 	m_text_margin = 3;
 	ResetTextRect();
@@ -80,23 +78,25 @@ MultiLineTextControl::MultiLineTextControl(BRect frame, const char* name, const 
 
 MultiLineTextControl::~MultiLineTextControl()
 {
-	if(m_modification_message)
+	if (m_modification_message)
 		delete m_modification_message;
 }
 
 
-void MultiLineTextControl::AttachedToWindow()
+void
+MultiLineTextControl::AttachedToWindow()
 {
 	BControl::AttachedToWindow();
 	rgb_color background_color = Parent()->ViewColor();
-	m_dark_1_color = tint_color(background_color,B_DARKEN_1_TINT);
-	m_dark_2_color = tint_color(background_color,B_DARKEN_4_TINT);
+	m_dark_1_color = tint_color(background_color, B_DARKEN_1_TINT);
+	m_dark_2_color = tint_color(background_color, B_DARKEN_4_TINT);
 	SetViewColor(background_color);
 	ReevaluateLabelRect();
 }
 
 
-void MultiLineTextControl::ReevaluateLabelRect()
+void
+MultiLineTextControl::ReevaluateLabelRect()
 {
 	BFont font;
 	GetFont(&font);
@@ -105,225 +105,229 @@ void MultiLineTextControl::ReevaluateLabelRect()
 	m_label_font_ascent = ceilf(curr_font_height.ascent);
 	float height = m_label_font_ascent + ceilf(curr_font_height.descent);
 	float width = font.StringWidth(Label());
-	if(m_inline_label)
-	{
+	if (m_inline_label) {
 		m_label_text_rect.top = 4;
 		m_label_text_rect.bottom = m_label_text_rect.top + height;
 		m_label_text_rect.left = 3;
 		m_label_text_rect.right = width;
-	}
-	else
-	{
+	} else {
 		m_label_text_rect.top = 0;
 		m_label_text_rect.bottom = height;
 		m_label_text_rect.left = 6;
-		m_label_text_rect.right = m_label_text_rect.left + width;	
+		m_label_text_rect.right = m_label_text_rect.left + width;
 	}
 }
 
-void MultiLineTextControl::SetEnabled( bool enabled) {
+void
+MultiLineTextControl::SetEnabled(bool enabled)
+{
 	m_enabled = enabled;
-	BControl::SetEnabled( enabled);
-	m_text_view->SetViewColor( BmWeakenColor( B_DOCUMENT_BACKGROUND_COLOR, 
-															enabled ? 0 : 1));
-	m_text_view->MakeEditable( enabled);
-	MakeFocus( false);
+	BControl::SetEnabled(enabled);
+	m_text_view->SetViewColor(BmWeakenColor(B_DOCUMENT_BACKGROUND_COLOR, enabled ? 0 : 1));
+	m_text_view->MakeEditable(enabled);
+	MakeFocus(false);
 	Invalidate();
 	m_text_view->Invalidate();
 }
 
 
-void MultiLineTextControl::Draw(BRect update_rect)
+void
+MultiLineTextControl::Draw(BRect update_rect)
 {
-	if (m_entry_text_rect.Height()==0 || m_entry_text_rect.Width()==0)
+	if (m_entry_text_rect.Height() == 0 || m_entry_text_rect.Width() == 0)
 		return;
 	if (m_enabled) {
-		if(update_rect.Intersects(m_label_text_rect) && Label()) {
-			SetHighColor( ui_color( B_PANEL_TEXT_COLOR));
-			DrawString(Label(),BPoint(m_label_text_rect.left,m_label_text_rect.top+m_label_font_ascent));
+		if (update_rect.Intersects(m_label_text_rect) && Label()) {
+			SetHighColor(ui_color(B_PANEL_TEXT_COLOR));
+			DrawString(Label(),
+				BPoint(m_label_text_rect.left, m_label_text_rect.top + m_label_font_ascent));
 		}
-		if(update_rect.Intersects(m_entry_text_rect))
-		{
+		if (update_rect.Intersects(m_entry_text_rect)) {
 			rgb_color original_color = HighColor();
 			SetHighColor(m_dark_1_color);
-			StrokeLine(BPoint(m_entry_text_rect.left,m_entry_text_rect.top),
-				BPoint(m_entry_text_rect.right,m_entry_text_rect.top));
-			StrokeLine(BPoint(m_entry_text_rect.left,m_entry_text_rect.top+1),
-				BPoint(m_entry_text_rect.left,m_entry_text_rect.bottom));
-			SetHighColor( ui_color( B_SHINE_COLOR));
-			StrokeLine(BPoint(m_entry_text_rect.right,m_entry_text_rect.top+1),
-				BPoint(m_entry_text_rect.right,m_entry_text_rect.bottom-1));
-			StrokeLine(BPoint(m_entry_text_rect.left+1,m_entry_text_rect.bottom),
-				BPoint(m_entry_text_rect.right,m_entry_text_rect.bottom));
-			if(m_text_view->IsFocus())
-			{
+			StrokeLine(BPoint(m_entry_text_rect.left, m_entry_text_rect.top),
+				BPoint(m_entry_text_rect.right, m_entry_text_rect.top));
+			StrokeLine(BPoint(m_entry_text_rect.left, m_entry_text_rect.top + 1),
+				BPoint(m_entry_text_rect.left, m_entry_text_rect.bottom));
+			SetHighColor(ui_color(B_SHINE_COLOR));
+			StrokeLine(BPoint(m_entry_text_rect.right, m_entry_text_rect.top + 1),
+				BPoint(m_entry_text_rect.right, m_entry_text_rect.bottom - 1));
+			StrokeLine(BPoint(m_entry_text_rect.left + 1, m_entry_text_rect.bottom),
+				BPoint(m_entry_text_rect.right, m_entry_text_rect.bottom));
+			if (m_text_view->IsFocus()) {
 				SetHighColor(m_focus_color);
-				StrokeRect(m_entry_text_rect.InsetByCopy(1,1));
-			}
-			else
-			{
+				StrokeRect(m_entry_text_rect.InsetByCopy(1, 1));
+			} else {
 				SetHighColor(m_dark_2_color);
-				StrokeLine(BPoint(m_entry_text_rect.left+1,m_entry_text_rect.top+1),
-					BPoint(m_entry_text_rect.right-1,m_entry_text_rect.top+1));
-				StrokeLine(BPoint(m_entry_text_rect.left+1,m_entry_text_rect.top+2),
-					BPoint(m_entry_text_rect.left+1,m_entry_text_rect.bottom-1));
+				StrokeLine(BPoint(m_entry_text_rect.left + 1, m_entry_text_rect.top + 1),
+					BPoint(m_entry_text_rect.right - 1, m_entry_text_rect.top + 1));
+				StrokeLine(BPoint(m_entry_text_rect.left + 1, m_entry_text_rect.top + 2),
+					BPoint(m_entry_text_rect.left + 1, m_entry_text_rect.bottom - 1));
 			}
 			SetHighColor(original_color);
 		}
 	} else {
-		if(update_rect.Intersects(m_label_text_rect) && Label()) {
-			SetHighColor( 
-				tint_color( 
-					ui_color( B_PANEL_TEXT_COLOR), B_DISABLED_MARK_TINT
-				)
-			);
-			DrawString(Label(),BPoint(m_label_text_rect.left,m_label_text_rect.top+m_label_font_ascent));
+		if (update_rect.Intersects(m_label_text_rect) && Label()) {
+			SetHighColor(tint_color(ui_color(B_PANEL_TEXT_COLOR), B_DISABLED_MARK_TINT));
+			DrawString(Label(),
+				BPoint(m_label_text_rect.left, m_label_text_rect.top + m_label_font_ascent));
 		}
-		if(update_rect.Intersects(m_entry_text_rect))
-		{
+		if (update_rect.Intersects(m_entry_text_rect)) {
 			rgb_color original_color = HighColor();
 			SetHighColor(m_dark_1_color);
-			StrokeLine(BPoint(m_entry_text_rect.left,m_entry_text_rect.top),
-				BPoint(m_entry_text_rect.right,m_entry_text_rect.top));
-			StrokeLine(BPoint(m_entry_text_rect.left,m_entry_text_rect.top+1),
-				BPoint(m_entry_text_rect.left,m_entry_text_rect.bottom));
-			SetHighColor(ui_color( B_SHINE_COLOR));
-			StrokeLine(BPoint(m_entry_text_rect.right,m_entry_text_rect.top+1),
-				BPoint(m_entry_text_rect.right,m_entry_text_rect.bottom-1));
-			StrokeLine(BPoint(m_entry_text_rect.left+1,m_entry_text_rect.bottom),
-				BPoint(m_entry_text_rect.right,m_entry_text_rect.bottom));
+			StrokeLine(BPoint(m_entry_text_rect.left, m_entry_text_rect.top),
+				BPoint(m_entry_text_rect.right, m_entry_text_rect.top));
+			StrokeLine(BPoint(m_entry_text_rect.left, m_entry_text_rect.top + 1),
+				BPoint(m_entry_text_rect.left, m_entry_text_rect.bottom));
+			SetHighColor(ui_color(B_SHINE_COLOR));
+			StrokeLine(BPoint(m_entry_text_rect.right, m_entry_text_rect.top + 1),
+				BPoint(m_entry_text_rect.right, m_entry_text_rect.bottom - 1));
+			StrokeLine(BPoint(m_entry_text_rect.left + 1, m_entry_text_rect.bottom),
+				BPoint(m_entry_text_rect.right, m_entry_text_rect.bottom));
 
 			SetHighColor(BmWeakenColor(B_SHADOW_COLOR, BeShadowMod));
-			StrokeLine(BPoint(m_entry_text_rect.left+1,m_entry_text_rect.top+1),
-				BPoint(m_entry_text_rect.right-1,m_entry_text_rect.top+1));
-			StrokeLine(BPoint(m_entry_text_rect.left+1,m_entry_text_rect.top+2),
-				BPoint(m_entry_text_rect.left+1,m_entry_text_rect.bottom-1));
+			StrokeLine(BPoint(m_entry_text_rect.left + 1, m_entry_text_rect.top + 1),
+				BPoint(m_entry_text_rect.right - 1, m_entry_text_rect.top + 1));
+			StrokeLine(BPoint(m_entry_text_rect.left + 1, m_entry_text_rect.top + 2),
+				BPoint(m_entry_text_rect.left + 1, m_entry_text_rect.bottom - 1));
 			SetHighColor(original_color);
 		}
 	}
 }
 
-void MultiLineTextControl::FrameResized(float, float)
+void
+MultiLineTextControl::FrameResized(float, float)
 {
-	BRect new_entry_text_rect = m_text_view->Frame().InsetByCopy(-2,-2);
+	BRect new_entry_text_rect = m_text_view->Frame().InsetByCopy(-2, -2);
 
 	float right_min = m_entry_text_rect.right;
-	if(right_min > new_entry_text_rect.right)
+	if (right_min > new_entry_text_rect.right)
 		right_min = new_entry_text_rect.right;
 	float right_max = m_entry_text_rect.right;
-	if(right_max < new_entry_text_rect.right)
+	if (right_max < new_entry_text_rect.right)
 		right_max = new_entry_text_rect.right;
 	float bottom_min = m_entry_text_rect.bottom;
-	if(bottom_min > new_entry_text_rect.bottom)
+	if (bottom_min > new_entry_text_rect.bottom)
 		bottom_min = new_entry_text_rect.bottom;
 	float bottom_max = m_entry_text_rect.bottom;
-	if(bottom_max < new_entry_text_rect.bottom)
+	if (bottom_max < new_entry_text_rect.bottom)
 		bottom_max = new_entry_text_rect.bottom;
 
-	if(new_entry_text_rect.right != m_entry_text_rect.right)
-		Invalidate(BRect(right_min-1,new_entry_text_rect.top,right_max,bottom_max));
-	if(new_entry_text_rect.bottom != m_entry_text_rect.bottom)
-		Invalidate(BRect(new_entry_text_rect.left,bottom_min-1,right_max,bottom_max));
+	if (new_entry_text_rect.right != m_entry_text_rect.right)
+		Invalidate(BRect(right_min - 1, new_entry_text_rect.top, right_max, bottom_max));
+	if (new_entry_text_rect.bottom != m_entry_text_rect.bottom)
+		Invalidate(BRect(new_entry_text_rect.left, bottom_min - 1, right_max, bottom_max));
 
 	m_entry_text_rect = new_entry_text_rect;
 	ResetTextRect();
 }
 
 
-void MultiLineTextControl::MakeFocus(bool flag)
+void
+MultiLineTextControl::MakeFocus(bool flag)
 {
 	m_text_view->MakeFocus(flag);
 }
 
 
-void MultiLineTextControl::SetLabel(const char *text)
+void
+MultiLineTextControl::SetLabel(const char* text)
 {
 	BControl::SetLabel(text);
 	BRect old_rect = m_label_text_rect;
 	ReevaluateLabelRect();
-	Invalidate(old_rect|m_label_text_rect);
+	Invalidate(old_rect | m_label_text_rect);
 }
 
 
-void MultiLineTextControl::SetText(const char *text)
+void
+MultiLineTextControl::SetText(const char* text)
 {
 	m_text_view->SetText(text);
 }
 
 
-const char* MultiLineTextControl::Text(void) const
+const char*
+MultiLineTextControl::Text(void) const
 {
 	return m_text_view->Text();
 }
 
 
-void MultiLineTextControl::SetTabAllowed(bool allowed)
+void
+MultiLineTextControl::SetTabAllowed(bool allowed)
 {
 	m_text_view->SetTabAllowed(allowed);
 }
 
 
-bool MultiLineTextControl::TabAllowed() const
+bool
+MultiLineTextControl::TabAllowed() const
 {
 	return m_text_view->TabAllowed();
 }
 
 
-BTextView* MultiLineTextControl::TextView(void) const
+BTextView*
+MultiLineTextControl::TextView(void) const
 {
 	return m_text_view;
 }
 
 
-void MultiLineTextControl::SetDivider(float divider)
+void
+MultiLineTextControl::SetDivider(float divider)
 {
-	if(m_inline_label)
-	{
+	if (m_inline_label) {
 		BRect area = Bounds();
 		area.left = divider;
 		m_divider = divider;
 		m_entry_text_rect = area;
-		area.InsetBy(2,2);
-		m_text_view->MoveTo(area.left,area.top);
-		m_text_view->ResizeTo(area.Width(),area.Height());
+		area.InsetBy(2, 2);
+		m_text_view->MoveTo(area.left, area.top);
+		m_text_view->ResizeTo(area.Width(), area.Height());
 		ReevaluateLabelRect();
 		Invalidate();
 	}
 }
 
 
-void MultiLineTextControl::SetModificationMessage(BMessage* message)
+void
+MultiLineTextControl::SetModificationMessage(BMessage* message)
 {
-	if(m_modification_message)
+	if (m_modification_message)
 		delete m_modification_message;
 	m_modification_message = message;
 }
 
 
-BMessage* MultiLineTextControl::ModificationMessage() const
+BMessage*
+MultiLineTextControl::ModificationMessage() const
 {
 	return m_modification_message;
 }
 
 
-void MultiLineTextControl::ResizeToWithChildren(float width, float height)
+void
+MultiLineTextControl::ResizeToWithChildren(float width, float height)
 {
-	ResizeTo(width,height);
+	ResizeTo(width, height);
 	BRect area = Bounds();
-	if(m_inline_label)
+	if (m_inline_label)
 		area.left = m_divider;
 	else
-		area.top = m_label_text_rect.bottom+3;
+		area.top = m_label_text_rect.bottom + 3;
 	m_entry_text_rect = area;
-	area.InsetBy(2,2);
-	m_text_view->MoveTo(area.left,area.top);
-	m_text_view->ResizeTo(area.Width(),area.Height());
-	m_text_view->FrameResized(area.Width(),area.Height());
+	area.InsetBy(2, 2);
+	m_text_view->MoveTo(area.left, area.top);
+	m_text_view->ResizeTo(area.Width(), area.Height());
+	m_text_view->FrameResized(area.Width(), area.Height());
 	Invalidate();
 }
 
 
-void MultiLineTextControl::ResetTextRect()
+void
+MultiLineTextControl::ResetTextRect()
 {
 	BRect textRect = m_text_view->Bounds();
 	textRect.left = m_text_margin;
@@ -334,9 +338,10 @@ void MultiLineTextControl::ResetTextRect()
 }
 
 
-void MultiLineTextControl::Modified()
+void
+MultiLineTextControl::Modified()
 {
-	if(m_modification_message)
+	if (m_modification_message)
 		Invoke(m_modification_message);
 }
 
@@ -344,8 +349,9 @@ void MultiLineTextControl::Modified()
 //******************************************************************************************************
 //**** MultiLineTextControlTextView
 //******************************************************************************************************
-MultiLineTextControlTextView::MultiLineTextControlTextView(BRect frame, uint32 flags,uint32 res_mode)
-: BTextView(frame,NULL,frame.OffsetToCopy(0,0).InsetByCopy(1,1),res_mode,flags)
+MultiLineTextControlTextView::MultiLineTextControlTextView(
+	BRect frame, uint32 flags, uint32 res_mode)
+	: BTextView(frame, NULL, frame.OffsetToCopy(0, 0).InsetByCopy(1, 1), res_mode, flags)
 {
 	m_tab_allowed = true;
 	m_modified = false;
@@ -353,50 +359,52 @@ MultiLineTextControlTextView::MultiLineTextControlTextView(BRect frame, uint32 f
 }
 
 
-void MultiLineTextControlTextView::MakeFocus(bool flag)
+void
+MultiLineTextControlTextView::MakeFocus(bool flag)
 {
-	Parent()->Invalidate(Frame().InsetByCopy(-2,-2));
+	Parent()->Invalidate(Frame().InsetByCopy(-2, -2));
 	BTextView::MakeFocus(flag);
-	if(flag == false)
-	{
-		if(m_modified)
-			((MultiLineTextControl*)Parent())->Invoke();		//Text has changed.  Invoke control.
+	if (flag == false) {
+		if (m_modified)
+			((MultiLineTextControl*)Parent())->Invoke();  // Text has changed.  Invoke control.
 		m_modified = false;
 	}
 }
 
 
-void MultiLineTextControlTextView::KeyDown(const char* bytes, int32 num_bytes)
+void
+MultiLineTextControlTextView::KeyDown(const char* bytes, int32 num_bytes)
 {
-	if(num_bytes == 1 && (bytes[0] == B_TAB && (!m_tab_allowed)))
-	{
-		//Skip the text view, which would take the tab.  The BView will interpret it to change focus.
-		BView::KeyDown(bytes,num_bytes);
+	if (num_bytes == 1 && (bytes[0] == B_TAB && (!m_tab_allowed))) {
+		// Skip the text view, which would take the tab.  The BView will interpret it to change
+		// focus.
+		BView::KeyDown(bytes, num_bytes);
 		return;
 	}
-	BTextView::KeyDown(bytes,num_bytes);
+	BTextView::KeyDown(bytes, num_bytes);
 }
 
 
-void MultiLineTextControlTextView::InsertText(const char *text, int32 length, int32 offset,
-	const text_run_array* runs)
+void
+MultiLineTextControlTextView::InsertText(
+	const char* text, int32 length, int32 offset, const text_run_array* runs)
 {
-	BTextView::InsertText(text,length,offset,runs);
-	//Text has changed.  Invoke control.
+	BTextView::InsertText(text, length, offset, runs);
+	// Text has changed.  Invoke control.
 	BView* parent = Parent();
-	if(parent)
+	if (parent)
 		((MultiLineTextControl*)parent)->Modified();
 	m_modified = true;
 }
 
 
-void MultiLineTextControlTextView::DeleteText(int32 from_offset, int32 to_offset)
+void
+MultiLineTextControlTextView::DeleteText(int32 from_offset, int32 to_offset)
 {
-	BTextView::DeleteText(from_offset,to_offset);
-	//Text has changed.  Invoke control.
+	BTextView::DeleteText(from_offset, to_offset);
+	// Text has changed.  Invoke control.
 	BView* parent = Parent();
-	if(parent)
+	if (parent)
 		((MultiLineTextControl*)parent)->Modified();
 	m_modified = true;
 }
-

@@ -2,9 +2,9 @@
  * Larry Greenfield
  */
 /***********************************************************
-        Copyright 1999 by Carnegie Mellon University
+		Copyright 1999 by Carnegie Mellon University
 
-                      All Rights Reserved
+					  All Rights Reserved
 
 Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted,
@@ -30,30 +30,30 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "sieve_interface.h"
 
 struct sieve_interp {
-    /* standard callbacks for actions */
-    sieve_callback *redirect, *discard, *reject, *fileinto, *keep;
-    sieve_callback *notify;
-    sieve_vacation_t *vacation;
+	/* standard callbacks for actions */
+	sieve_callback *redirect, *discard, *reject, *fileinto, *keep;
+	sieve_callback* notify;
+	sieve_vacation_t* vacation;
 
-    sieve_get_size *getsize;
-    sieve_get_header *getheader;
-    sieve_get_envelope *getenvelope;
+	sieve_get_size* getsize;
+	sieve_get_header* getheader;
+	sieve_get_envelope* getenvelope;
 
-    sieve_parse_error *err;
+	sieve_parse_error* err;
 
-    /* current imapflags state */
-    sieve_imapflags_t curflags;
+	/* current imapflags state */
+	sieve_imapflags_t curflags;
 
-    /* site-specific imapflags for mark/unmark */
-    sieve_imapflags_t *markflags;
+	/* site-specific imapflags for mark/unmark */
+	sieve_imapflags_t* markflags;
 
-    sieve_execute_error *execute_err;
+	sieve_execute_error* execute_err;
 
-    /* context to pass along */
-    void *interp_context;
+	/* context to pass along */
+	void* interp_context;
 };
 
-int interp_verify(sieve_interp_t *interp);
-void free_imapflags(sieve_imapflags_t *imapflags);
+int interp_verify(sieve_interp_t* interp);
+void free_imapflags(sieve_imapflags_t* imapflags);
 
 #endif

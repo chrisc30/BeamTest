@@ -20,56 +20,52 @@ class BBitmap;
 class BMenu;
 class BPicture;
 
-enum { 
-	BM_FONT_SELECTED 		= 'bmFN',
+enum {
+	BM_FONT_SELECTED = 'bmFN',
 	BM_FONTSIZE_SELECTED = 'bmFS'
 };
 
 enum BmPicFrameType {
-	BmPicFrame_None         = 0,
+	BmPicFrame_None = 0,
 	BmPicFrame_ActionButton = 1
 };
 
 /*------------------------------------------------------------------------------*\
-	BmResources 
+	BmResources
 		-	holds all resources needed by Beam
 		- 	additionally holds the paths used within Beam
 \*------------------------------------------------------------------------------*/
 class BmResources {
-
 public:
 	// creator-func, c'tors and d'tor:
 	static BmResources* CreateInstance();
-	BmResources( void);
+	BmResources(void);
 	~BmResources();
 
 	// native methods:
 	void InitializeWithPrefs();
 
-	BmBitmapHandle* IconByName( const BmString name);
+	BmBitmapHandle* IconByName(const BmString name);
 	//
 	font_height BePlainFontHeight;
-	float FontBaselineOffset( const BFont* font=NULL);
-	float FontHeight( const BFont* font=NULL);
-	float FontLineHeight( const BFont* font=NULL);
+	float FontBaselineOffset(const BFont* font = NULL);
+	float FontHeight(const BFont* font = NULL);
+	float FontLineHeight(const BFont* font = NULL);
 	//
-	BPicture* CreatePictureFor( BBitmap* image, float width, float height,
-										 bool transparentBack = false,
-										 color_which backgrounCol = B_PANEL_BACKGROUND_COLOR,
-										 BmPicFrameType frameType = BmPicFrame_None,
-										 float offset = 0.0);
+	BPicture* CreatePictureFor(BBitmap* image, float width, float height,
+		bool transparentBack = false, color_which backgrounCol = B_PANEL_BACKGROUND_COLOR,
+		BmPicFrameType frameType = BmPicFrame_None, float offset = 0.0);
 	//
-	void AddFontSubmenuTo( BMenu* menu, BHandler* target=NULL, 
-								  BFont* selectedFont=NULL);
+	void AddFontSubmenuTo(BMenu* menu, BHandler* target = NULL, BFont* selectedFont = NULL);
 	//
 	BCursor mUrlCursor;
 
 	static BmResources* theInstance;
-	
+
 	static const char* const BM_MSG_FONT_FAMILY;
 	static const char* const BM_MSG_FONT_STYLE;
 	static const char* const BM_MSG_FONT_SIZE;
-	
+
 private:
 	void FetchIcons();
 	void FetchOwnFQDN();

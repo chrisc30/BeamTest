@@ -15,28 +15,27 @@
 
 #include "BmString.h"
 
-class IMPEXPBMGUIBASE BmCaption : public BView
-{
+class IMPEXPBMGUIBASE BmCaption : public BView {
 	typedef BView inherited;
 
 public:
 	// creator-func, c'tors and d'tor:
-	BmCaption( BRect frame, const char* text);
+	BmCaption(BRect frame, const char* text);
 	~BmCaption();
 
-	const char* Text() const				{ return mText.String(); }
-	void SetText( const char* txt);
+	const char* Text() const { return mText.String(); }
+	void SetText(const char* txt);
 
-	void SetHighlight( bool highlight, const char* label="");
+	void SetHighlight(bool highlight, const char* label = "");
 
 	// overrides of BView base:
-	virtual void Draw( BRect bounds);
+	virtual void Draw(BRect bounds);
 
 private:
 	// Hide copy-constructor and assignment:
-	BmCaption( const BmCaption&);
-	BmCaption operator=( const BmCaption&);
-	
+	BmCaption(const BmCaption&);
+	BmCaption operator=(const BmCaption&);
+
 	BmString mText;
 	bool mHighlight;
 	BmString mHighlightLabel;

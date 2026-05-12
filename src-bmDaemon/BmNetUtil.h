@@ -16,7 +16,7 @@
 /*------------------------------------------------------------------------------*\*\
 	utility function that finds out this hosts FQHN:
 \*------------------------------------------------------------------------------*/
-IMPEXPBMDAEMON BmString OwnDomain( BmString fqdn="");
+IMPEXPBMDAEMON BmString OwnDomain(BmString fqdn = "");
 
 /*------------------------------------------------------------------------------*\*\
 	utility function that checks if PPP is up and running:

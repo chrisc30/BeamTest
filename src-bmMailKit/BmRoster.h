@@ -18,27 +18,26 @@
 
 /*------------------------------------------------------------------------------*\
 	BmRoster
-		-	a class that can be used by other classes and add-ons to 
+		-	a class that can be used by other classes and add-ons to
 			retrieve info about bmMailKit's state.
 \*------------------------------------------------------------------------------*/
 class BmRoster : public BmRosterBase {
-
 public:
 	BmRoster();
-	virtual ~BmRoster()						{}
-	
+	virtual ~BmRoster() {}
+
 	// overrides of base class:
-	bool IsQuitting()							{ return bmApp->IsQuitting(); }
+	bool IsQuitting() { return bmApp->IsQuitting(); }
 
-	const char* AppNameWithVersion()		{ return bmApp->BmAppNameWithVersion.String(); }
+	const char* AppNameWithVersion() { return bmApp->BmAppNameWithVersion.String(); }
 
-	const char* AppPath()					{ return bmApp->AppPath().String(); }
-	const char* SettingsPath()				{ return mSettingsPath.String(); }
+	const char* AppPath() { return bmApp->AppPath().String(); }
+	const char* SettingsPath() { return mSettingsPath.String(); }
 
-	BDirectory* MailCacheFolder()			{ return &mMailCacheFolder; }
-	BDirectory* StateInfoFolder()			{ return &mStateInfoFolder; }
+	BDirectory* MailCacheFolder() { return &mMailCacheFolder; }
+	BDirectory* StateInfoFolder() { return &mStateInfoFolder; }
 
-	const char* OwnFQDN()					{ return mOwnFQDN.String(); }
+	const char* OwnFQDN() { return mOwnFQDN.String(); }
 
 private:
 	void FetchOwnFQDN();

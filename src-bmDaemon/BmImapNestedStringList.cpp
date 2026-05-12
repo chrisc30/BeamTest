@@ -19,23 +19,19 @@ static BmImapNestedStringList EmptyStringList;
 	BmImapNestedStringList()
 		-	contructor
 \*------------------------------------------------------------------------------*/
-BmImapNestedStringList::BmImapNestedStringList()
-{
-}
+BmImapNestedStringList::BmImapNestedStringList() {}
 
 /*------------------------------------------------------------------------------*\
 	~BmImapNestedStringList()
 		-	destructor
 \*------------------------------------------------------------------------------*/
-BmImapNestedStringList::~BmImapNestedStringList()
-{
-}
+BmImapNestedStringList::~BmImapNestedStringList() {}
 
 /*------------------------------------------------------------------------------*\
 	operator[]
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-const BmImapNestedStringList& 
+const BmImapNestedStringList&
 BmImapNestedStringList::operator[](uint32 index) const
 {
 	if (index >= mChildren.size())
@@ -50,7 +46,8 @@ BmImapNestedStringList::operator[](uint32 index) const
 			position where the parsing has stopped (which is either at the end
 			of the string or directly behind a closing parenthesis).
 \*------------------------------------------------------------------------------*/
-const char* BmImapNestedStringList::Parse(const char* data)
+const char*
+BmImapNestedStringList::Parse(const char* data)
 {
 	mChildren.clear();
 	if (!data)
@@ -65,14 +62,15 @@ const char* BmImapNestedStringList::Parse(const char* data)
 
 /*------------------------------------------------------------------------------*\
 	_Parse()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-const char* BmImapNestedStringList::_Parse(const char* data)
+const char*
+BmImapNestedStringList::_Parse(const char* data)
 {
 	char c;
-	while((c = *data) != '\0') {
+	while ((c = *data) != '\0') {
 		BmImapNestedStringList subList;
-		switch(c) {
+		switch (c) {
 			case '(':
 				data = subList.Parse(data);
 				mChildren.push_back(subList);
@@ -100,11 +98,12 @@ const char* BmImapNestedStringList::_Parse(const char* data)
 		-	parses a string enclosed by "" and returns the position following
 			the closing quotation mark
 \*------------------------------------------------------------------------------*/
-const char* BmImapNestedStringList::_ParseQuotedString(const char* data)
+const char*
+BmImapNestedStringList::_ParseQuotedString(const char* data)
 {
 	char c;
 	const char* start = data;
-	while((c = *data) != '\0') {
+	while ((c = *data) != '\0') {
 		if (c == '"') {
 			mText.SetTo(start, (int32)(data - start));
 			return data + 1;
@@ -117,14 +116,15 @@ const char* BmImapNestedStringList::_ParseQuotedString(const char* data)
 /*------------------------------------------------------------------------------*\
 	_ParseString()
 		-	parses a (non-quoted) string and returns the position of the char
-			that follows the string (end-of-string, a space or a closing 
+			that follows the string (end-of-string, a space or a closing
 			parenthesis)
 \*------------------------------------------------------------------------------*/
-const char* BmImapNestedStringList::_ParseString(const char* data)
+const char*
+BmImapNestedStringList::_ParseString(const char* data)
 {
 	char c;
 	const char* start = data;
-	while((c = *data) != '\0') {
+	while ((c = *data) != '\0') {
 		if (c == ' ' || c == ')') {
 			mText.SetTo(start, (int32)(data - start));
 			return data;

@@ -15,25 +15,25 @@
 #ifndef _QuotedPrintableEncoderTest_h
 #define _QuotedPrintableEncoderTest_h
 
+#include <TestCase.h>
 #include <cppunit/TestCaller.h>
 #include <cppunit/TestSuite.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <TestCase.h>
 
-class QuotedPrintableEncoderTest : public BTestCase
-{
+class QuotedPrintableEncoderTest : public BTestCase {
 	typedef TestCase inherited;
-	CPPUNIT_TEST_SUITE( QuotedPrintableEncoderTest );
-	CPPUNIT_TEST( SimpleTest);
-	CPPUNIT_TEST( MultiLineTest);
-	CPPUNIT_TEST( LargeDataTest);
+	CPPUNIT_TEST_SUITE(QuotedPrintableEncoderTest);
+	CPPUNIT_TEST(SimpleTest);
+	CPPUNIT_TEST(MultiLineTest);
+	CPPUNIT_TEST(LargeDataTest);
 	CPPUNIT_TEST_SUITE_END();
+
 public:
-//	static CppUnit::Test* Suite();
-	
+	//	static CppUnit::Test* Suite();
+
 	// This function called before *each* test added in Suite()
 	void setUp();
-	
+
 	// This function called after *each* test added in Suite()
 	void tearDown();
 

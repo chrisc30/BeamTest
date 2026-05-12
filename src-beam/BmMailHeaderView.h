@@ -21,16 +21,16 @@
 	types of messages handled by a BmMailHeaderView:
 \*------------------------------------------------------------------------------*/
 enum {
-	BM_HEADERVIEW_SMALL			= 'bmfa',
-	BM_HEADERVIEW_LARGE			= 'bmfb',
-	BM_HEADERVIEW_FULL			= 'bmfc',
-	BM_HEADERVIEW_SWITCH_RESENT= 'bmfd',
-	BM_HEADERVIEW_COPY_HEADER	= 'bmfe'
+	BM_HEADERVIEW_SMALL = 'bmfa',
+	BM_HEADERVIEW_LARGE = 'bmfb',
+	BM_HEADERVIEW_FULL = 'bmfc',
+	BM_HEADERVIEW_SWITCH_RESENT = 'bmfd',
+	BM_HEADERVIEW_COPY_HEADER = 'bmfe'
 };
 
 /*------------------------------------------------------------------------------*\
 	BmMailHeaderView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmMailHeaderView : public BView {
 	typedef BView inherited;
@@ -51,38 +51,38 @@ public:
 	};
 
 	// c'tors and d'tor:
-	BmMailHeaderView( BmMailHeader* header);
+	BmMailHeaderView(BmMailHeader* header);
 	~BmMailHeaderView();
 
 	// native methods:
-	void ShowHeader( BmMailHeader* header, bool invalidate=true);
-	status_t Archive( BMessage* archive, bool deep=true) const;
-	status_t Unarchive( BMessage* archive, bool deep=true);
+	void ShowHeader(BmMailHeader* header, bool invalidate = true);
+	status_t Archive(BMessage* archive, bool deep = true) const;
+	status_t Unarchive(BMessage* archive, bool deep = true);
 	float AddFieldViews();
 	void RemoveFieldViews();
-	float FixedWidth() const				{ return 5000; }
-	int16 DisplayMode() const				{ return mDisplayMode; }
-	bool ShowRedirectFields() const		{ return mShowRedirectFields; }
+	float FixedWidth() const { return 5000; }
+	int16 DisplayMode() const { return mDisplayMode; }
+	bool ShowRedirectFields() const { return mShowRedirectFields; }
 
 	// overrides of BView base:
-	void Draw( BRect bounds);
-	void MessageReceived( BMessage* msg);
+	void Draw(BRect bounds);
+	void MessageReceived(BMessage* msg);
 	status_t UISettingsChanged(const BMessage* changes, uint32 flags);
 
 private:
 	BmRef<BmMailHeader> mMailHeader;
 	int16 mDisplayMode;
-							// 0=small, 2=large, anyother=medium
-	BFont mFont;		
-							// font to be used for header-fields
+	// 0=small, 2=large, anyother=medium
+	BFont mFont;
+	// font to be used for header-fields
 	bool mShowRedirectFields;
-							// true=>show redirect-fields false=>show original fields
+	// true=>show redirect-fields false=>show original fields
 	float mMaxTitleWidth;
 	vector<BmMailHeaderFieldView*> mFieldViews;
 
 	// Hide copy-constructor and assignment:
-	BmMailHeaderView( const BmMailHeaderView&);
-	BmMailHeaderView operator=( const BmMailHeaderView&);
+	BmMailHeaderView(const BmMailHeaderView&);
+	BmMailHeaderView operator=(const BmMailHeaderView&);
 };
 
 #endif

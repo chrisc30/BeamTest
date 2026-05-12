@@ -2,9 +2,9 @@
  * Larry Greenfield
  */
 /***********************************************************
-        Copyright 1999 by Carnegie Mellon University
+		Copyright 1999 by Carnegie Mellon University
 
-                      All Rights Reserved
+					  All Rights Reserved
 
 Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose and without fee is hereby granted,
@@ -39,105 +39,105 @@ typedef struct Tag tag_t;
 typedef struct Taglist taglist_t;
 
 struct Stringlist {
-    char *s;
-    stringlist_t *next;
+	char* s;
+	stringlist_t* next;
 };
 
 struct Patternlist {
-    void *p;
-    patternlist_t *next;
+	void* p;
+	patternlist_t* next;
 };
 
 struct Tag {
-    int type;
-    char *arg;
+	int type;
+	char* arg;
 };
 
 struct Taglist {
-    tag_t *t;
-    taglist_t *next;
+	tag_t* t;
+	taglist_t* next;
 };
 
 struct Test {
-    int type;
-    union {
-	testlist_t *tl; /* anyof, allof */
-	stringlist_t *sl; /* exists */
-	struct { /* it's a header test */
-	    int comptag;
-	    int relation;
-	    comparator_t *comp;
-	    stringlist_t *sl;
-	    patternlist_t *pl;
-	} h;
-	struct { /* it's an address or envelope test */
-	    int comptag;
-	    int relation;
-	    comparator_t *comp;
-	    stringlist_t *sl;
-	    patternlist_t *pl;
-            int addrpart;
-	} ae; 
-	test_t *t; /* not */
-	struct { /* size */
-	    int t; /* tag */
-	    int n; /* param */
-	} sz;
-    } u;
+	int type;
+	union {
+		testlist_t* tl;	  /* anyof, allof */
+		stringlist_t* sl; /* exists */
+		struct {		  /* it's a header test */
+			int comptag;
+			int relation;
+			comparator_t* comp;
+			stringlist_t* sl;
+			patternlist_t* pl;
+		} h;
+		struct { /* it's an address or envelope test */
+			int comptag;
+			int relation;
+			comparator_t* comp;
+			stringlist_t* sl;
+			patternlist_t* pl;
+			int addrpart;
+		} ae;
+		test_t* t; /* not */
+		struct {   /* size */
+			int t; /* tag */
+			int n; /* param */
+		} sz;
+	} u;
 };
 
 struct Testlist {
-    test_t *t;
-    testlist_t *next;
+	test_t* t;
+	testlist_t* next;
 };
 
 struct Commandlist {
-    int type;
-    union {
-        char *str;
-	stringlist_t *sl; /* the parameters */
-	struct { /* it's an if statement */
-	    test_t *t;
-	    commandlist_t *do_then;
-	    commandlist_t *do_else;
-	} i;
-	struct { /* it's a vacation action */
-	    char *subject;
-	    int days;
-	    stringlist_t *addresses;
-	    char *message;
-	    int mime;
-	} v;
-	struct { /* it's a notify action */
-	    char *method;
-	    char *id;
-	    stringlist_t *options;
-	    const char *priority;
-	    char *message;
-	} n;
-	struct { /* it's a denotify action */
-	    int comptag;
-	    int relation;
-	    comparator_t *comp;
-	    void *pattern;
-	    const char *priority;
-	} d;
-    } u;
-    struct Commandlist *next;
+	int type;
+	union {
+		char* str;
+		stringlist_t* sl; /* the parameters */
+		struct {		  /* it's an if statement */
+			test_t* t;
+			commandlist_t* do_then;
+			commandlist_t* do_else;
+		} i;
+		struct { /* it's a vacation action */
+			char* subject;
+			int days;
+			stringlist_t* addresses;
+			char* message;
+			int mime;
+		} v;
+		struct { /* it's a notify action */
+			char* method;
+			char* id;
+			stringlist_t* options;
+			const char* priority;
+			char* message;
+		} n;
+		struct { /* it's a denotify action */
+			int comptag;
+			int relation;
+			comparator_t* comp;
+			void* pattern;
+			const char* priority;
+		} d;
+	} u;
+	struct Commandlist* next;
 };
 
-stringlist_t *new_sl(char *s, stringlist_t *n);
-patternlist_t *new_pl(void *pat, patternlist_t *n);
-tag_t *new_tag(int type, char *s);
-taglist_t *new_taglist(tag_t *t, taglist_t *n);
-test_t *new_test(int type);
-testlist_t *new_testlist(test_t *t, testlist_t *n);
-commandlist_t *new_command(int type);
-commandlist_t *new_if(test_t *t, commandlist_t *y, commandlist_t *n);
+stringlist_t* new_sl(char* s, stringlist_t* n);
+patternlist_t* new_pl(void* pat, patternlist_t* n);
+tag_t* new_tag(int type, char* s);
+taglist_t* new_taglist(tag_t* t, taglist_t* n);
+test_t* new_test(int type);
+testlist_t* new_testlist(test_t* t, testlist_t* n);
+commandlist_t* new_command(int type);
+commandlist_t* new_if(test_t* t, commandlist_t* y, commandlist_t* n);
 
-void free_sl(stringlist_t *sl);
-void free_pl(patternlist_t *pl, int comptag);
-void free_test(test_t *t);
-void free_tree(commandlist_t *cl);
+void free_sl(stringlist_t* sl);
+void free_pl(patternlist_t* pl, int comptag);
+void free_test(test_t* t);
+void free_tree(commandlist_t* cl);
 
 #endif

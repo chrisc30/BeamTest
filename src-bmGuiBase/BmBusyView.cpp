@@ -28,52 +28,57 @@ static const float kBvWidth = kBvHeight - 1;
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmBusyView::BmBusyView( BPoint leftTop)
-	:	inherited( BRect(leftTop.x, leftTop.y, 
-							  leftTop.x+kBvWidth-1, leftTop.y+kBvHeight-1), 
-					  "BmBusyView", B_FOLLOW_NONE, B_WILL_DRAW)
-	,	mMsgRunner( NULL)
-	,	mBusyCount( 0)
-	,	mCurrState( 0)
+BmBusyView::BmBusyView(BPoint leftTop)
+	: inherited(BRect(leftTop.x, leftTop.y, leftTop.x + kBvWidth - 1, leftTop.y + kBvHeight - 1),
+		  "BmBusyView", B_FOLLOW_NONE, B_WILL_DRAW),
+	  mMsgRunner(NULL),
+	  mBusyCount(0),
+	  mCurrState(0)
 {
-	SetViewUIColor( B_PANEL_BACKGROUND_COLOR);
-	SetLowUIColor( B_PANEL_BACKGROUND_COLOR);
+	SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
+	SetLowUIColor(B_PANEL_BACKGROUND_COLOR);
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmBusyView::~BmBusyView() {
+BmBusyView::~BmBusyView()
+{
 	delete mMsgRunner;
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmBusyView::SetBusy() {
+void
+BmBusyView::SetBusy()
+{
 	if (!mBusyCount)
 		UnsetErrorText();
 	mBusyCount++;
 	if (!mMsgRunner) {
-		BMessenger ourselvesAsTarget( this);
+		BMessenger ourselvesAsTarget(this);
 		if (!ourselvesAsTarget.IsValid())
-			BM_THROW_RUNTIME( "BusyView(): Could not init Messenger.");
-		mMsgRunner = new BMessageRunner( ourselvesAsTarget, &pulseMsg, 100*1000, -1);
+			BM_THROW_RUNTIME("BusyView(): Could not init Messenger.");
+		mMsgRunner = new BMessageRunner(ourselvesAsTarget, &pulseMsg, 100 * 1000, -1);
 		status_t err;
 		if ((err = mMsgRunner->InitCheck()) != B_OK)
-		 	BM_THROW_RUNTIME( BmString("BusyView(): Could not init MessageRunner. Error:") << strerror(err));
+			BM_THROW_RUNTIME(
+				BmString("BusyView(): Could not init MessageRunner. Error:") << strerror(err));
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmBusyView::UnsetBusy() {
+void
+BmBusyView::UnsetBusy()
+{
 	if (mBusyCount > 0) {
 		mBusyCount--;
 		if (!mBusyCount) {
@@ -87,9 +92,10 @@ void BmBusyView::UnsetBusy() {
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmBusyView::UnsetErrorText() 
+void
+BmBusyView::UnsetErrorText()
 {
 	mErrorText.Truncate(0);
 	UpdateErrorStatus();
@@ -97,9 +103,10 @@ void BmBusyView::UnsetErrorText()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmBusyView::SetErrorText(const BmString& txt) 
+void
+BmBusyView::SetErrorText(const BmString& txt)
 {
 	mErrorText = txt;
 	UpdateErrorStatus();
@@ -107,79 +114,83 @@ void BmBusyView::SetErrorText(const BmString& txt)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmBusyView::UpdateErrorStatus() 
+void
+BmBusyView::UpdateErrorStatus()
 {
 	if (mErrorText.Length() > 0)
-		TheBubbleHelper->SetHelp( this, mErrorText.String());
+		TheBubbleHelper->SetHelp(this, mErrorText.String());
 	else
-		TheBubbleHelper->SetHelp( this, NULL);
+		TheBubbleHelper->SetHelp(this, NULL);
 	Invalidate();
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmBusyView::MessageReceived( BMessage* msg) {
-	switch( msg->what) {
-		case BM_PULSE: {
+void
+BmBusyView::MessageReceived(BMessage* msg)
+{
+	switch (msg->what) {
+		case BM_PULSE:
+		{
 			Pulse();
 			break;
 		}
 		default:
-			inherited::MessageReceived( msg);
+			inherited::MessageReceived(msg);
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmBusyView::Pulse() {
+void
+BmBusyView::Pulse()
+{
 	if (mBusyCount > 0) {
-		mCurrState+=10;
+		mCurrState += 10;
 		Invalidate();
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmBusyView::Draw( BRect) {
+void
+BmBusyView::Draw(BRect)
+{
 	BRect r = Bounds();
-	SetHighColor( ui_color( B_SHINE_COLOR));
-	StrokeLine( BPoint(0.0,1.0), BPoint(r.right-1,1.0));
-	StrokeLine( BPoint(0.0,1.0), r.LeftBottom());
-	SetHighColor( BmWeakenColor( B_SHADOW_COLOR, BeShadowMod));
-	StrokeLine( r.LeftTop(), r.RightTop());
-	StrokeLine( r.RightTop(), r.RightBottom());
-	StrokeLine( r.LeftBottom(), r.RightBottom());
+	SetHighColor(ui_color(B_SHINE_COLOR));
+	StrokeLine(BPoint(0.0, 1.0), BPoint(r.right - 1, 1.0));
+	StrokeLine(BPoint(0.0, 1.0), r.LeftBottom());
+	SetHighColor(BmWeakenColor(B_SHADOW_COLOR, BeShadowMod));
+	StrokeLine(r.LeftTop(), r.RightTop());
+	StrokeLine(r.RightTop(), r.RightBottom());
+	StrokeLine(r.LeftBottom(), r.RightBottom());
 	if (mBusyCount <= 0) {
 		if (mErrorText.Length() > 0 && nErrorIcon) {
-			SetDrawingMode( B_OP_ALPHA);
-			SetBlendingMode( B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
-			DrawBitmap( nErrorIcon->bitmap, BPoint(0,1));
+			SetDrawingMode(B_OP_ALPHA);
+			SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+			DrawBitmap(nErrorIcon->bitmap, BPoint(0, 1));
 		}
 		return;
 	}
-	r.InsetBy( 1.0, 1.0);
+	r.InsetBy(1.0, 1.0);
 	r.top++;
-	SetHighColor( ui_color( B_CONTROL_BACKGROUND_COLOR));
-	StrokeEllipse( r);
-	r.InsetBy( 1.0, 1.0);
+	SetHighColor(ui_color(B_CONTROL_BACKGROUND_COLOR));
+	StrokeEllipse(r);
+	r.InsetBy(1.0, 1.0);
 	float start = 0;
 	float end = float(mCurrState % 360);
-	SetHighColor( (mCurrState / 360) % 2 
-		? ui_color( B_CONTROL_HIGHLIGHT_COLOR)
-		: ui_color( B_CONTROL_BACKGROUND_COLOR)
-	);
-	FillArc( r, end, 359.0);
-	SetHighColor( (mCurrState / 360) % 2 
-		? ui_color( B_CONTROL_BACKGROUND_COLOR)
-		: ui_color( B_CONTROL_HIGHLIGHT_COLOR)
-	);
-	FillArc( r, start, end);
+	SetHighColor((mCurrState / 360) % 2 ? ui_color(B_CONTROL_HIGHLIGHT_COLOR)
+										: ui_color(B_CONTROL_BACKGROUND_COLOR));
+	FillArc(r, end, 359.0);
+	SetHighColor((mCurrState / 360) % 2 ? ui_color(B_CONTROL_BACKGROUND_COLOR)
+										: ui_color(B_CONTROL_HIGHLIGHT_COLOR));
+	FillArc(r, start, end);
 }

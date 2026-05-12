@@ -14,14 +14,13 @@
 
 /*------------------------------------------------------------------------------*\
 	BmRefItemFilter
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-class BmMailRefItemFilter : public BmViewItemFilter
-{
+class BmMailRefItemFilter : public BmViewItemFilter {
 public:
 	BmMailRefItemFilter(const BmString& filterKind, const BmString& filterText);
 	virtual ~BmMailRefItemFilter();
-	
+
 	// overrides of base
 	virtual bool Matches(const BmListViewItem* viewItem) const;
 
@@ -35,14 +34,14 @@ private:
 
 /*------------------------------------------------------------------------------*\
 	BmMailRefViewFilter
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmMailRefViewFilterJob : public BmJobModel {
 	typedef BmJobModel inherited;
 
-	typedef vector< BmRef< BmMail> > BmMailVect;
-	typedef vector< const char**> BmHeaderVect;
-	
+	typedef vector<BmRef<BmMail> > BmMailVect;
+	typedef vector<const char**> BmHeaderVect;
+
 public:
 	BmMailRefViewFilterJob(BmViewItemFilter* filter, BmMailRefView* mailRefView);
 	virtual ~BmMailRefViewFilterJob();
@@ -55,8 +54,8 @@ private:
 	BmMailRefView* mMailRefView;
 
 	// Hide copy-constructor and assignment:
-	BmMailRefViewFilterJob( const BmMailRefViewFilterJob&);
-	BmMailRefViewFilterJob operator=( const BmMailRefViewFilterJob&);
+	BmMailRefViewFilterJob(const BmMailRefViewFilterJob&);
+	BmMailRefViewFilterJob operator=(const BmMailRefViewFilterJob&);
 };
 
 #endif

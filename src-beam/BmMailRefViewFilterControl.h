@@ -11,8 +11,8 @@
 
 #include <MessageFilter.h>
 
-#include <layout.h>
 #include <HGroup.h>
+#include <layout.h>
 
 #include "BmController.h"
 #include "BmMailRefViewFilterJob.h"
@@ -25,11 +25,10 @@ class BmTextControl;
 
 enum {
 	BM_MAILREF_VIEW_FILTER_CHANGED = 'bmfD'
-						// sent whenever the filter has changed
+	// sent whenever the filter has changed
 };
 
-class BmMailRefViewFilterControl : public HGroup, public BmJobController
-{
+class BmMailRefViewFilterControl : public HGroup, public BmJobController {
 	typedef HGroup inheritedView;
 	typedef BmJobController inheritedController;
 
@@ -37,23 +36,23 @@ public:
 	// creator-func, c'tors and d'tor:
 	BmMailRefViewFilterControl();
 	~BmMailRefViewFilterControl();
-	
+
 	// native methods:
-	void TeamUpWith(BmMailRefView* mrv)	{ mPartnerMailRefView = mrv; }
+	void TeamUpWith(BmMailRefView* mrv) { mPartnerMailRefView = mrv; }
 	void ClearFilter();
 
 	// overrides of controller base:
-	BHandler* GetControllerHandler() 	{ return this; }
+	BHandler* GetControllerHandler() { return this; }
 
 	// overrides of view base:
 	void AttachedToWindow();
 	void MessageReceived(BMessage* msg);
-	void KeyDown(const char *bytes, int32 numBytes);
+	void KeyDown(const char* bytes, int32 numBytes);
 	void MakeFocus(bool focus);
 
-	static filter_result MessageFilterHook(BMessage* msg, BHandler** handler,
-														BMessageFilter* messageFilter);
-	
+	static filter_result MessageFilterHook(
+		BMessage* msg, BHandler** handler, BMessageFilter* messageFilter);
+
 protected:
 	// overrides of controller base:
 	void JobIsDone(bool completed);
@@ -61,16 +60,16 @@ protected:
 private:
 	BmMenuControl* mMenuControl;
 	BmTextControl* mTextControl;
-	
+
 	BMessageRunner* mMsgRunner;
 	BmMailRefView* mPartnerMailRefView;
-	
+
 	BmString mLastKind;
 	BmString mLastContent;
-	
+
 	// Hide copy-constructor and assignment:
-	BmMailRefViewFilterControl( const BmMailRefViewFilterControl&);
-	BmMailRefViewFilterControl operator=( const BmMailRefViewFilterControl&);
+	BmMailRefViewFilterControl(const BmMailRefViewFilterControl&);
+	BmMailRefViewFilterControl operator=(const BmMailRefViewFilterControl&);
 };
 
 

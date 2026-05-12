@@ -29,7 +29,7 @@ BinaryEncoderTest::setUp()
 {
 	inherited::setUp();
 }
-	
+
 // tearDown
 void
 BinaryEncoderTest::tearDown()
@@ -37,51 +37,50 @@ BinaryEncoderTest::tearDown()
 	inherited::tearDown();
 }
 
-static void EncodeAndCheck( BmString input, BmString result);
+static void EncodeAndCheck(BmString input, BmString result);
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-static void EncodeAndCheck( BmString input, BmString result) {
+static void
+EncodeAndCheck(BmString input, BmString result)
+{
 	BmString encodedStr;
 	int32 blockSize = 128;
-	BmStringIBuf srcBuf( input);
-	BmStringOBuf destBuf( blockSize);
-	BmBinaryEncoder encoder( &srcBuf, blockSize);
-	destBuf.Write( &encoder, blockSize);
-	encodedStr.Adopt( destBuf.TheString());
+	BmStringIBuf srcBuf(input);
+	BmStringOBuf destBuf(blockSize);
+	BmBinaryEncoder encoder(&srcBuf, blockSize);
+	destBuf.Write(&encoder, blockSize);
+	encodedStr.Adopt(destBuf.TheString());
 	try {
-		CPPUNIT_ASSERT( encodedStr.Compare( result)==0);
-	} catch( ...) {
-		DumpResult( encodedStr);
+		CPPUNIT_ASSERT(encodedStr.Compare(result) == 0);
+	} catch (...) {
+		DumpResult(encodedStr);
 		throw;
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 void
 BinaryEncoderTest::SimpleTest()
 {
 	// empty run:
-	NextSubTest(); 
-	EncodeAndCheck( "",
-						 "");
+	NextSubTest();
+	EncodeAndCheck("", "");
 	// binary decoding is just a copy, so there's really nothing to do...
-	NextSubTest(); 
-	EncodeAndCheck( "A simple text",
-						 "A simple text");
+	NextSubTest();
+	EncodeAndCheck("A simple text", "A simple text");
 	// check handling of embedded 0-bytes:
-	NextSubTest(); 
+	NextSubTest();
 	BmString input("abcdefghijklmnopqrstuvwxyz");
 	int32 len = input.Length();
-	char* p = input.LockBuffer( -1);
+	char* p = input.LockBuffer(-1);
 	p[10] = '\0';
 	p[20] = '\0';
-	input.UnlockBuffer( len);
-	BmString output( input);
-	EncodeAndCheck( input,
-						 output);
+	input.UnlockBuffer(len);
+	BmString output(input);
+	EncodeAndCheck(input, output);
 }

@@ -24,13 +24,15 @@ class BMenuItem;
 class BMessage;
 
 
-template <class T> 
-class BmViewManager
-{
+template <class T>
+class BmViewManager {
 	typedef set<T*> BmViewSet;
+
 public:
 	BmViewManager()
-	:	mLock( "ViewManager") {}
+		: mLock("ViewManager")
+	{
+	}
 	virtual ~BmViewManager() {}
 	void Register(T* v)
 	{
@@ -51,19 +53,20 @@ public:
 			theInstance = new BmViewManager<T>;
 		return theInstance;
 	}
+
 private:
 	static BmViewManager<T>* theInstance;
 	BmViewSet mViewSet;
 	BLocker mLock;
 };
 
-class BmMenuItem : public BMenuItem
-{
+class BmMenuItem : public BMenuItem {
 public:
 	BmMenuItem(const char* label, BMessage* msg, const char* idForShortcut);
 	BmMenuItem(BMenu* subMenu, BMessage* msg, const char* idForShortcut);
 	virtual ~BmMenuItem();
 	void UpdateShortcut();
+
 private:
 	BmString mShortcutID;
 };
@@ -74,17 +77,13 @@ typedef BmViewManager<BmMenuItem> BmMenuItemManager;
 /*------------------------------------------------------------------------------*\
 	utility functions that make menu-creation easier:
 \*------------------------------------------------------------------------------*/
-char ParseShortcut( BmString shortcut, int32* _modifiers);
-void AddItemToMenu( BMenu* menu, BMenuItem* item, BHandler* target=NULL);
-BMenuItem* CreateMenuItem( const char* label, int32 msgWhat, 
-									const char* idForShortcut=NULL);
-BMenuItem* CreateMenuItem( const char* label, BMessage* msg, 
-									const char* idForShortcut=NULL);
-BMenuItem* CreateSubMenuItem( const char* label, int32 msgWhat, 
-										const char* idForShortcut=NULL,
-										BMenu* subMenu=NULL);
-BMenuItem* CreateSubMenuItem( const char* label, BMessage* msg, 
-										const char* idForShortcut,
-										BMenu* subMenu=NULL);
+char ParseShortcut(BmString shortcut, int32* _modifiers);
+void AddItemToMenu(BMenu* menu, BMenuItem* item, BHandler* target = NULL);
+BMenuItem* CreateMenuItem(const char* label, int32 msgWhat, const char* idForShortcut = NULL);
+BMenuItem* CreateMenuItem(const char* label, BMessage* msg, const char* idForShortcut = NULL);
+BMenuItem* CreateSubMenuItem(
+	const char* label, int32 msgWhat, const char* idForShortcut = NULL, BMenu* subMenu = NULL);
+BMenuItem* CreateSubMenuItem(
+	const char* label, BMessage* msg, const char* idForShortcut, BMenu* subMenu = NULL);
 
 #endif

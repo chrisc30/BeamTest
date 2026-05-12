@@ -18,22 +18,22 @@ using std::vector;
 		-	implements the parenthesized list structure as defined by the IMAP
 			protocol
 \*------------------------------------------------------------------------------*/
-class IMPEXPBMDAEMON BmImapNestedStringList
-{
+class IMPEXPBMDAEMON BmImapNestedStringList {
 	typedef vector<BmImapNestedStringList> BmItemVect;
+
 public:
 	BmImapNestedStringList();
 	~BmImapNestedStringList();
 
 	const char* Parse(const char* data);
 
-	const BmString& Text() const			{ return mText; }
+	const BmString& Text() const { return mText; }
 
-	inline bool IsLeaf() const				{ return mChildren.empty(); }
-	inline size_t Size() const				{ return mChildren.size(); }
+	inline bool IsLeaf() const { return mChildren.empty(); }
+	inline size_t Size() const { return mChildren.size(); }
 
-	const BmImapNestedStringList& operator[] (uint32 index) const;
-	
+	const BmImapNestedStringList& operator[](uint32 index) const;
+
 private:
 	const char* _Parse(const char* data);
 	const char* _ParseQuotedString(const char* data);

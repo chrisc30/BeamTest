@@ -18,28 +18,28 @@ class BmTextControl;
 class MButton;
 /*------------------------------------------------------------------------------*\
 	BmPrefsMailConstrView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmPrefsMailConstrView : public BmPrefsView {
 	typedef BmPrefsView inherited;
 
 	enum {
-		BM_CHARSET_SELECTED		 		= 'bmCS',
-		BM_FORWARD_TYPE_SELECTED		= 'bmFS',
-		BM_QUOTE_FORMATTING_SELECTED	= 'bmQS',
-		BM_HARD_WRAP_CHANGED				= 'bmHC',
-		BM_USED_CHARSET_SELECTED		= 'bmUS',
-		BM_LOOK_IN_PEOPLE_CHANGED		= 'bmLP',
-		BM_ADD_PEOPLE_NAME_CHANGED		= 'bmPN',
-		BM_SELECT_PEOPLE_FOLDER			= 'bmSP',
-		BM_UNDO_MODE_SELECTED		 	= 'bmUM'
+		BM_CHARSET_SELECTED = 'bmCS',
+		BM_FORWARD_TYPE_SELECTED = 'bmFS',
+		BM_QUOTE_FORMATTING_SELECTED = 'bmQS',
+		BM_HARD_WRAP_CHANGED = 'bmHC',
+		BM_USED_CHARSET_SELECTED = 'bmUS',
+		BM_LOOK_IN_PEOPLE_CHANGED = 'bmLP',
+		BM_ADD_PEOPLE_NAME_CHANGED = 'bmPN',
+		BM_SELECT_PEOPLE_FOLDER = 'bmSP',
+		BM_UNDO_MODE_SELECTED = 'bmUM'
 	};
-	
+
 public:
 	// c'tors and d'tor:
 	BmPrefsMailConstrView();
 	virtual ~BmPrefsMailConstrView();
-	
+
 	// native methods:
 	void SetupUsedCharsetsMenu();
 	void SetupUsedCharsetsPrefs();
@@ -51,10 +51,9 @@ public:
 	void UndoChanges();
 
 	// overrides of BView base:
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 
 private:
-
 	BmString PeopleFolderButtonLabel();
 
 	BmCheckControl* mHardWrapControl;
@@ -79,8 +78,8 @@ private:
 	BFilePanel* mPeoplePanel;
 
 	// Hide copy-constructor and assignment:
-	BmPrefsMailConstrView( const BmPrefsMailConstrView&);
-	BmPrefsMailConstrView operator=( const BmPrefsMailConstrView&);
+	BmPrefsMailConstrView(const BmPrefsMailConstrView&);
+	BmPrefsMailConstrView operator=(const BmPrefsMailConstrView&);
 };
 
 #endif

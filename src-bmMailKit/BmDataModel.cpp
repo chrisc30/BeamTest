@@ -8,8 +8,8 @@
 
 #include <Application.h>
 #include <DataIO.h>
-#include <Messenger.h>
 #include <File.h>
+#include <Messenger.h>
 
 #include "BmBasics.h"
 #include "BmController.h"
@@ -23,20 +23,18 @@
 // #pragma mark - BmDataModel
 
 //	message component definitions for status-msgs:
-const char* const BmDataModel::MSG_MODEL = 			"bm:model";
-const char* const BmDataModel::MSG_NEEDS_ACK = 		"bm:ack";
+const char* const BmDataModel::MSG_MODEL = "bm:model";
+const char* const BmDataModel::MSG_NEEDS_ACK = "bm:ack";
 
 /*------------------------------------------------------------------------------*\
 	BmDataModel( name)
 		-	standard contructor
 \*------------------------------------------------------------------------------*/
-BmDataModel::BmDataModel( const BmString& name) 
-	:	mModelName( name)
-	,	mModelLocker( (BmString("beam_dm_") << name)
-								.Truncate(B_OS_NAME_LENGTH).String(), 
-						  false)
-	,	mFrozenCount( 0)
-	,	mNeedControllersToContinue( true)
+BmDataModel::BmDataModel(const BmString& name)
+	: mModelName(name),
+	  mModelLocker((BmString("beam_dm_") << name).Truncate(B_OS_NAME_LENGTH).String(), false),
+	  mFrozenCount(0),
+	  mNeedControllersToContinue(true)
 {
 }
 
@@ -46,39 +44,34 @@ BmDataModel::BmDataModel( const BmString& name)
 		-	waits for all controllers to detach, so that they don't access a stale
 			pointer
 \*------------------------------------------------------------------------------*/
-BmDataModel::~BmDataModel() {
-	BM_LOG2( BM_LogModelController, 
-				BmString("DataModel <") << ModelName() << "> is being deleted");
-	BmAutolockCheckGlobal lock( mModelLocker);
+BmDataModel::~BmDataModel()
+{
+	BM_LOG2(BM_LogModelController, BmString("DataModel <") << ModelName() << "> is being deleted");
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() << "-destructor: Unable to get lock on controller-set"
-		);
-	if ( HasControllers()) {
+		BM_THROW_RUNTIME(ModelNameNC() << "-destructor: Unable to get lock on controller-set");
+	if (HasControllers()) {
 		WaitForAllToDetach();
 	}
-	BM_LOG2( BM_LogModelController, 
-				BmString("DataModel <") << ModelName() << "> is dead now");
+	BM_LOG2(BM_LogModelController, BmString("DataModel <") << ModelName() << "> is dead now");
 }
 
 /*------------------------------------------------------------------------------*\
 	AddController( controller)
 		-	adds a new controller to the list of interested parties
-		-	trying to add a controller that is already interested does no harm, 
+		-	trying to add a controller that is already interested does no harm,
 			the controller just won't be added again.
 \*------------------------------------------------------------------------------*/
-void BmDataModel::AddController( BmController* controller) {
-	BmAutolockCheckGlobal lock( mModelLocker);
+void
+BmDataModel::AddController(BmController* controller)
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() 
-				<< ":AddController(): Unable to get lock on controller-set"
-		);
-	BM_LOG2( BM_LogModelController, 
-				BmString("Model <") << ModelName() 
-					<< "> is adding controller " << controller->ControllerName());
+		BM_THROW_RUNTIME(ModelNameNC() << ":AddController(): Unable to get lock on controller-set");
+	BM_LOG2(BM_LogModelController, BmString("Model <") << ModelName() << "> is adding controller "
+													   << controller->ControllerName());
 	// add controller to set of connected controllers:
-	mControllerSet.insert( controller);
+	mControllerSet.insert(controller);
 }
 
 /*------------------------------------------------------------------------------*\
@@ -87,18 +80,17 @@ void BmDataModel::AddController( BmController* controller) {
 		-	trying to remove a controller that has not been interested before does
 			no harm.
 \*------------------------------------------------------------------------------*/
-void BmDataModel::RemoveController( BmController* controller) {
-	BmAutolockCheckGlobal lock( mModelLocker);
+void
+BmDataModel::RemoveController(BmController* controller)
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() 
-				<< ":RemoveController(): Unable to get lock on controller-set"
-		);
-	BM_LOG2( BM_LogModelController, 
-				BmString("Model <") << ModelName() 
-					<< "> is removing controller " << controller->ControllerName());
-	mControllerSet.erase( controller);
-	mOutstandingSet.erase( controller);
+		BM_THROW_RUNTIME(
+			ModelNameNC() << ":RemoveController(): Unable to get lock on controller-set");
+	BM_LOG2(BM_LogModelController, BmString("Model <") << ModelName() << "> is removing controller "
+													   << controller->ControllerName());
+	mControllerSet.erase(controller);
+	mOutstandingSet.erase(controller);
 }
 
 /*------------------------------------------------------------------------------*\
@@ -106,77 +98,66 @@ void BmDataModel::RemoveController( BmController* controller) {
 		-	notes the acknowledgement of a controller (that it has reveived the
 			last message that required an ack)
 \*------------------------------------------------------------------------------*/
-void BmDataModel::ControllerAck( BmController* controller) {
-	BmAutolockCheckGlobal lock( mModelLocker);
+void
+BmDataModel::ControllerAck(BmController* controller)
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() 
-				<< ":ControllerAck(): Unable to get lock on controller-set"
-		);
-	BM_LOG2( BM_LogModelController, 
-				BmString("Model <") << ModelName() 
-					<< "> has received ack from controller " 
-					<< controller->ControllerName());
+		BM_THROW_RUNTIME(ModelNameNC() << ":ControllerAck(): Unable to get lock on controller-set");
+	BM_LOG2(BM_LogModelController, BmString("Model <")
+									   << ModelName() << "> has received ack from controller "
+									   << controller->ControllerName());
 	// add controller to set of connected controllers:
-	mOutstandingSet.erase( controller);
+	mOutstandingSet.erase(controller);
 }
 
 /*------------------------------------------------------------------------------*\
 	TellControllers( msg)
-		-	tells controllers about our new state (msg holding the 
+		-	tells controllers about our new state (msg holding the
 			state-description)
 		-	if no interested controller exists, this does nothing
 		-	if this dataModel is frozen, nothing happens
 \*------------------------------------------------------------------------------*/
-void BmDataModel::TellControllers( BMessage* msg, bool waitForAck) {
-	BmAutolockCheckGlobal lock( mModelLocker);
+void
+BmDataModel::TellControllers(BMessage* msg, bool waitForAck)
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() 
-				<< ":TellControllers(): Unable to get lock on controller-set"
-		);
+		BM_THROW_RUNTIME(
+			ModelNameNC() << ":TellControllers(): Unable to get lock on controller-set");
 	BHandler* controller;
 	status_t err;
 	if (Frozen()) {
-		BM_LOG3( BM_LogModelController, 
-					BmString("Model <") << ModelName() 
-					<< "> is frozen, so this msg is being dropped.");
+		BM_LOG3(BM_LogModelController,
+			BmString("Model <") << ModelName() << "> is frozen, so this msg is being dropped.");
 		return;
 	}
-	msg->AddString( MSG_MODEL, ModelName().String());
+	msg->AddString(MSG_MODEL, ModelName().String());
 	if (waitForAck) {
 		InitOutstanding();
-		msg->AddBool( MSG_NEEDS_ACK, true);
+		msg->AddBool(MSG_NEEDS_ACK, true);
 	}
 	BmControllerSet::iterator iter;
 	iter = mControllerSet.begin();
 	if (iter == mControllerSet.end()) {
-		BM_LOG2( BM_LogModelController, 
-					BmString("Model <") << ModelName() 
-					<< "> has no controllers to talk to.");
+		BM_LOG2(BM_LogModelController, BmString("Model <")
+										   << ModelName() << "> has no controllers to talk to.");
 	}
-	for( ; iter != mControllerSet.end(); ++iter) {
+	for (; iter != mControllerSet.end(); ++iter) {
 		if (!(controller = (*iter)->GetControllerHandler()))
-			BM_THROW_RUNTIME( 
-				ModelNameNC() 
-					<< ":TellControllers(): Controller found with NULL-handler!"
-			);
-		BMessenger msgr( controller, NULL, &err);
-		if (err != B_OK)
 			BM_THROW_RUNTIME(
-				ModelNameNC()
-					<< ":TellControllers(): BMessenger() failed for handler "
-					<< controller->Name() << "!\n\n Result: "
-					<< strerror(err)
-			);
-		BM_LOG2( BM_LogModelController, 
-					BmString("Talking to handler ") << (*iter)->ControllerName());
-		if ((err=msgr.SendMessage( msg)) != B_OK)
-			BM_THROW_RUNTIME( 
-				ModelNameNC() 
-					<< ":TellControllers(): SendMessage() failed!\n\n Result: " 
-					<< strerror(err)
-			);
+				ModelNameNC() << ":TellControllers(): Controller found with NULL-handler!");
+		BMessenger msgr(controller, NULL, &err);
+		if (err != B_OK)
+			BM_THROW_RUNTIME(ModelNameNC()
+							 << ":TellControllers(): BMessenger() failed for handler "
+							 << controller->Name() << "!\n\n Result: " << strerror(err));
+		BM_LOG2(
+			BM_LogModelController, BmString("Talking to handler ") << (*iter)->ControllerName());
+		if ((err = msgr.SendMessage(msg)) != B_OK)
+			BM_THROW_RUNTIME(ModelNameNC()
+							 << ":TellControllers(): SendMessage() failed!\n\n Result: "
+							 << strerror(err));
 	}
 	if (waitForAck)
 		WaitForAllToAck();
@@ -187,31 +168,35 @@ void BmDataModel::TellControllers( BMessage* msg, bool waitForAck) {
 		-	returns true as long as there is at least one controller
 			interested
 \*------------------------------------------------------------------------------*/
-bool BmDataModel::HasControllers() {
-	BmAutolockCheckGlobal lock( mModelLocker);
+bool
+BmDataModel::HasControllers()
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() 
-				<< ":HasControllers(): Unable to get lock on controller-set"
-		);
+		BM_THROW_RUNTIME(
+			ModelNameNC() << ":HasControllers(): Unable to get lock on controller-set");
 	return !mControllerSet.empty();
 }
 
 /*------------------------------------------------------------------------------*\
 	ShouldContinue()
 		-	checks whether this datamodel is still required to do its work
-		-	this implementation returns true as long as there is at least one 
+		-	this implementation returns true as long as there is at least one
 			controller interested
 \*------------------------------------------------------------------------------*/
-bool BmDataModel::ShouldContinue() {
+bool
+BmDataModel::ShouldContinue()
+{
 	return HasControllers() || !mNeedControllersToContinue;
 }
 
 /*------------------------------------------------------------------------------*\
 	InitOutstanding()
-		-	create list of all controllers 
+		-	create list of all controllers
 \*------------------------------------------------------------------------------*/
-void BmDataModel::InitOutstanding() {
+void
+BmDataModel::InitOutstanding()
+{
 	mOutstandingSet = mControllerSet;
 }
 
@@ -220,67 +205,64 @@ void BmDataModel::InitOutstanding() {
 		-	waits until all this model's controllers have acknowledged a message
 			that required so (for instance the removal of an item from a list)
 \*------------------------------------------------------------------------------*/
-void BmDataModel::WaitForAllToAck() {
-	BM_LOG2( BM_LogModelController, 
-				BmString("Model <") << ModelName() 
-					<< "> waits for controllers to ack");
-	while( ShouldContinue() && mOutstandingSet.size()) {
-		int lCount=0;
+void
+BmDataModel::WaitForAllToAck()
+{
+	BM_LOG2(BM_LogModelController, BmString("Model <")
+									   << ModelName() << "> waits for controllers to ack");
+	while (ShouldContinue() && mOutstandingSet.size()) {
+		int lCount = 0;
 		while (mModelLocker.IsLocked()) {
 			mModelLocker.Unlock();
-			lCount++; 
+			lCount++;
 		}
-		snooze(50*1000);
-		BM_LOG3( BM_LogModelController, 
-					BmString("Model <") << ModelName() 
-						<< "> is still waiting for some controllers to ack:");
+		snooze(50 * 1000);
+		BM_LOG3(BM_LogModelController, BmString("Model <")
+										   << ModelName()
+										   << "> is still waiting for some controllers to ack:");
 		BmControllerSet::iterator iter;
-		for(  iter = mOutstandingSet.begin(); 
-				iter != mOutstandingSet.end(); ++iter) {
-			BM_LOG3( BM_LogModelController, 
-						BmString("... <") << (*iter)->ControllerName() 
-							<< "> has still not ack'd!");
+		for (iter = mOutstandingSet.begin(); iter != mOutstandingSet.end(); ++iter) {
+			BM_LOG3(BM_LogModelController,
+				BmString("... <") << (*iter)->ControllerName() << "> has still not ack'd!");
 		}
-		while(lCount--) {
+		while (lCount--) {
 			mModelLocker.Lock();
 		}
 	}
-	BM_LOG2( BM_LogModelController, 
-				BmString("All controllers of model <") << ModelName() 
-					<< "> have ack'd");
+	BM_LOG2(BM_LogModelController, BmString("All controllers of model <")
+									   << ModelName() << "> have ack'd");
 }
 
 /*------------------------------------------------------------------------------*\
 	WaitForAllToDetach()
 		-	waits until all this model's controllers have detached
 \*------------------------------------------------------------------------------*/
-void BmDataModel::WaitForAllToDetach() {
-	BM_LOG2( BM_LogModelController, 
-				BmString("Model <") << ModelName() 
-					<< "> waits for controllers to detach");
-	while( HasControllers()) {
-		int lCount=0;
+void
+BmDataModel::WaitForAllToDetach()
+{
+	BM_LOG2(BM_LogModelController, BmString("Model <")
+									   << ModelName() << "> waits for controllers to detach");
+	while (HasControllers()) {
+		int lCount = 0;
 		while (mModelLocker.IsLocked()) {
 			mModelLocker.Unlock();
-			lCount++; 
+			lCount++;
 		}
-		snooze(200*1000);
-		BM_LOG3( BM_LogModelController, 
-					BmString("Model <") << ModelName() 
-						<< "> is still waiting for some controllers to detach:");
+		snooze(200 * 1000);
+		BM_LOG3(BM_LogModelController, BmString("Model <")
+										   << ModelName()
+										   << "> is still waiting for some controllers to detach:");
 		BmControllerSet::iterator iter;
-		for(  iter = mControllerSet.begin(); 
-				iter != mControllerSet.end(); ++iter) {
-			BM_LOG3( BM_LogModelController, 
-						BmString("... <") << (*iter)->ControllerName() 
-							<< "> is still attached!");
+		for (iter = mControllerSet.begin(); iter != mControllerSet.end(); ++iter) {
+			BM_LOG3(BM_LogModelController,
+				BmString("... <") << (*iter)->ControllerName() << "> is still attached!");
 		}
-		while(lCount--) {
+		while (lCount--) {
 			mModelLocker.Lock();
 		}
 	}
-	BM_LOG2( BM_LogModelController, 
-				BmString("Model <") << ModelName() << "> has no more controllers");
+	BM_LOG2(
+		BM_LogModelController, BmString("Model <") << ModelName() << "> has no more controllers");
 }
 
 /*------------------------------------------------------------------------------*\
@@ -288,57 +270,57 @@ void BmDataModel::WaitForAllToDetach() {
 		-	handles the given error by logging it and showing it to the
 			user if the dataModel should currently continue
 \*------------------------------------------------------------------------------*/
-void BmDataModel::HandleError( const BmString& errStr) {
-	if (ShouldContinue() && ThePrefs->GetBool( "ShowAlertForErrors", false)) {
-		BM_SHOWERR( errStr);
+void
+BmDataModel::HandleError(const BmString& errStr)
+{
+	if (ShouldContinue() && ThePrefs->GetBool("ShowAlertForErrors", false)) {
+		BM_SHOWERR(errStr);
 	} else {
-		BM_LOGERR( errStr);
-		snooze(200*1000);
+		BM_LOGERR(errStr);
+		snooze(200 * 1000);
 	}
 }
-
 
 
 // #pragma mark - BmJobModel
 
 //	message component definitions for status-msgs:
-const char* const BmJobModel::MSG_COMPLETED = 	"bm:completed";
-const char* const BmJobModel::MSG_DOMAIN = 		"bm:domain";
-const char* const BmJobModel::MSG_JOB_NAME = 	"bm:jobname";
+const char* const BmJobModel::MSG_COMPLETED = "bm:completed";
+const char* const BmJobModel::MSG_DOMAIN = "bm:domain";
+const char* const BmJobModel::MSG_JOB_NAME = "bm:jobname";
 
-const int32 BmJobModel::BM_DEFAULT_JOB = 	0;
+const int32 BmJobModel::BM_DEFAULT_JOB = 0;
 
-const char* const BmJobModel::MSG_JOB_SPEC = 	"bm:jobspec";
-const char* const BmJobModel::MSG_JOB_THREAD = 	"bm:jobthread";
+const char* const BmJobModel::MSG_JOB_SPEC = "bm:jobspec";
+const char* const BmJobModel::MSG_JOB_THREAD = "bm:jobthread";
 
 /*------------------------------------------------------------------------------*\
 	StartJobThread( data)
 		-	thread-entry function for every job-model that runs in its own thread
 		-	data is a pointer to a BmJobModel that contains further info
 \*------------------------------------------------------------------------------*/
-int32 BmJobModel::ThreadStartFunc( void* data) {
-	BmJobModel* job = static_cast<BmJobModel*>( data);
+int32
+BmJobModel::ThreadStartFunc(void* data)
+{
+	BmJobModel* job = static_cast<BmJobModel*>(data);
 	if (job) {
 		{
-			BmAutolockCheckGlobal lock( job->mModelLocker);
+			BmAutolockCheckGlobal lock(job->mModelLocker);
 			if (!lock.IsLocked()) {
-				BM_LOGERR( 
-					job->ModelNameNC() 
-						<< ":ThreadStartFunc(): Unable to get lock, thread stops!"
-				);
+				BM_LOGERR(
+					job->ModelNameNC() << ":ThreadStartFunc(): Unable to get lock, thread stops!");
 				return 10;
 			}
-			BM_LOG2( BM_LogModelController, 
-						BmString("Thread is started for job <") << job->ModelName() 
-							<< ">");
+			BM_LOG2(BM_LogModelController, BmString("Thread is started for job <")
+											   << job->ModelName() << ">");
 			job->doStartJob();
-			BM_LOG2( BM_LogModelController, 
-						BmString("Job <") << job->ModelName() << "> has finished");
+			BM_LOG2(
+				BM_LogModelController, BmString("Job <") << job->ModelName() << "> has finished");
 			job->mThreadID = 0;
 		}
 		job->RemoveRef();
-							// indicate that this thread has no more interest
-							// in jobmodel
+		// indicate that this thread has no more interest
+		// in jobmodel
 		return 0;
 	} else {
 		BM_LOGERR("StartJobThread(): Data-pointer is no BmJobModel");
@@ -350,11 +332,11 @@ int32 BmJobModel::ThreadStartFunc( void* data) {
 	BmJobModel( name)
 		-	contructor
 \*------------------------------------------------------------------------------*/
-BmJobModel::BmJobModel( const BmString& name)
-	:	BmDataModel( name)
-	,	mJobState( JOB_INITIALIZED)
-	,	mThreadID( 0)
-	,	mJobSpecifier( BM_DEFAULT_JOB)
+BmJobModel::BmJobModel(const BmString& name)
+	: BmDataModel(name),
+	  mJobState(JOB_INITIALIZED),
+	  mThreadID(0),
+	  mJobSpecifier(BM_DEFAULT_JOB)
 {
 }
 
@@ -362,27 +344,27 @@ BmJobModel::BmJobModel( const BmString& name)
 	~BmJobModel()
 		-	destructor
 \*------------------------------------------------------------------------------*/
-BmJobModel::~BmJobModel() {
-}
+BmJobModel::~BmJobModel() {}
 
 /*------------------------------------------------------------------------------*\
 	StartJobInNewThread()
 		-	spawns a new thread for this job and runs the job in that thread
 \*------------------------------------------------------------------------------*/
-void BmJobModel::StartJobInNewThread( int32 jobSpecifier) {
-	BmAutolockCheckGlobal lock( mModelLocker);
+void
+BmJobModel::StartJobInNewThread(int32 jobSpecifier)
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
 	if (mJobState == JOB_RUNNING)
-		return; 			// job is already running, we won't disturb
+		return;	 // job is already running, we won't disturb
 	mJobSpecifier = jobSpecifier;
 	if (!mThreadID) {
 		// we create a new thread for this job...
 		BmString tname = ModelName();
-		tname.Truncate( B_OS_NAME_LENGTH);
-		thread_id t_id = spawn_thread( &BmJobModel::ThreadStartFunc, 
-												 tname.String(),
-												 B_NORMAL_PRIORITY, this);
+		tname.Truncate(B_OS_NAME_LENGTH);
+		thread_id t_id
+			= spawn_thread(&BmJobModel::ThreadStartFunc, tname.String(), B_NORMAL_PRIORITY, this);
 		if (t_id < 0)
 			throw BM_runtime_error("StartJob(): Could not spawn thread");
 
@@ -393,13 +375,11 @@ void BmJobModel::StartJobInNewThread( int32 jobSpecifier) {
 		AddRef();
 
 		// finally, we activate the job:
-		BM_LOG2( BM_LogModelController, 
-					BmString("Starting job thread ") << t_id);
+		BM_LOG2(BM_LogModelController, BmString("Starting job thread ") << t_id);
 		mJobState = JOB_RUNNING;
-		resume_thread( t_id);
+		resume_thread(t_id);
 	} else {
-		BM_LOG2( BM_LogModelController, 
-					BmString("Trying to start a job that is already running"));
+		BM_LOG2(BM_LogModelController, BmString("Trying to start a job that is already running"));
 	}
 }
 
@@ -409,25 +389,27 @@ void BmJobModel::StartJobInNewThread( int32 jobSpecifier) {
 		-	if the job is still running, this method synchronizes to it, i.e.
 			it blocks until the job has finished (or was stopped).
 \*------------------------------------------------------------------------------*/
-void BmJobModel::StartJobInThisThread( int32 jobSpecifier) {
+void
+BmJobModel::StartJobInThisThread(int32 jobSpecifier)
+{
 	bool isRunning;
-	{	// scope for autolock
-		BmAutolockCheckGlobal lock( mModelLocker);
+	{  // scope for autolock
+		BmAutolockCheckGlobal lock(mModelLocker);
 		if (!lock.IsLocked())
-			BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
+			BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
 		isRunning = (mJobState == JOB_RUNNING);
 	}
 	if (isRunning) {
 		// job is already running, we need to wait till job has finished...
-		while( isRunning) {
-			snooze(200*1000);
+		while (isRunning) {
+			snooze(200 * 1000);
 			{
-				BmAutolockCheckGlobal lock( mModelLocker);
+				BmAutolockCheckGlobal lock(mModelLocker);
 				if (!lock.IsLocked())
-					BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
+					BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
 				isRunning = (mJobState == JOB_RUNNING);
 			}
- 		}
+		}
 	} else {
 		// start job:
 		mJobSpecifier = jobSpecifier;
@@ -440,23 +422,24 @@ void BmJobModel::StartJobInThisThread( int32 jobSpecifier) {
 		-	executes the real job by calling the job's StartJob()-method
 		-	ensures that the job-lock is free during execution of the actual job
 \*------------------------------------------------------------------------------*/
-void BmJobModel::doStartJob() {
-	BM_LOG2( BM_LogModelController, 
-				BmString("Job <") << ModelName() << "> has started");
+void
+BmJobModel::doStartJob()
+{
+	BM_LOG2(BM_LogModelController, BmString("Job <") << ModelName() << "> has started");
 	mJobState = JOB_RUNNING;
-	int lCount=0;
+	int lCount = 0;
 	while (mModelLocker.IsLocked()) {
 		mModelLocker.Unlock();
-		lCount++; 
+		lCount++;
 	}
 	try {
 		bool result = StartJob();
-		TellJobIsDone( result && mJobState != JOB_STOPPED);
-	} catch( BM_error& e) {
-		BM_SHOWERR( e.what());
+		TellJobIsDone(result && mJobState != JOB_STOPPED);
+	} catch (BM_error& e) {
+		BM_SHOWERR(e.what());
 	}
-	
-	while(lCount--) {
+
+	while (lCount--) {
 		mModelLocker.Lock();
 	}
 }
@@ -466,7 +449,9 @@ void BmJobModel::doStartJob() {
 		-	pauses this job, causing it to wait indefinitely, until it is
 			explicitly stopped or continued
 \*------------------------------------------------------------------------------*/
-void BmJobModel::PauseJob() {
+void
+BmJobModel::PauseJob()
+{
 	mJobState = JOB_PAUSED;
 }
 
@@ -474,7 +459,9 @@ void BmJobModel::PauseJob() {
 	ContinueJob()
 		-	continues this job
 \*------------------------------------------------------------------------------*/
-void BmJobModel::ContinueJob() {
+void
+BmJobModel::ContinueJob()
+{
 	mJobState = JOB_RUNNING;
 }
 
@@ -482,7 +469,9 @@ void BmJobModel::ContinueJob() {
 	StopJob()
 		-	stops the current job
 \*------------------------------------------------------------------------------*/
-void BmJobModel::StopJob() {
+void
+BmJobModel::StopJob()
+{
 	if (IsJobRunning()) {
 		mJobState = JOB_STOPPED;
 	}
@@ -492,7 +481,8 @@ void BmJobModel::StopJob() {
 	IsJobCompleted()
 		-	checks if this job has been completed
 \*------------------------------------------------------------------------------*/
-bool BmJobModel::IsJobCompleted() const
+bool
+BmJobModel::IsJobCompleted() const
 {
 	return mJobState == JOB_COMPLETED;
 }
@@ -501,7 +491,9 @@ bool BmJobModel::IsJobCompleted() const
 	IsJobRunning()
 		-	checks if this job is currently running (or paused)
 \*------------------------------------------------------------------------------*/
-bool BmJobModel::IsJobRunning() const {
+bool
+BmJobModel::IsJobRunning() const
+{
 	return (mJobState == JOB_RUNNING || mJobState == JOB_PAUSED);
 }
 
@@ -511,19 +503,18 @@ bool BmJobModel::IsJobRunning() const {
 		-	this implementation requires a job to have interested controllers
 			in order to let it continue
 \*------------------------------------------------------------------------------*/
-bool BmJobModel::ShouldContinue() {
+bool
+BmJobModel::ShouldContinue()
+{
 	// check if we are in pause mode, if so we wait till we snap out of it:
-	while( mJobState == JOB_PAUSED) {
-		snooze(200*1000);
+	while (mJobState == JOB_PAUSED) {
+		snooze(200 * 1000);
 	}
-	BmAutolockCheckGlobal lock( mModelLocker);
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() 
-				<< ":ShouldContinue(): Unable to get lock on controller-set"
-		);
-	return ((HasControllers() || !mNeedControllersToContinue) 
-			 && mJobState == JOB_RUNNING);
+		BM_THROW_RUNTIME(
+			ModelNameNC() << ":ShouldContinue(): Unable to get lock on controller-set");
+	return ((HasControllers() || !mNeedControllersToContinue) && mJobState == JOB_RUNNING);
 }
 
 /*------------------------------------------------------------------------------*\
@@ -532,31 +523,29 @@ bool BmJobModel::ShouldContinue() {
 		-	param completed indicates if the job has finished normally (=true)
 			or was stopped (=false)
 \*------------------------------------------------------------------------------*/
-void BmJobModel::TellJobIsDone( bool completed) {
-	BmAutolockCheckGlobal lock( mModelLocker);
+void
+BmJobModel::TellJobIsDone(bool completed)
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() << ":TellJobIsDone(): Unable to get lock"
-		);
+		BM_THROW_RUNTIME(ModelNameNC() << ":TellJobIsDone(): Unable to get lock");
 	BmString name = ModelName();
-	BMessage msg( BM_JOB_DONE);
-	msg.AddBool( MSG_COMPLETED, completed);
+	BMessage msg(BM_JOB_DONE);
+	msg.AddBool(MSG_COMPLETED, completed);
 	if (completed)
 		mJobState = JOB_COMPLETED;
 	else
 		mJobState = JOB_STOPPED;
-	BM_LOG2( BM_LogModelController, 
-				BmString("Job <") << name << "> tells it is done");
-	TellControllers( &msg, false);
+	BM_LOG2(BM_LogModelController, BmString("Job <") << name << "> tells it is done");
+	TellControllers(&msg, false);
 }
-
 
 
 // #pragma mark - BmListModelItem
 
-const char* const BmListModelItem::MSG_VERSION  = 		"bm:version";
-const char* const BmListModelItem::MSG_NUMCHILDREN = 	"bm:count";
-const char* const BmListModelItem::MSG_CHILDREN = 		"bm:chld";
+const char* const BmListModelItem::MSG_VERSION = "bm:version";
+const char* const BmListModelItem::MSG_NUMCHILDREN = "bm:count";
+const char* const BmListModelItem::MSG_CHILDREN = "bm:chld";
 
 // additional fieldnames for stored actions:
 const char* const BmListModelItem::MSG_OPCODE = "bm:op";
@@ -565,12 +554,11 @@ const char* const BmListModelItem::MSG_OPCODE = "bm:op";
 	ListModelItem( key, parent)
 		-	c'tor
 \*------------------------------------------------------------------------------*/
-BmListModelItem::BmListModelItem( const BmString& key, BmListModel* model, 
-											 BmListModelItem* parent)
-	:	mKey( key)
-	,	mListModel( model)
-	,	mParent( parent)
-	,	mIsValid( true)
+BmListModelItem::BmListModelItem(const BmString& key, BmListModel* model, BmListModelItem* parent)
+	: mKey(key),
+	  mListModel(model),
+	  mParent(parent),
+	  mIsValid(true)
 {
 }
 
@@ -578,25 +566,28 @@ BmListModelItem::BmListModelItem( const BmString& key, BmListModel* model,
 	~ListModelItem()
 		-	d'tor
 \*------------------------------------------------------------------------------*/
-BmListModelItem::~BmListModelItem() {
-}
+BmListModelItem::~BmListModelItem() {}
 
 /*------------------------------------------------------------------------------*\
 	Archive( archive, deep)
 		-	writes version of item-format into archive
 		-	parameter deep makes no difference...
 \*------------------------------------------------------------------------------*/
-status_t BmListModelItem::Archive( BMessage* archive, bool deep) const {
-	status_t ret = (inheritedArchivable::Archive( archive, deep)
-		||	archive->AddInt16( MSG_VERSION, ArchiveVersion()));
+status_t
+BmListModelItem::Archive(BMessage* archive, bool deep) const
+{
+	status_t ret = (inheritedArchivable::Archive(archive, deep)
+					|| archive->AddInt16(MSG_VERSION, ArchiveVersion()));
 	return ret;
 }
 
 /*------------------------------------------------------------------------------*\
 	ExecuteAction(action)
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmListModelItem::ExecuteAction(BMessage* /*action*/) {
+void
+BmListModelItem::ExecuteAction(BMessage* /*action*/)
+{
 }
 
 /*------------------------------------------------------------------------------*\
@@ -605,15 +596,17 @@ void BmListModelItem::ExecuteAction(BMessage* /*action*/) {
 		-	N.B.: The ListModel this item lives in must be locked when calling
 			this method, otherwise "bad things"(TM) happen!
 \*------------------------------------------------------------------------------*/
-bool BmListModelItem::AddSubItem( BmListModelItem* subItem) {
+bool
+BmListModelItem::AddSubItem(BmListModelItem* subItem)
+{
 #ifdef BM_REF_DEBUGGING
-	BmRef<BmListModel> listModel( ListModel());
-	BM_ASSERT( !listModel || listModel->ModelLocker().IsLocked());
+	BmRef<BmListModel> listModel(ListModel());
+	BM_ASSERT(!listModel || listModel->ModelLocker().IsLocked());
 #endif
-	BmModelItemMap::iterator iter = mSubItemMap.find( subItem->Key());
+	BmModelItemMap::iterator iter = mSubItemMap.find(subItem->Key());
 	if (iter == mSubItemMap.end()) {
 		mSubItemMap[subItem->Key()] = subItem;
-		subItem->Parent( this);
+		subItem->Parent(this);
 		return true;
 	}
 	return false;
@@ -625,12 +618,14 @@ bool BmListModelItem::AddSubItem( BmListModelItem* subItem) {
 		-	N.B.: The ListModel this item lives in must be locked when calling
 			this method, otherwise "bad things"(TM) happen!
 \*------------------------------------------------------------------------------*/
-void BmListModelItem::RemoveSubItem( BmListModelItem* subItem) {
+void
+BmListModelItem::RemoveSubItem(BmListModelItem* subItem)
+{
 #ifdef BM_REF_DEBUGGING
-	BmRef<BmListModel> listModel( ListModel());
-	BM_ASSERT( listModel && listModel->ModelLocker().IsLocked());
+	BmRef<BmListModel> listModel(ListModel());
+	BM_ASSERT(listModel && listModel->ModelLocker().IsLocked());
 #endif
-	mSubItemMap.erase( subItem->Key());
+	mSubItemMap.erase(subItem->Key());
 }
 
 /*------------------------------------------------------------------------------*\
@@ -641,10 +636,12 @@ void BmListModelItem::RemoveSubItem( BmListModelItem* subItem) {
 			added to a listmodel) nothing happens
 		-	param updFlags indicates which part of item has been updated
 \*------------------------------------------------------------------------------*/
-void BmListModelItem::TellModelItemUpdated( BmUpdFlags flags) {
-	BmRef<BmListModel> listModel( ListModel());
+void
+BmListModelItem::TellModelItemUpdated(BmUpdFlags flags)
+{
+	BmRef<BmListModel> listModel(ListModel());
 	if (listModel)
-		listModel->TellModelItemUpdated( this, flags);
+		listModel->TellModelItemUpdated(this, flags);
 }
 
 /*------------------------------------------------------------------------------*\
@@ -654,79 +651,81 @@ void BmListModelItem::TellModelItemUpdated( BmUpdFlags flags) {
 		-	N.B.: The ListModel this item lives in must be locked when calling
 			this method, otherwise "bad things"(TM) happen!
 \*------------------------------------------------------------------------------*/
-BmListModelItem* BmListModelItem::FindItemByKey( const BmString& key) {
+BmListModelItem*
+BmListModelItem::FindItemByKey(const BmString& key)
+{
 #ifdef BM_REF_DEBUGGING
-	BmRef<BmListModel> listModel( ListModel());
-	BM_ASSERT( listModel && listModel->ModelLocker().IsLocked());
+	BmRef<BmListModel> listModel(ListModel());
+	BM_ASSERT(listModel && listModel->ModelLocker().IsLocked());
 #endif
 	BmListModelItem* found = NULL;
 	BmModelItemMap::const_iterator iter;
-	for( iter = begin(); !found && iter != end(); ++iter) {
+	for (iter = begin(); !found && iter != end(); ++iter) {
 		BmListModelItem* item = iter->second.Get();
 		if (item->Key() == key)
 			return item;
 		else if (!item->empty())
-			found = item->FindItemByKey( key);
+			found = item->FindItemByKey(key);
 	}
 	return found;
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmModelItemMap::const_iterator BmListModelItem::begin() const	
-{ 
+BmModelItemMap::const_iterator
+BmListModelItem::begin() const
+{
 #ifdef BM_REF_DEBUGGING
-	BmRef<BmListModel> listModel( ListModel());
+	BmRef<BmListModel> listModel(ListModel());
 	if (listModel)
-		BM_ASSERT( listModel->ModelLocker().IsLocked());
+		BM_ASSERT(listModel->ModelLocker().IsLocked());
 #endif
 	return mSubItemMap.begin();
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmModelItemMap::const_iterator BmListModelItem::end() const	
-{ 
+BmModelItemMap::const_iterator
+BmListModelItem::end() const
+{
 #ifdef BM_REF_DEBUGGING
-	BmRef<BmListModel> listModel( ListModel());
+	BmRef<BmListModel> listModel(ListModel());
 	if (listModel)
-		BM_ASSERT( listModel->ModelLocker().IsLocked());
+		BM_ASSERT(listModel->ModelLocker().IsLocked());
 #endif
-	return mSubItemMap.end(); 
+	return mSubItemMap.end();
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-size_t BmListModelItem::size() const				
-{ 
-	BmRef<BmListModel> listModel( ListModel());
+size_t
+BmListModelItem::size() const
+{
+	BmRef<BmListModel> listModel(ListModel());
 	if (listModel) {
-		BmAutolockCheckGlobal lock( listModel->ModelLocker());
+		BmAutolockCheckGlobal lock(listModel->ModelLocker());
 		if (!lock.IsLocked())
-			BM_THROW_RUNTIME( 
-				listModel->ModelNameNC() << "size(): Unable to get lock"
-			);
-		return mSubItemMap.size(); 
+			BM_THROW_RUNTIME(listModel->ModelNameNC() << "size(): Unable to get lock");
+		return mSubItemMap.size();
 	} else
 		return 0;
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmListModelItem::empty() const				
-{ 
-	BmRef<BmListModel> listModel( ListModel());
+bool
+BmListModelItem::empty() const
+{
+	BmRef<BmListModel> listModel(ListModel());
 	if (listModel) {
-		BmAutolockCheckGlobal lock( listModel->ModelLocker());
+		BmAutolockCheckGlobal lock(listModel->ModelLocker());
 		if (!lock.IsLocked())
-			BM_THROW_RUNTIME( 
-				listModel->ModelNameNC() << "empty(): Unable to get lock"
-			);
-		return mSubItemMap.empty(); 
+			BM_THROW_RUNTIME(listModel->ModelNameNC() << "empty(): Unable to get lock");
+		return mSubItemMap.empty();
 	} else
 		return true;
 }
@@ -735,32 +734,38 @@ bool BmListModelItem::empty() const
 	ListModel()
 		-	dereferences the weak-reference to the listmodel (may be NULL)
 \*------------------------------------------------------------------------------*/
-BmRef<BmListModel> BmListModelItem::ListModel() const	{ 
-	return mListModel.Get(); 
+BmRef<BmListModel>
+BmListModelItem::ListModel() const
+{
+	return mListModel.Get();
 }
 
 /*------------------------------------------------------------------------------*\
 	OutlineLevel()
 		-	returns the number of parents this item has
 \*------------------------------------------------------------------------------*/
-uint32 BmListModelItem::OutlineLevel() const	{
+uint32
+BmListModelItem::OutlineLevel() const
+{
 	uint32 level = 0;
- 	for( BmListModelItem* parent = mParent; parent; parent = parent->mParent)
- 		level++;
+	for (BmListModelItem* parent = mParent; parent; parent = parent->mParent)
+		level++;
 	return level;
 }
 
 /*------------------------------------------------------------------------------*\
 	IsValid( b)
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmListModelItem::IsValid( bool _isValid) {
+void
+BmListModelItem::IsValid(bool _isValid)
+{
 	if (mIsValid != _isValid) {
-		BmRef<BmListModel> listModel( ListModel());
+		BmRef<BmListModel> listModel(ListModel());
 		if (listModel)
 			// we have a listmodel, so we delegate the validity change to it,
 			// since it will deal with required updates, too:
-			listModel->SetItemValidity( this, _isValid);
+			listModel->SetItemValidity(this, _isValid);
 		else
 			// no listmodel, we just change the validity:
 			mIsValid = _isValid;
@@ -768,17 +773,16 @@ void BmListModelItem::IsValid( bool _isValid) {
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmListModelItem
-::ForEachSubItem(BmListModelItem::Collector& collector) const
+bool
+BmListModelItem ::ForEachSubItem(BmListModelItem::Collector& collector) const
 {
 	BmModelItemMap::const_iterator iter;
-	for( iter=begin(); iter != end(); ++iter) {
+	for (iter = begin(); iter != end(); ++iter) {
 		if (!iter->second)
 			continue;
-		if (!collector(iter->second.Get())
-		|| !iter->second->ForEachSubItem( collector))
+		if (!collector(iter->second.Get()) || !iter->second->ForEachSubItem(collector))
 			return false;
 	}
 	return true;
@@ -788,34 +792,35 @@ bool BmListModelItem
 
 const char* const BmListModel::MSG_VERSION = "bm:version";
 
-const char* const BmListModel::MSG_ITEMKEY 		=	"bm:ikey";
-const char* const BmListModel::MSG_PARENTKEY 	= 	"bm:pkey";
-const char* const BmListModel::MSG_MODELITEM 	= 	"bm:item";
-const char* const BmListModel::MSG_UPD_FLAGS		= 	"bm:updflags";
-const char* const BmListModel::MSG_OLD_KEY		= 	"bm:oldkey";
+const char* const BmListModel::MSG_ITEMKEY = "bm:ikey";
+const char* const BmListModel::MSG_PARENTKEY = "bm:pkey";
+const char* const BmListModel::MSG_MODELITEM = "bm:item";
+const char* const BmListModel::MSG_UPD_FLAGS = "bm:updflags";
+const char* const BmListModel::MSG_OLD_KEY = "bm:oldkey";
 
 /*------------------------------------------------------------------------------*\
 	ListModel()
 		-	c'tor
 \*------------------------------------------------------------------------------*/
-BmListModel::BmListModel( const BmString& name, uint32 logTerrain)
-	:  inherited( name)
-	,	mInitCheck( B_NO_INIT)
-	,	mNeedsStore( false)
-	,	mInvalidCount( 0)
-	,	mStoredActionManager(this)
-	,	mLogTerrain( logTerrain)
-	,	mFilter(NULL)
+BmListModel::BmListModel(const BmString& name, uint32 logTerrain)
+	: inherited(name),
+	  mInitCheck(B_NO_INIT),
+	  mNeedsStore(false),
+	  mInvalidCount(0),
+	  mStoredActionManager(this),
+	  mLogTerrain(logTerrain),
+	  mFilter(NULL)
 {
 	mStoredActionManager.MaxCacheSize(100);
-		// allow caching of 100 stored actions before writing through to disk
+	// allow caching of 100 stored actions before writing through to disk
 }
 
 /*------------------------------------------------------------------------------*\
 	~ListModel()
 		-	d'tor
 \*------------------------------------------------------------------------------*/
-BmListModel::~BmListModel() {
+BmListModel::~BmListModel()
+{
 	delete mFilter;
 }
 
@@ -823,10 +828,12 @@ BmListModel::~BmListModel() {
 	Cleanup()
 		-	frees occupied memory
 \*------------------------------------------------------------------------------*/
-void BmListModel::Cleanup() {
-	BmAutolockCheckGlobal lock( mModelLocker);
+void
+BmListModel::Cleanup()
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ":Cleanup(): Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ":Cleanup(): Unable to get lock");
 	mStoredActionManager.Flush();
 	if (mFilter) {
 		delete mFilter;
@@ -841,9 +848,11 @@ void BmListModel::Cleanup() {
 
 /*------------------------------------------------------------------------------*\
 	FlushStoredActions()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmListModel::FlushStoredActions() {
+bool
+BmListModel::FlushStoredActions()
+{
 	return mStoredActionManager.Flush();
 }
 
@@ -852,41 +861,40 @@ bool BmListModel::FlushStoredActions() {
 		-	adds given item to given parent-item
 		-	if parent==NULL the item is added to the listmodel itself
 \*------------------------------------------------------------------------------*/
-bool BmListModel::AddItemToList( BmListModelItem* item, 
-											BmListModelItem* parent) {
+bool
+BmListModel::AddItemToList(BmListModelItem* item, BmListModelItem* parent)
+{
 	if (item) {
-		BmAutolockCheckGlobal lock( mModelLocker);
+		BmAutolockCheckGlobal lock(mModelLocker);
 		if (!lock.IsLocked())
-			BM_THROW_RUNTIME( 
-				ModelNameNC() << ":AddItemToList(): Unable to get lock"
-			);
+			BM_THROW_RUNTIME(ModelNameNC() << ":AddItemToList(): Unable to get lock");
 		if (parent) {
-			if (parent->AddSubItem( item)) {
+			if (parent->AddSubItem(item)) {
 				item->mListModel = this;
 				if (!item->mIsValid)
 					IncInvalidCount();
 				mNeedsStore = true;
-				TellModelItemAdded( item);
+				TellModelItemAdded(item);
 				if (parent->size() == 1) {
-					// the parent has just become a superitem (and thus 
+					// the parent has just become a superitem (and thus
 					// needs to be updated):
-					TellModelItemUpdated( parent, UPD_EXPANDER);
+					TellModelItemUpdated(parent, UPD_EXPANDER);
 				}
 				return true;
 			}
 		} else {
 			if (mFilter && item->IsValid() && !mFilter->Matches(item))
 				return false;
-				
-			BmModelItemMap::iterator iter = mModelItemMap.find( item->Key());
+
+			BmModelItemMap::iterator iter = mModelItemMap.find(item->Key());
 			if (iter == mModelItemMap.end()) {
 				mModelItemMap[item->Key()] = item;
-				item->Parent( NULL);
+				item->Parent(NULL);
 				item->mListModel = this;
 				if (!item->IsValid())
 					IncInvalidCount();
 				mNeedsStore = true;
-				TellModelItemAdded( item);
+				TellModelItemAdded(item);
 				return true;
 			}
 		}
@@ -899,29 +907,29 @@ bool BmListModel::AddItemToList( BmListModelItem* item,
 		-	removes the given item from this listmodel
 		-	safe to call with empty item
 \*------------------------------------------------------------------------------*/
-void BmListModel::RemoveItemFromList( BmListModelItem* item) {
+void
+BmListModel::RemoveItemFromList(BmListModelItem* item)
+{
 	if (item) {
-		BmAutolockCheckGlobal lock( mModelLocker);
+		BmAutolockCheckGlobal lock(mModelLocker);
 		if (!lock.IsLocked())
-			BM_THROW_RUNTIME( 
-				ModelNameNC() << ":RemoveItemFromList(): Unable to get lock"
-			);
+			BM_THROW_RUNTIME(ModelNameNC() << ":RemoveItemFromList(): Unable to get lock");
 		BmRef<BmListModelItem> parent = item->Parent();
 		mNeedsStore = true;
 		if (parent) {
-			parent->RemoveSubItem( item);
+			parent->RemoveSubItem(item);
 			if (parent->size() == 0) {
-				// the parent has just become a non-superitem (and thus 
+				// the parent has just become a non-superitem (and thus
 				// needs to be updated):
-				TellModelItemUpdated( parent.Get(), UPD_EXPANDER);
+				TellModelItemUpdated(parent.Get(), UPD_EXPANDER);
 			}
 		} else {
-			mModelItemMap.erase( item->Key());
+			mModelItemMap.erase(item->Key());
 		}
 		item->mListModel = NULL;
 		if (!item->mIsValid)
 			DecInvalidCount();
-		TellModelItemRemoved( item);
+		TellModelItemRemoved(item);
 	}
 }
 
@@ -929,41 +937,41 @@ void BmListModel::RemoveItemFromList( BmListModelItem* item) {
 	RemoveItemByKey( key)
 		-	removes item with given key from this listmodel's item-hierarchy
 \*------------------------------------------------------------------------------*/
-BmRef<BmListModelItem> BmListModel::RemoveItemByKey( const BmString& key) {
-	BmAutolockCheckGlobal lock( mModelLocker);
+BmRef<BmListModelItem>
+BmListModel::RemoveItemByKey(const BmString& key)
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() << ":RemoveItemFromList(): Unable to get lock"
-		);
-	BmRef<BmListModelItem> item( FindItemByKey( key));
+		BM_THROW_RUNTIME(ModelNameNC() << ":RemoveItemFromList(): Unable to get lock");
+	BmRef<BmListModelItem> item(FindItemByKey(key));
 	if (item)
-		RemoveItemFromList( item.Get());
+		RemoveItemFromList(item.Get());
 	return item;
 }
 
 /*------------------------------------------------------------------------------*\
 	SetItemValidity( item, b)
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmListModel::SetItemValidity(  BmListModelItem* item, bool isValid) {
+void
+BmListModel::SetItemValidity(BmListModelItem* item, bool isValid)
+{
 	if (item && item->mIsValid != isValid) {
-		BmAutolockCheckGlobal lock( mModelLocker);
+		BmAutolockCheckGlobal lock(mModelLocker);
 		if (!lock.IsLocked())
-			BM_THROW_RUNTIME( 
-				ModelNameNC() << ":SetItemValidity(): Unable to get lock"
-			);
+			BM_THROW_RUNTIME(ModelNameNC() << ":SetItemValidity(): Unable to get lock");
 		if (isValid) {
 			// item has changed from invalid to valid, we set to valid and then
 			// tell controllers about its addition:
 			item->mIsValid = true;
 			DecInvalidCount();
-			TellModelItemAdded( item);
+			TellModelItemAdded(item);
 		} else {
 			// item has changed from valid to invalid, we first
 			// tell controllers about its removal and then set item to invalid
 			// (otherwise, TellModelItemRemoved would ignore our request,
 			// since this item is invalid):
-			TellModelItemRemoved( item);
+			TellModelItemRemoved(item);
 			IncInvalidCount();
 			item->mIsValid = false;
 		}
@@ -971,9 +979,10 @@ void BmListModel::SetItemValidity(  BmListModelItem* item, bool isValid) {
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmListModel::StoreAction(BMessage* action)
+bool
+BmListModel::StoreAction(BMessage* action)
 {
 	if (!action)
 		return false;
@@ -981,89 +990,94 @@ bool BmListModel::StoreAction(BMessage* action)
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmListModel::AddForeignKey( const char* key, BmListModel* model) {
+void
+BmListModel::AddForeignKey(const char* key, BmListModel* model)
+{
 	BmForeignKey foreignKey;
 	foreignKey.keyName = key;
 	foreignKey.foreignListModel = model;
-	mForeignKeyVect.push_back( foreignKey);
+	mForeignKeyVect.push_back(foreignKey);
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmListModel::AdjustForeignKeys( const BmString& oldVal, 
-												 const BmString& newVal) {
+void
+BmListModel::AdjustForeignKeys(const BmString& oldVal, const BmString& newVal)
+{
 	// adjust all foreign-keys (if any):
-	for( uint32 i=0; i<mForeignKeyVect.size(); ++i) {
-		BmRef<BmListModel> foreignList( 
-			mForeignKeyVect[i].foreignListModel.Get());
+	for (uint32 i = 0; i < mForeignKeyVect.size(); ++i) {
+		BmRef<BmListModel> foreignList(mForeignKeyVect[i].foreignListModel.Get());
 		if (foreignList) {
-			foreignList->ForeignKeyChanged( mForeignKeyVect[i].keyName,
-													  oldVal, newVal);
+			foreignList->ForeignKeyChanged(mForeignKeyVect[i].keyName, oldVal, newVal);
 		}
 	}
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmModelItemMap::const_iterator BmListModel::begin() const
-{ 
-#ifdef BM_REF_DEBUGGING
-	BM_ASSERT( mModelLocker.IsLocked());
-#endif
-	return mModelItemMap.begin(); 
-}
-
-/*------------------------------------------------------------------------------*\
-		-	
-\*------------------------------------------------------------------------------*/
-BmModelItemMap::const_iterator BmListModel::end() const
+BmModelItemMap::const_iterator
+BmListModel::begin() const
 {
 #ifdef BM_REF_DEBUGGING
-	BM_ASSERT( mModelLocker.IsLocked());
+	BM_ASSERT(mModelLocker.IsLocked());
 #endif
-	return mModelItemMap.end(); 
+	return mModelItemMap.begin();
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-size_t BmListModel::size() const
-{ 
-	BmAutolockCheckGlobal lock( mModelLocker);
-	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << "size(): Unable to get lock");
-	return mModelItemMap.size(); 
-}
-
-/*------------------------------------------------------------------------------*\
-		-	
-\*------------------------------------------------------------------------------*/
-bool BmListModel::empty() const
+BmModelItemMap::const_iterator
+BmListModel::end() const
 {
-	BmAutolockCheckGlobal lock( mModelLocker);
-	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << "empty(): Unable to get lock");
-	return mModelItemMap.empty(); 
+#ifdef BM_REF_DEBUGGING
+	BM_ASSERT(mModelLocker.IsLocked());
+#endif
+	return mModelItemMap.end();
 }
 
 /*------------------------------------------------------------------------------*\
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmListModel::ForEachItem(BmListModelItem::Collector& collector) const
+size_t
+BmListModel::size() const
 {
-	BmAutolockCheckGlobal lock( mModelLocker);
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << "ForEachItem(): Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << "size(): Unable to get lock");
+	return mModelItemMap.size();
+}
+
+/*------------------------------------------------------------------------------*\
+		-
+\*------------------------------------------------------------------------------*/
+bool
+BmListModel::empty() const
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
+	if (!lock.IsLocked())
+		BM_THROW_RUNTIME(ModelNameNC() << "empty(): Unable to get lock");
+	return mModelItemMap.empty();
+}
+
+/*------------------------------------------------------------------------------*\
+		-
+\*------------------------------------------------------------------------------*/
+bool
+BmListModel::ForEachItem(BmListModelItem::Collector& collector) const
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
+	if (!lock.IsLocked())
+		BM_THROW_RUNTIME(ModelNameNC() << "ForEachItem(): Unable to get lock");
 	BmModelItemMap::const_iterator iter;
-	for( iter=begin(); iter != end(); ++iter) {
+	for (iter = begin(); iter != end(); ++iter) {
 		if (!iter->second)
 			continue;
-		if (!collector(iter->second.Get())
-		|| !iter->second->ForEachSubItem( collector))
+		if (!collector(iter->second.Get()) || !iter->second->ForEachSubItem(collector))
 			return false;
 	}
 	return true;
@@ -1074,46 +1088,47 @@ bool BmListModel::ForEachItem(BmListModelItem::Collector& collector) const
 		-	renames the item that has the given key oldKey into suggestedNewKey
 		-	if suggestedNewKey is not unique, a unique new key is generated
 		-	the real new key of the item is returned
-		-	N.B.: oldKey is passed in by-value so that it does not change during 
+		-	N.B.: oldKey is passed in by-value so that it does not change during
 			the rename (so that old value is available afterwards).
 \*------------------------------------------------------------------------------*/
-BmString BmListModel::RenameItem( const BmString oldKey, 
-											 const BmString& suggestedNewKey) {
-	BmAutolockCheckGlobal lock( mModelLocker);
+BmString
+BmListModel::RenameItem(const BmString oldKey, const BmString& suggestedNewKey)
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ":RenameItem(): Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ":RenameItem(): Unable to get lock");
 	// find unique key for item:
-	BmString newKey=suggestedNewKey;
+	BmString newKey = suggestedNewKey;
 	BmRef<BmListModelItem> doubleItem;
 	if (oldKey != newKey) {
 		// if key has actually changed, we check if the new key already exists
-		for( int32 i = 1; (doubleItem=FindItemByKey( newKey)); ++i) {
-			newKey = suggestedNewKey+"("<<i<<")";
-							// find a unique new key
+		for (int32 i = 1; (doubleItem = FindItemByKey(newKey)); ++i) {
+			newKey = suggestedNewKey + "(" << i << ")";
+			// find a unique new key
 		}
 	}
 	// now find item under old key...
-	BmRef<BmListModelItem> item( FindItemByKey( oldKey));
+	BmRef<BmListModelItem> item(FindItemByKey(oldKey));
 	if (!item)
 		return oldKey;
 	// ...and rename it:
-	mModelItemMap.erase( oldKey);
-	item->RenameRef( newKey.String());
-	item->Key( newKey);
+	mModelItemMap.erase(oldKey);
+	item->RenameRef(newKey.String());
+	item->Key(newKey);
 	mModelItemMap[newKey] = item.Get();
-	TellModelItemUpdated( item.Get(), UPD_KEY, oldKey);
+	TellModelItemUpdated(item.Get(), UPD_KEY, oldKey);
 	// ...determine path to item (needed for handling of foreign-keys):
 	BmString path;
 	BmListModelItem* curr = item.Get();
-	while( (curr = curr->Parent().Get()) != NULL) {
+	while ((curr = curr->Parent().Get()) != NULL) {
 		if (!path.Length())
-			path.Prepend( curr->DisplayKey());
-		else		
-			path.Prepend( curr->DisplayKey() + "/");
+			path.Prepend(curr->DisplayKey());
+		else
+			path.Prepend(curr->DisplayKey() + "/");
 	}
 	// now adjust foreign keys:
-	AdjustForeignKeys( path.Length() ? path + "/" + oldKey : oldKey,
-							 path.Length() ? path + "/" + newKey : newKey);
+	AdjustForeignKeys(
+		path.Length() ? path + "/" + oldKey : oldKey, path.Length() ? path + "/" + newKey : newKey);
 	// return new key (might differ from the one suggested):
 	return newKey;
 }
@@ -1122,21 +1137,21 @@ BmString BmListModel::RenameItem( const BmString oldKey,
 	FindItemByKey( key)
 		-	finds and returns the item that has the given key
 \*------------------------------------------------------------------------------*/
-BmRef<BmListModelItem> BmListModel::FindItemByKey( const BmString& key) {
+BmRef<BmListModelItem>
+BmListModel::FindItemByKey(const BmString& key)
+{
 	BmListModelItem* found = NULL;
-	BmAutolockCheckGlobal lock( mModelLocker);
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() << ":FindItemByKey(): Unable to get lock"
-		);
-	BmModelItemMap::const_iterator iter = mModelItemMap.find( key);
+		BM_THROW_RUNTIME(ModelNameNC() << ":FindItemByKey(): Unable to get lock");
+	BmModelItemMap::const_iterator iter = mModelItemMap.find(key);
 	if (iter != end()) {
 		found = iter->second.Get();
 	} else {
-		for( iter = begin(); !found && iter != end(); ++iter) {
+		for (iter = begin(); !found && iter != end(); ++iter) {
 			BmListModelItem* item = iter->second.Get();
 			if (!item->empty())
-				found = item->FindItemByKey( key);
+				found = item->FindItemByKey(key);
 		}
 	}
 	return found;
@@ -1144,9 +1159,11 @@ BmRef<BmListModelItem> BmListModel::FindItemByKey( const BmString& key) {
 
 /*------------------------------------------------------------------------------*\
 	SetFilter( item, b)
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmListModel::SetFilter(BmListModelItemFilter* filter) {
+void
+BmListModel::SetFilter(BmListModelItemFilter* filter)
+{
 	delete mFilter;
 	mFilter = filter;
 }
@@ -1155,54 +1172,52 @@ void BmListModel::SetFilter(BmListModelItemFilter* filter) {
 	TellModelItemAdded( item)
 		-	tells all controllers that the given item has been added to hierarchy
 \*------------------------------------------------------------------------------*/
-void BmListModel::TellModelItemAdded( BmListModelItem* item) {
+void
+BmListModel::TellModelItemAdded(BmListModelItem* item)
+{
 	if (Frozen() || !item->IsValid())
 		return;
-	BmAutolockCheckGlobal lock( mModelLocker);
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() << ":TellModelItemRemoved(): Unable to get lock"
-		);
+		BM_THROW_RUNTIME(ModelNameNC() << ":TellModelItemRemoved(): Unable to get lock");
 	if (HasControllers()) {
-		BMessage msg( BM_LISTMODEL_ADD);
-		msg.AddPointer( MSG_MODELITEM, static_cast<void*>(item));
+		BMessage msg(BM_LISTMODEL_ADD);
+		msg.AddPointer(MSG_MODELITEM, static_cast<void*>(item));
 		// since each message will reference the item, we add
 		// as many refs to the item as we have controllers:
-		for( uint32 i=0; i<mControllerSet.size(); ++i)
+		for (uint32 i = 0; i < mControllerSet.size(); ++i)
 			item->AddRef();
-		BM_LOG2( BM_LogModelController, 
-					BmString("ListModel <") << ModelName() 
-						<< "> tells about added item " << item->Key());
-		TellControllers( &msg);
+		BM_LOG2(BM_LogModelController,
+			BmString("ListModel <") << ModelName() << "> tells about added item " << item->Key());
+		TellControllers(&msg);
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	TellModelItemRemoved( item)
-		-	tells all controllers that the given item has been removed from 
+		-	tells all controllers that the given item has been removed from
 			hierarchy
 		-	the controllers are requested to acknowledge the removal, so that
 			they won't access the removed item (stale pointer)
 \*------------------------------------------------------------------------------*/
-void BmListModel::TellModelItemRemoved( BmListModelItem* item) {
+void
+BmListModel::TellModelItemRemoved(BmListModelItem* item)
+{
 	if (Frozen() || !item->IsValid())
 		return;
-	BmAutolockCheckGlobal lock( mModelLocker);
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() << ":TellModelItemRemoved(): Unable to get lock"
-		);
+		BM_THROW_RUNTIME(ModelNameNC() << ":TellModelItemRemoved(): Unable to get lock");
 	if (HasControllers()) {
-		BMessage msg( BM_LISTMODEL_REMOVE);
-		msg.AddPointer( MSG_MODELITEM, static_cast<void*>(item));
+		BMessage msg(BM_LISTMODEL_REMOVE);
+		msg.AddPointer(MSG_MODELITEM, static_cast<void*>(item));
 		// since each message will reference the item, we add
 		// as many refs to the item as we have controllers:
-		for( uint32 i=0; i<mControllerSet.size(); ++i)
+		for (uint32 i = 0; i < mControllerSet.size(); ++i)
 			item->AddRef();
-		BM_LOG2( BM_LogModelController, 
-					BmString("ListModel <") << ModelName() 
-						<< "> tells about removed item " << item->Key());
-		TellControllers( &msg, true);
+		BM_LOG2(BM_LogModelController,
+			BmString("ListModel <") << ModelName() << "> tells about removed item " << item->Key());
+		TellControllers(&msg, true);
 	}
 }
 
@@ -1212,31 +1227,28 @@ void BmListModel::TellModelItemRemoved( BmListModelItem* item) {
 		-	param updFlags indicates which part of the item has been changed
 		-	param oldKey contains the old key of the item if the item was renamed
 \*------------------------------------------------------------------------------*/
-void BmListModel::TellModelItemUpdated( BmListModelItem* item, 
-													 BmUpdFlags flags,
-													 const BmString oldKey) {
+void
+BmListModel::TellModelItemUpdated(BmListModelItem* item, BmUpdFlags flags, const BmString oldKey)
+{
 	if (Frozen() || !item->IsValid())
 		return;
-	BmAutolockCheckGlobal lock( mModelLocker);
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() << ":TellModelItemUpdated(): Unable to get lock"
-		);
+		BM_THROW_RUNTIME(ModelNameNC() << ":TellModelItemUpdated(): Unable to get lock");
 	if (HasControllers()) {
-		BMessage msg( BM_LISTMODEL_UPDATE);
-		msg.AddPointer( MSG_MODELITEM, static_cast<void*>(item));
+		BMessage msg(BM_LISTMODEL_UPDATE);
+		msg.AddPointer(MSG_MODELITEM, static_cast<void*>(item));
 		// since each message will reference the item, we add
 		// as many refs to the item as we have controllers:
-		for( uint32 i=0; i<mControllerSet.size(); ++i)
+		for (uint32 i = 0; i < mControllerSet.size(); ++i)
 			item->AddRef();
-		msg.AddInt32( MSG_UPD_FLAGS, flags);
+		msg.AddInt32(MSG_UPD_FLAGS, flags);
 		if (oldKey.Length())
 			// item has been renamed, we include old key:
-			msg.AddString( MSG_OLD_KEY, oldKey.String());
-		BM_LOG2( BM_LogModelController, 
-					BmString("ListModel <") << ModelName() 
-						<< "> tells about updated item " << item->Key());
-		TellControllers( &msg);
+			msg.AddString(MSG_OLD_KEY, oldKey.String());
+		BM_LOG2(BM_LogModelController,
+			BmString("ListModel <") << ModelName() << "> tells about updated item " << item->Key());
+		TellControllers(&msg);
 	}
 }
 
@@ -1244,37 +1256,38 @@ void BmListModel::TellModelItemUpdated( BmListModelItem* item,
 	TellJobIsDone()
 		-	extends job-model method with updating of menu-controllers
 \*------------------------------------------------------------------------------*/
-void BmListModel::TellJobIsDone( bool completed) {
-	inherited::TellJobIsDone( completed);
+void
+BmListModel::TellJobIsDone(bool completed)
+{
+	inherited::TellJobIsDone(completed);
 }
 
 /*------------------------------------------------------------------------------*\
 	Archive( archive)
 		-	archives the listmodel with all items into the given message
 \*------------------------------------------------------------------------------*/
-status_t BmListModel::Archive( BMessage* archive, bool deep) const {
-	BmAutolockCheckGlobal lock( mModelLocker);
+status_t
+BmListModel::Archive(BMessage* archive, bool deep) const
+{
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( 
-			ModelNameNC() << ":Archive(): Unable to get lock"
-		);
-	status_t ret = BArchivable::Archive( archive, deep);
+		BM_THROW_RUNTIME(ModelNameNC() << ":Archive(): Unable to get lock");
+	status_t ret = BArchivable::Archive(archive, deep);
 	if (ret == B_OK) {
-		ret = archive->AddInt32( BmListModelItem::MSG_NUMCHILDREN, (int32)size());
-		ret = archive->AddInt16( BmListModelItem::MSG_VERSION, ArchiveVersion());
+		ret = archive->AddInt32(BmListModelItem::MSG_NUMCHILDREN, (int32)size());
+		ret = archive->AddInt16(BmListModelItem::MSG_VERSION, ArchiveVersion());
 	}
 	if (deep && ret == B_OK) {
-		BM_LOG( BM_LogModelController, 
-				  BmString("ListModel <") << ModelName() << "> begins to archive");
+		BM_LOG(
+			BM_LogModelController, BmString("ListModel <") << ModelName() << "> begins to archive");
 		BmModelItemMap::const_iterator iter;
-		for( iter = begin(); iter != end() && ret == B_OK; ++iter) {
+		for (iter = begin(); iter != end() && ret == B_OK; ++iter) {
 			BMessage msg;
-			ret = iter->second->Archive( &msg, deep)
-					|| archive->AddMessage( BmListModelItem::MSG_CHILDREN, &msg);
+			ret = iter->second->Archive(&msg, deep)
+				  || archive->AddMessage(BmListModelItem::MSG_CHILDREN, &msg);
 		}
-		BM_LOG( BM_LogModelController, 
-				  BmString("ListModel <") << ModelName() 
-				  	<< "> finished with archive");
+		BM_LOG(BM_LogModelController, BmString("ListModel <")
+										  << ModelName() << "> finished with archive");
 	}
 	return ret;
 }
@@ -1283,7 +1296,9 @@ status_t BmListModel::Archive( BMessage* archive, bool deep) const {
 	StoreIfNeeded()
 		-	stores if indicated to do so (by mNeedsStore)
 \*------------------------------------------------------------------------------*/
-void BmListModel::StoreIfNeeded() {
+void
+BmListModel::StoreIfNeeded()
+{
 	if (mNeedsStore)
 		Store();
 }
@@ -1292,7 +1307,9 @@ void BmListModel::StoreIfNeeded() {
 	Store()
 		-	stores List inside Settings-dir
 \*------------------------------------------------------------------------------*/
-bool BmListModel::Store() {
+bool
+BmListModel::Store()
+{
 	BMessage archive;
 	BmBackedFile arcFile;
 	status_t err;
@@ -1300,23 +1317,21 @@ bool BmListModel::Store() {
 	if (mInitCheck != B_OK)
 		return true;
 	try {
-		BmAutolockCheckGlobal lock( mModelLocker);
+		BmAutolockCheckGlobal lock(mModelLocker);
 		if (!lock.IsLocked())
-			BM_THROW_RUNTIME( ModelNameNC() << ":Store(): Unable to get lock");
+			BM_THROW_RUNTIME(ModelNameNC() << ":Store(): Unable to get lock");
 		BmString filename = SettingsFileName();
-		if (this->Archive( &archive, true) != B_OK)
-			BM_THROW_RUNTIME( 
-				BmString("Unable to archive list-model ")<<ModelName()
-			);
-		if ((err = arcFile.SetTo( filename.String())) != B_OK) {
-			BM_THROW_RUNTIME( BmString("Could not create settings-file\n\t<") 
-										<< filename << ">\n\n Result: " << strerror(err));
+		if (this->Archive(&archive, true) != B_OK)
+			BM_THROW_RUNTIME(BmString("Unable to archive list-model ") << ModelName());
+		if ((err = arcFile.SetTo(filename.String())) != B_OK) {
+			BM_THROW_RUNTIME(BmString("Could not create settings-file\n\t<")
+							 << filename << ">\n\n Result: " << strerror(err));
 		}
-		if ((err = archive.Flatten( &arcFile.File())) != B_OK)
-			BM_THROW_RUNTIME( BmString("Could not store settings into file\n\t<") 
-										<< filename << ">\n\n Result: " << strerror(err));
-	} catch( BM_error &e) {
-		BM_SHOWERR( e.what());
+		if ((err = archive.Flatten(&arcFile.File())) != B_OK)
+			BM_THROW_RUNTIME(BmString("Could not store settings into file\n\t<")
+							 << filename << ">\n\n Result: " << strerror(err));
+	} catch (BM_error& e) {
+		BM_SHOWERR(e.what());
 		return false;
 	}
 	return true;
@@ -1326,16 +1341,16 @@ bool BmListModel::Store() {
 	Restore()
 		-	restores List from given stream
 \*------------------------------------------------------------------------------*/
-BMessage* BmListModel::Restore( BDataIO* dataIO) {
+BMessage*
+BmListModel::Restore(BDataIO* dataIO)
+{
 	BMessage* archive = new BMessage;
 
 	// try to fetch list-archive from given stream:
 	status_t err = archive->Unflatten(dataIO);
 	if (err != B_OK) {
-		BM_SHOWERR( 
-			BmString("Could not fetch settings from given stream\n\nResult: ") 
-				<< strerror(err)
-		);
+		BM_SHOWERR(
+			BmString("Could not fetch settings from given stream\n\nResult: ") << strerror(err));
 		delete archive;
 		return NULL;
 	} else
@@ -1346,9 +1361,11 @@ BMessage* BmListModel::Restore( BDataIO* dataIO) {
 	InstantiateItemsFromStream( dataIO, headerMsg)
 		-	instantiates the list from the given stream
 \*------------------------------------------------------------------------------*/
-void BmListModel::InstantiateItemsFromStream( BDataIO* dataIO, BMessage* /*headerMsg*/) {
-	BM_LOG2( mLogTerrain, BmString("Start of InstantiateItems() for ") << Name());
-	std::auto_ptr<BMessage> archive( Restore( dataIO));
+void
+BmListModel::InstantiateItemsFromStream(BDataIO* dataIO, BMessage* /*headerMsg*/)
+{
+	BM_LOG2(mLogTerrain, BmString("Start of InstantiateItems() for ") << Name());
+	std::auto_ptr<BMessage> archive(Restore(dataIO));
 	InstantiateItems(archive.get());
 }
 
@@ -1356,22 +1373,21 @@ void BmListModel::InstantiateItemsFromStream( BDataIO* dataIO, BMessage* /*heade
 	InstantiateItems( archive)
 		-	instantiates the list from the given archive
 \*------------------------------------------------------------------------------*/
-void BmListModel::InstantiateItems( BMessage* archive) {
+void
+BmListModel::InstantiateItems(BMessage* archive)
+{
 	if (!archive)
 		return;
-	int32 numChildren 
-		= FindMsgInt32( archive, BmListModelItem::MSG_NUMCHILDREN);
+	int32 numChildren = FindMsgInt32(archive, BmListModelItem::MSG_NUMCHILDREN);
 	status_t err;
 	BMessage msg;
-	for( int i=0; i<numChildren; ++i) {
-		if ((err = archive->FindMessage( 
-			BmListModelItem::MSG_CHILDREN, i, &msg
-		)) != B_OK)
-			BM_THROW_RUNTIME(BmString("Could not instantiate item nr. ") << i+1 
-										<< " \n\nError:" << strerror(err));
+	for (int i = 0; i < numChildren; ++i) {
+		if ((err = archive->FindMessage(BmListModelItem::MSG_CHILDREN, i, &msg)) != B_OK)
+			BM_THROW_RUNTIME(BmString("Could not instantiate item nr. ")
+							 << i + 1 << " \n\nError:" << strerror(err));
 		InstantiateItem(&msg);
 	}
-	BM_LOG2( mLogTerrain, BmString("End of InstantiateItems() for ") << Name());
+	BM_LOG2(mLogTerrain, BmString("End of InstantiateItems() for ") << Name());
 	mInitCheck = B_OK;
 }
 
@@ -1379,15 +1395,16 @@ void BmListModel::InstantiateItems( BMessage* archive) {
 	RestoreAndExecuteActionsFrom(dataIO)
 		-	fetches all stored actions from the given stream and executes them.
 		-	during the process of restoring the actions, we lock the list in order
-			to stop new (incoming) actions from being stored, as these actions would 
-			be written to the file we are currently reading from (and we'd like 
+			to stop new (incoming) actions from being stored, as these actions would
+			be written to the file we are currently reading from (and we'd like
 			to avoid racing ourselves).
 \*------------------------------------------------------------------------------*/
-bool BmListModel::RestoreAndExecuteActionsFrom(BDataIO* dataIO)
+bool
+BmListModel::RestoreAndExecuteActionsFrom(BDataIO* dataIO)
 {
-	BmAutolockCheckGlobal lock( mModelLocker);
+	BmAutolockCheckGlobal lock(mModelLocker);
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ":RestoreAndExecute(): Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ":RestoreAndExecute(): Unable to get lock");
 	FlushStoredActions();
 	uint32 count = 0;
 	BMessage action;
@@ -1402,9 +1419,11 @@ bool BmListModel::RestoreAndExecuteActionsFrom(BDataIO* dataIO)
 
 /*------------------------------------------------------------------------------*\
 	ExecuteAction()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmListModel::ExecuteAction(BMessage* action) {
+void
+BmListModel::ExecuteAction(BMessage* action)
+{
 	if (action) {
 		BmString key = action->FindString(MSG_ITEMKEY);
 		BmRef<BmListModelItem> item(FindItemByKey(key));
@@ -1416,12 +1435,14 @@ void BmListModel::ExecuteAction(BMessage* action) {
 /*------------------------------------------------------------------------------*\
 	StartJob()
 		-	executes the default job for a listmodel
-		-	tries to read the listmodel-hierarchy from a cache-file 
+		-	tries to read the listmodel-hierarchy from a cache-file
 			via InstantiateItems()
 		-	if no cache-file exists, list-model is initialized afresh via
 			InitializeItems()
 \*------------------------------------------------------------------------------*/
-bool BmListModel::StartJob() {
+bool
+BmListModel::StartJob()
+{
 	// try to open cache-file (if any) or else initialize the long way
 	if (InitCheck() == B_OK) {
 		return true;
@@ -1433,19 +1454,19 @@ bool BmListModel::StartJob() {
 		mStoredActionManager.Flush();
 		// try to open settings-file...
 		BFile file;
-		status_t err = file.SetTo( SettingsFileName().String(), B_READ_ONLY);
+		status_t err = file.SetTo(SettingsFileName().String(), B_READ_ONLY);
 		if (err == B_OK) {
 			// read archive(s) from cache/settings-file:
 			InstantiateItemsFromStream(&file);
 			RestoreAndExecuteActionsFrom(&file);
 		}
 		if (mInitCheck != B_OK) {
-			// no cache file found, or it couldn't be read, we fetch the 
+			// no cache file found, or it couldn't be read, we fetch the
 			// existing items by hand:
 			InitializeItems();
 		}
-	} catch (BM_error &e) {
-		BM_SHOWERR( e.what());
+	} catch (BM_error& e) {
+		BM_SHOWERR(e.what());
 	}
 
 	Thaw();

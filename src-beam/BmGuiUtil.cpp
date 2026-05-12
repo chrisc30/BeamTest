@@ -13,17 +13,16 @@ using namespace BmEncoding;
 #include "BmGuiUtil.h"
 #include "BmPrefs.h"
 
-template<>
+template <>
 BmMenuItemManager* BmMenuItemManager::theInstance = NULL;
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmMenuItem::BmMenuItem(const char* label, BMessage* msg, 
-							  const char* idForShortcut)
-	:	BMenuItem(label, msg)
-	,	mShortcutID(idForShortcut ? idForShortcut : label)
+BmMenuItem::BmMenuItem(const char* label, BMessage* msg, const char* idForShortcut)
+	: BMenuItem(label, msg),
+	  mShortcutID(idForShortcut ? idForShortcut : label)
 {
 	TheMenuItemManager->Register(this);
 	UpdateShortcut();
@@ -31,19 +30,18 @@ BmMenuItem::BmMenuItem(const char* label, BMessage* msg,
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmMenuItem::BmMenuItem(BMenu* menu, BMessage* msg, 
-							  const char* idForShortcut)
-	:	BMenuItem(menu, msg)
-	,	mShortcutID(idForShortcut)
+BmMenuItem::BmMenuItem(BMenu* menu, BMessage* msg, const char* idForShortcut)
+	: BMenuItem(menu, msg),
+	  mShortcutID(idForShortcut)
 {
 	TheMenuItemManager->Register(this);
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmMenuItem::~BmMenuItem()
 {
@@ -52,9 +50,10 @@ BmMenuItem::~BmMenuItem()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMenuItem::UpdateShortcut()
+void
+BmMenuItem::UpdateShortcut()
 {
 	BmString shortcut = ThePrefs->GetShortcutFor(mShortcutID.String());
 	int32 modifiers = 0;
@@ -64,14 +63,15 @@ void BmMenuItem::UpdateShortcut()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-template<>
-void BmMenuItemManager::UpdateAll()
+template <>
+void
+BmMenuItemManager::UpdateAll()
 {
 	mLock.Lock();
 	BmViewSet::iterator iter;
-	for(iter=mViewSet.begin(); iter != mViewSet.end(); ++iter) {
+	for (iter = mViewSet.begin(); iter != mViewSet.end(); ++iter) {
 		BmMenuItem* menuItem = (*iter);
 		if (menuItem)
 			menuItem->UpdateShortcut();
@@ -84,23 +84,25 @@ void BmMenuItemManager::UpdateAll()
 		-	parses given shortcut and returns info about the corresponding
 			keycode and modifiers
 \*------------------------------------------------------------------------------*/
-char ParseShortcut(BmString shortcut, int32* _modifiers) {
+char
+ParseShortcut(BmString shortcut, int32* _modifiers)
+{
 	shortcut.RemoveSet(" \t");
 	shortcut.ToUpper();
 	char keycode = 0;
 	int32 modifiers = 0;
 	int32 pos;
-	if ((pos=shortcut.FindFirst("<SHIFT>")) != B_ERROR) {
+	if ((pos = shortcut.FindFirst("<SHIFT>")) != B_ERROR) {
 		modifiers |= B_SHIFT_KEY;
 		shortcut.Remove(pos, 7);
 	}
-	if (shortcut=="<RIGHT_ARROW>")
+	if (shortcut == "<RIGHT_ARROW>")
 		keycode = B_RIGHT_ARROW;
-	else if (shortcut=="<LEFT_ARROW>")
+	else if (shortcut == "<LEFT_ARROW>")
 		keycode = B_LEFT_ARROW;
-	else if (shortcut=="<UP_ARROW>")
+	else if (shortcut == "<UP_ARROW>")
 		keycode = B_UP_ARROW;
-	else if (shortcut=="<DOWN_ARROW>")
+	else if (shortcut == "<DOWN_ARROW>")
 		keycode = B_DOWN_ARROW;
 	else if (shortcut.Length())
 		keycode = shortcut[0];
@@ -113,7 +115,9 @@ char ParseShortcut(BmString shortcut, int32* _modifiers) {
 	AddItemToMenu( menu, item, target)
 		-	adds item to menu and sets item's target
 \*------------------------------------------------------------------------------*/
-void AddItemToMenu(BMenu* menu, BMenuItem* item, BHandler* target) {
+void
+AddItemToMenu(BMenu* menu, BMenuItem* item, BHandler* target)
+{
 	if (target)
 		item->SetTarget(target);
 	menu->AddItem(item);
@@ -121,37 +125,40 @@ void AddItemToMenu(BMenu* menu, BMenuItem* item, BHandler* target) {
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BMenuItem* CreateMenuItem(const char* label, int32 msgWhat, 
-								  const char* idForShortcut) {
+BMenuItem*
+CreateMenuItem(const char* label, int32 msgWhat, const char* idForShortcut)
+{
 	return CreateMenuItem(label, new BMessage(msgWhat), idForShortcut);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BMenuItem* CreateMenuItem(const char* label, BMessage* msg, 
-								  const char* idForShortcut) {
+BMenuItem*
+CreateMenuItem(const char* label, BMessage* msg, const char* idForShortcut)
+{
 	return new BmMenuItem(label, msg, idForShortcut);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BMenuItem* CreateSubMenuItem(const char* label, int32 msgWhat, 
-									  const char* idForShortcut, BMenu* subMenu) {
+BMenuItem*
+CreateSubMenuItem(const char* label, int32 msgWhat, const char* idForShortcut, BMenu* subMenu)
+{
 	return CreateSubMenuItem(label, new BMessage(msgWhat), idForShortcut, subMenu);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BMenuItem* CreateSubMenuItem(const char* label, BMessage* msg, 
-									  const char* idForShortcut, BMenu* subMenu) 
+BMenuItem*
+CreateSubMenuItem(const char* label, BMessage* msg, const char* idForShortcut, BMenu* subMenu)
 {
 	if (!subMenu)
 		subMenu = new BMenu(label);

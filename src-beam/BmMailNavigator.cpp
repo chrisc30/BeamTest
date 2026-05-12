@@ -6,48 +6,50 @@
  *		Oliver Tappe <beam@hirschkaefer.de>
  */
 
-#include "BmMail.h"
 #include "BmMailNavigator.h"
+#include "BmMail.h"
 #include "BmMailRef.h"
 #include "BmMailRefView.h"
 #include "BmMailView.h"
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmMailRefSelector::operator() (BmMailRef* mailRef) const
+bool
+BmMailRefSelector::operator()(BmMailRef* mailRef) const
 {
 	return mailRef && mailRef->IsValid();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmNewMailRefSelector::operator() (BmMailRef* mailRef) const
+bool
+BmNewMailRefSelector::operator()(BmMailRef* mailRef) const
 {
 	return mailRef && mailRef->Status() == BM_MAIL_STATUS_NEW;
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmMailNavigator::BmMailNavigator(BmMailRefView* refView, 
-											BmMailView* mailView,
-											const BmMailRefSelector& selector)
-  :	mRefView(refView)
-  ,	mMailView(mailView)
-  ,	mMailRefSelector(selector)
+BmMailNavigator::BmMailNavigator(
+	BmMailRefView* refView, BmMailView* mailView, const BmMailRefSelector& selector)
+	: mRefView(refView),
+	  mMailView(mailView),
+	  mMailRefSelector(selector)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailNavigator::MoveBackward()
+void
+BmMailNavigator::MoveBackward()
 {
 	if (!_MoveMailView())
 		_MoveRefView(true);
@@ -55,9 +57,10 @@ void BmMailNavigator::MoveBackward()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailNavigator::MoveForward()
+void
+BmMailNavigator::MoveForward()
 {
 	if (!_MoveMailView())
 		_MoveRefView(false);
@@ -65,15 +68,16 @@ void BmMailNavigator::MoveForward()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmMailNavigator::_MoveMailView()
+bool
+BmMailNavigator::_MoveMailView()
 {
 	bool result = false;
 	if (mMailView && mMailView->LockLooper()) {
 		float currTop = mMailView->Bounds().top;
 		char navKey = B_PAGE_DOWN;
-		mMailView->KeyDown( &navKey, 1);
+		mMailView->KeyDown(&navKey, 1);
 		result = mMailView->Bounds().top != currTop;
 		mMailView->UnlockLooper();
 	}
@@ -82,9 +86,10 @@ bool BmMailNavigator::_MoveMailView()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmMailNavigator::_MoveRefView(bool backward)
+bool
+BmMailNavigator::_MoveRefView(bool backward)
 {
 	bool result = false;
 	if (mRefView && mRefView->LockLooper()) {
@@ -94,7 +99,7 @@ bool BmMailNavigator::_MoveRefView(bool backward)
 		int32 sortKeys[100];
 		CLVSortMode sortModes[100];
 		int32 sortKeyCount = mRefView->GetSorting(sortKeys, sortModes);
-		for(int32 i=0; i<sortKeyCount; ++i) {
+		for (int32 i = 0; i < sortKeyCount; ++i) {
 			CLVColumn* column = mRefView->ColumnAt(sortKeys[i]);
 			if (column->Flags() & (CLV_COLDATA_DATE | CLV_COLDATA_BIGTIME)) {
 				if (sortModes[i] == Descending) {
@@ -108,8 +113,8 @@ bool BmMailNavigator::_MoveRefView(bool backward)
 		BmMailRefItem* refItem = NULL;
 		int32 currSel = mRefView->CurrentSelection();
 		if (backward) {
-			int32 idx = currSel >= 0 ? currSel-1 : mRefView->CountItems()-1;
-			for( ; idx >= 0; --idx) {
+			int32 idx = currSel >= 0 ? currSel - 1 : mRefView->CountItems() - 1;
+			for (; idx >= 0; --idx) {
 				refItem = dynamic_cast<BmMailRefItem*>(mRefView->ItemAt(idx));
 				if (refItem && mMailRefSelector(refItem->ModelItem())) {
 					mRefView->Select(idx);
@@ -119,8 +124,8 @@ bool BmMailNavigator::_MoveRefView(bool backward)
 				}
 			}
 		} else {
-			int32 idx = currSel >= 0 ? currSel+1 : 0;
-			for( ; idx < mRefView->CountItems(); ++idx) {
+			int32 idx = currSel >= 0 ? currSel + 1 : 0;
+			for (; idx < mRefView->CountItems(); ++idx) {
 				refItem = dynamic_cast<BmMailRefItem*>(mRefView->ItemAt(idx));
 				if (refItem && mMailRefSelector(refItem->ModelItem())) {
 					mRefView->Select(idx);

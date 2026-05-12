@@ -18,13 +18,12 @@
 class BLocker;
 class BView;
 
-class IMPEXPBMMAILKIT BmApplication : public BApplication
-{
+class IMPEXPBMMAILKIT BmApplication : public BApplication {
 	typedef BApplication inherited;
 
 public:
 	//
-	BmApplication( const char *sig, bool testModeRequested);
+	BmApplication(const char* sig, bool testModeRequested);
 	~BmApplication();
 
 	// native methods:
@@ -33,9 +32,9 @@ public:
 	thread_id Run();
 
 	// getters
-	inline bool IsQuitting()				{ return mIsQuitting; }
-	inline BLocker* StartupLocker()		{ return mStartupLocker; }
-	inline const BmString& AppPath()		{ return mAppPath; }
+	inline bool IsQuitting() { return mIsQuitting; }
+	inline BLocker* StartupLocker() { return mStartupLocker; }
+	inline const BmString& AppPath() { return mAppPath; }
 
 	BmString BmAppVersion;
 	BmString BmAppName;
@@ -46,9 +45,9 @@ protected:
 	bool mIsQuitting;
 
 	BLocker* mStartupLocker;
-	
+
 	BmString mAppPath;
-	
+
 	static int InstanceCount;
 };
 

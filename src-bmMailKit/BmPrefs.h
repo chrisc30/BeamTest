@@ -19,7 +19,7 @@
 #include "BmString.h"
 
 /*------------------------------------------------------------------------------*\
-	BmPrefs 
+	BmPrefs
 		-	holds preference information for Beam
 		- 	derived from BArchivable, so it can be read from and
 			written to a file
@@ -32,41 +32,41 @@ class IMPEXPBMMAILKIT BmPrefs : public BArchivable {
 	static const char* const MSG_VERSION;
 
 	static const int16 nPrefsVersion;
-	
+
 public:
 	// creator-func, c'tors and d'tor:
 	static BmPrefs* CreateInstance();
-	BmPrefs( void);
-	BmPrefs( BMessage* archive);
+	BmPrefs(void);
+	BmPrefs(BMessage* archive);
 	virtual ~BmPrefs();
 
 	// native methods:
 	bool Store();
-	bool GetBool( const char* name);
-	bool GetBool( const char* name, const bool defaultVal);
-	int32 GetInt( const char* name);
-	int32 GetInt( const char* name, const int32 defaultVal);
-	BMessage* GetMsg( const char* name);
-	BmString GetString( const char* name);
-	BmString GetString( const char* name, const BmString defaultVal);
-	void SetBool( const char* name, const bool val);
-	void SetInt( const char* name, const int32 val);
-	void SetMsg( const char* name, const BMessage* val);
-	void SetString( const char* name, const BmString val);
+	bool GetBool(const char* name);
+	bool GetBool(const char* name, const bool defaultVal);
+	int32 GetInt(const char* name);
+	int32 GetInt(const char* name, const int32 defaultVal);
+	BMessage* GetMsg(const char* name);
+	BmString GetString(const char* name);
+	BmString GetString(const char* name, const BmString defaultVal);
+	void SetBool(const char* name, const bool val);
+	void SetInt(const char* name, const int32 val);
+	void SetMsg(const char* name, const BMessage* val);
+	void SetString(const char* name, const BmString val);
 	//
 	void ResetToSaved();
 	void ResetToDefault();
 
-	BmString GetShortcutFor( const char* shortcutID);
-	void SetShortcutFor( const char* name, const BmString val);
+	BmString GetShortcutFor(const char* shortcutID);
+	void SetShortcutFor(const char* name, const BmString val);
 
-	uint32 GetNumericLogLevelFor( uint32 terrain);
-	const char* GetLogLevelFor( uint32 terrain);
-	void SetLogLevelForTo( uint32 terrain, BmString level);
+	uint32 GetNumericLogLevelFor(uint32 terrain);
+	const char* GetLogLevelFor(uint32 terrain);
+	void SetLogLevelForTo(uint32 terrain, BmString level);
 
 	// getters:
-	BMessage* ShortcutsMsg()				{ return &mShortcutsMsg; }
-	BLocker& Locker()							{ return mLocker; }
+	BMessage* ShortcutsMsg() { return &mShortcutsMsg; }
+	BLocker& Locker() { return mLocker; }
 
 	static BmPrefs* theInstance;
 
@@ -84,11 +84,10 @@ public:
 	static const BmString nDefaultIconset;
 
 private:
-
 	void SetLoglevels();
 	static void InitDefaults(BMessage& defaultsMsg);
-	static BMessage* GetShortcutDefaults( BMessage* msg=NULL);
-	static void SetShortcutIfNew( BMessage* msg, const char* name, const BmString val);
+	static BMessage* GetShortcutDefaults(BMessage* msg = NULL);
+	static void SetShortcutIfNew(BMessage* msg, const char* name, const BmString val);
 
 	BMessage mPrefsMsg;
 	BMessage mDefaultsMsg;
@@ -98,9 +97,8 @@ private:
 	BLocker mLocker;
 
 	// Hide copy-constructor and assignment:
-	BmPrefs( const BmPrefs&);
-	BmPrefs operator=( const BmPrefs&);
-
+	BmPrefs(const BmPrefs&);
+	BmPrefs operator=(const BmPrefs&);
 };
 
 #define ThePrefs BmPrefs::theInstance

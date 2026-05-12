@@ -19,34 +19,32 @@
 			Beam's state.
 \*------------------------------------------------------------------------------*/
 class BmGuiRoster : public BmGuiRosterBase {
-
 public:
 	BmGuiRoster();
-	virtual ~BmGuiRoster()						{}
-	
+	virtual ~BmGuiRoster() {}
+
 	// overrides of base class:
-	bool AskUserForPwd( const BmString& text, BmString& pwd);
-	bool AskUserForPopAcc( const BmString& accName, BmString& popAccName);
+	bool AskUserForPwd(const BmString& text, BmString& pwd);
+	bool AskUserForPopAcc(const BmString& accName, BmString& popAccName);
 
-	bool IsEmailKnown( const BmString& email);
+	bool IsEmailKnown(const BmString& email);
 
-	void RebuildCharsetMenu( BmMenuControllerBase* menu);
-	void AddCharsetMenu( BMenu* menu, BHandler* target, int32 msgType);
-	void RebuildFilterMenu( BmMenuControllerBase* menu);
-	void RebuildFilterChainMenu( BmMenuControllerBase* menu);
-	void RebuildFolderMenu( BmMenuControllerBase* menu);
-	void RebuildIdentityMenu( BmMenuControllerBase* menu);
-	void RebuildLogMenu( BmMenuControllerBase* menu);
-	void RebuildPeopleMenu( BmMenuControllerBase* menu);
-	void RebuildRecvAccountMenu( BmMenuControllerBase* menu);
-	void RebuildSignatureMenu( BmMenuControllerBase* menu);
-	void RebuildSmtpAccountMenu( BmMenuControllerBase* menu);
-	void RebuildStatusMenu( BmMenuControllerBase* menu);
-	void RebuildMailRefFilterMenu( BmMenuControllerBase* menu);
-	void RebuildMailRefViewFilterMenu( BmMenuControllerBase* menu);
+	void RebuildCharsetMenu(BmMenuControllerBase* menu);
+	void AddCharsetMenu(BMenu* menu, BHandler* target, int32 msgType);
+	void RebuildFilterMenu(BmMenuControllerBase* menu);
+	void RebuildFilterChainMenu(BmMenuControllerBase* menu);
+	void RebuildFolderMenu(BmMenuControllerBase* menu);
+	void RebuildIdentityMenu(BmMenuControllerBase* menu);
+	void RebuildLogMenu(BmMenuControllerBase* menu);
+	void RebuildPeopleMenu(BmMenuControllerBase* menu);
+	void RebuildRecvAccountMenu(BmMenuControllerBase* menu);
+	void RebuildSignatureMenu(BmMenuControllerBase* menu);
+	void RebuildSmtpAccountMenu(BmMenuControllerBase* menu);
+	void RebuildStatusMenu(BmMenuControllerBase* menu);
+	void RebuildMailRefFilterMenu(BmMenuControllerBase* menu);
+	void RebuildMailRefViewFilterMenu(BmMenuControllerBase* menu);
 
-	int32 ShowAlert( const BmString& text, const char* btn1,
-						  const char* btn2, const char* btn3);
+	int32 ShowAlert(const BmString& text, const char* btn1, const char* btn2, const char* btn3);
 };
 
 

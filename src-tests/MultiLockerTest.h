@@ -24,7 +24,7 @@ public:
 	MultiLockerTest(string name = "");
 
 	static CppUnit::Test* suite();
-	
+
 	void MassiveReadLockTest();
 
 	void BasicReadLockTest();
@@ -48,7 +48,7 @@ public:
 	void ExpandReadToWriteLockTest4();
 
 protected:
-	bool WaitForVal( int32 val);
+	bool WaitForVal(int32 val);
 	BmMultiLocker mLocker;
 	int32 mVal;
 };

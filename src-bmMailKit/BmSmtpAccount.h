@@ -17,9 +17,9 @@
 #include "BmMail.h"
 
 enum {
-	BM_JOBWIN_SMTP			= 'bmeb'
-						// sent to JobMetaController in order to start
-						// smtp-connection
+	BM_JOBWIN_SMTP = 'bmeb'
+	// sent to JobMetaController in order to start
+	// smtp-connection
 };
 
 class BNetAddress;
@@ -34,88 +34,99 @@ class IMPEXPBMMAILKIT BmSmtpAccount : public BmListModelItem {
 	typedef BmListModelItem inherited;
 
 public:
-	BmSmtpAccount( const char* name, BmSmtpAccountList* model);
-	BmSmtpAccount( BMessage* archive, BmSmtpAccountList* model);
+	BmSmtpAccount(const char* name, BmSmtpAccountList* model);
+	BmSmtpAccount(BMessage* archive, BmSmtpAccountList* model);
 	virtual ~BmSmtpAccount();
 
 	// native methods:
 	bool NeedsAuthViaPopServer();
-	bool SanityCheck( BmString& complaint, BmString& fieldName) const;
+	bool SanityCheck(BmString& complaint, BmString& fieldName) const;
 	//
-	void SendMail( const entry_ref& eref);
+	void SendMail(const entry_ref& eref);
 	void SendPendingMails();
 
-	const char* DefaultPort(bool encrypted) const {
-		return encrypted ? "465" : "25";
-	}
+	const char* DefaultPort(bool encrypted) const { return encrypted ? "465" : "25"; }
 
 	void GetSupportedAuthTypes(vector<BmString>& outList) const;
 
 	// stuff needed for Archival:
-	status_t Archive( BMessage* archive, bool deep = true) const;
-	int16 ArchiveVersion() const			{ return nArchiveVersion; }
+	status_t Archive(BMessage* archive, bool deep = true) const;
+	int16 ArchiveVersion() const { return nArchiveVersion; }
 
 	// getters:
-	inline const BmString &Name() const { return Key(); }
-	inline const BmString &Username() const
-													{ return mUsername; }
-	inline const BmString &Password() const
-													{ return mPassword; }
-	inline bool PwdStoredOnDisk() const	{ return mPwdStoredOnDisk; }
-	inline const BmString &SMTPServer() const
-													{ return mSMTPServer; }
-	inline const BmString &DomainToAnnounce() const
-													{ return mDomainToAnnounce; }
-	inline const BmString &EncryptionType() const
-													{ return mEncryptionType; }
-	inline const BmString &AuthMethod() const
-													{ return mAuthMethod; }
-	inline uint16 PortNr() const			{ return mPortNr; }
-	inline const BmString &PortNrString() const
-													{ return mPortNrString; }
-	inline const BmString &AccForSmtpAfterPop() const
-													{ return mAccForSmtpAfterPop; }
-	inline const BmString &ClientCertificate() const
-													{ return mClientCertificate; }
-	inline const BmString &AcceptedCertID() const
-													{ return mAcceptedCertID; }
+	inline const BmString& Name() const { return Key(); }
+	inline const BmString& Username() const { return mUsername; }
+	inline const BmString& Password() const { return mPassword; }
+	inline bool PwdStoredOnDisk() const { return mPwdStoredOnDisk; }
+	inline const BmString& SMTPServer() const { return mSMTPServer; }
+	inline const BmString& DomainToAnnounce() const { return mDomainToAnnounce; }
+	inline const BmString& EncryptionType() const { return mEncryptionType; }
+	inline const BmString& AuthMethod() const { return mAuthMethod; }
+	inline uint16 PortNr() const { return mPortNr; }
+	inline const BmString& PortNrString() const { return mPortNrString; }
+	inline const BmString& AccForSmtpAfterPop() const { return mAccForSmtpAfterPop; }
+	inline const BmString& ClientCertificate() const { return mClientCertificate; }
+	inline const BmString& AcceptedCertID() const { return mAcceptedCertID; }
 
 	// setters:
-	inline void Username( const BmString &s)
-													{ mUsername = s;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void Password( const BmString &s)
-													{ mPassword = s;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void PwdStoredOnDisk( bool b){ mPwdStoredOnDisk = b;
-													  if (!b)
-														  mPassword.Truncate( 0, false);
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void SMTPServer( const BmString &s)
-													{ mSMTPServer = s;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void DomainToAnnounce( const BmString &s)
-													{ mDomainToAnnounce = s;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void EncryptionType( const BmString &s)
-													{ mEncryptionType = s;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void AuthMethod( const BmString &s)
-													{ mAuthMethod = s;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void PortNr( uint16 i)			{ mPortNr = i;
-													  mPortNrString
-													  		= BmString()<<(uint32)i;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void AccForSmtpAfterPop( const BmString &s)
-													{ mAccForSmtpAfterPop = s;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void ClientCertificate( const BmString &s)
-													{ mClientCertificate = s;
-													  TellModelItemUpdated( UPD_ALL); }
-	inline void AcceptedCertID( const BmString &s)
-													{ mAcceptedCertID = s;
-													  TellModelItemUpdated( UPD_ALL); }
+	inline void Username(const BmString& s)
+	{
+		mUsername = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void Password(const BmString& s)
+	{
+		mPassword = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void PwdStoredOnDisk(bool b)
+	{
+		mPwdStoredOnDisk = b;
+		if (!b)
+			mPassword.Truncate(0, false);
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void SMTPServer(const BmString& s)
+	{
+		mSMTPServer = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void DomainToAnnounce(const BmString& s)
+	{
+		mDomainToAnnounce = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void EncryptionType(const BmString& s)
+	{
+		mEncryptionType = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void AuthMethod(const BmString& s)
+	{
+		mAuthMethod = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void PortNr(uint16 i)
+	{
+		mPortNr = i;
+		mPortNrString = BmString() << (uint32)i;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void AccForSmtpAfterPop(const BmString& s)
+	{
+		mAccForSmtpAfterPop = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void ClientCertificate(const BmString& s)
+	{
+		mClientCertificate = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
+	inline void AcceptedCertID(const BmString& s)
+	{
+		mAcceptedCertID = s;
+		TellModelItemUpdated(UPD_ALL);
+	}
 
 	static const char* const ENCR_AUTO;
 	static const char* const ENCR_STARTTLS;
@@ -149,27 +160,27 @@ public:
 	static const char* const MSG_REF;
 
 private:
-	BmSmtpAccount();					// hide default constructor
+	BmSmtpAccount();  // hide default constructor
 	// Hide copy-constructor and assignment:
-	BmSmtpAccount( const BmSmtpAccount&);
-	BmSmtpAccount operator=( const BmSmtpAccount&);
+	BmSmtpAccount(const BmSmtpAccount&);
+	BmSmtpAccount operator=(const BmSmtpAccount&);
 
-	//BmString mName;					// name is stored in key (base-class)
+	// BmString mName;					// name is stored in key (base-class)
 	BmString mUsername;
 	BmString mPassword;
-	BmString mSMTPServer;			//
-	BmString mDomainToAnnounce;	// domain-name that will be used when we
-											// announce ourselves to the server (HELO/EHLO)
-	BmString mEncryptionType;		// type of encryption to use
-	BmString mAuthMethod;			// authentication method to use
-	uint16 mPortNr;					// usually 25
-	BmString mPortNrString;			// Port-Nr as String
-	bool mPwdStoredOnDisk;			// store Passwords unsafely on disk?
-	BmString mAccForSmtpAfterPop;	// pop-account to use for authentication
-	BmString mClientCertificate;	// the client certificate that is going to
-											// be used during SSL/TLS handshake
-	BmString mAcceptedCertID;		// ID of certificate that has been explicitly
-											// accepted by user
+	BmString mSMTPServer;		   //
+	BmString mDomainToAnnounce;	   // domain-name that will be used when we
+								   // announce ourselves to the server (HELO/EHLO)
+	BmString mEncryptionType;	   // type of encryption to use
+	BmString mAuthMethod;		   // authentication method to use
+	uint16 mPortNr;				   // usually 25
+	BmString mPortNrString;		   // Port-Nr as String
+	bool mPwdStoredOnDisk;		   // store Passwords unsafely on disk?
+	BmString mAccForSmtpAfterPop;  // pop-account to use for authentication
+	BmString mClientCertificate;   // the client certificate that is going to
+								   // be used during SSL/TLS handshake
+	BmString mAcceptedCertID;	   // ID of certificate that has been explicitly
+								   // accepted by user
 };
 
 
@@ -191,19 +202,19 @@ public:
 
 	// native methods:
 	void SendPendingMails();
-	void SendPendingMailsFor( const BmString accName);
+	void SendPendingMailsFor(const BmString accName);
 
 	// overrides of listmodel base:
 	const BmString SettingsFileName();
-	void InstantiateItem( BMessage* archive);
-	int16 ArchiveVersion() const			{ return nArchiveVersion; }
+	void InstantiateItem(BMessage* archive);
+	int16 ArchiveVersion() const { return nArchiveVersion; }
 
 	static BmRef<BmSmtpAccountList> theInstance;
 
 private:
 	// Hide copy-constructor and assignment:
-	BmSmtpAccountList( const BmSmtpAccountList&);
-	BmSmtpAccountList operator=( const BmSmtpAccountList&);
+	BmSmtpAccountList(const BmSmtpAccountList&);
+	BmSmtpAccountList operator=(const BmSmtpAccountList&);
 };
 
 #define TheSmtpAccountList BmSmtpAccountList::theInstance

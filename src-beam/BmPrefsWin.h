@@ -17,8 +17,7 @@ class UserResizeSplitView;
 class BmPrefsViewContainer;
 class MButton;
 
-class BmPrefsWin : public BmWindow
-{
+class BmPrefsWin : public BmWindow {
 	typedef BmWindow inherited;
 
 	// archival-fieldnames:
@@ -31,35 +30,35 @@ public:
 	~BmPrefsWin();
 
 	// native methods:
-	void SendMsgToSubView( const BmString& subViewName, BMessage* msg);
+	void SendMsgToSubView(const BmString& subViewName, BMessage* msg);
 
 	// overrides of BWindow base:
-	void MessageReceived( BMessage*);
+	void MessageReceived(BMessage*);
 	bool QuitRequested();
 	void Quit();
 
 	static BmPrefsWin* theInstance;
 
 protected:
-	status_t ArchiveState( BMessage* archive) const;
-	status_t UnarchiveState( BMessage* archive);
+	status_t ArchiveState(BMessage* archive) const;
+	status_t UnarchiveState(BMessage* archive);
 
 private:
-	ColumnListView* CreatePrefsListView( int32 width, int32 height);
-	void PrefsListSelectionChanged( int32 numSelected);
+	ColumnListView* CreatePrefsListView(int32 width, int32 height);
+	void PrefsListSelectionChanged(int32 numSelected);
 
 	ColumnListView* mPrefsListView;
 	BmPrefsViewContainer* mPrefsViewContainer;
 	UserResizeSplitView* mVertSplitter;
-	
+
 	bool mChanged;
 	MButton* mSaveButton;
 	MButton* mRevertButton;
 	MButton* mDefaultsButton;
 
 	// Hide copy-constructor and assignment:
-	BmPrefsWin( const BmPrefsWin&);
-	BmPrefsWin operator=( const BmPrefsWin&);
+	BmPrefsWin(const BmPrefsWin&);
+	BmPrefsWin operator=(const BmPrefsWin&);
 };
 
 #define ThePrefsWin BmPrefsWin::theInstance

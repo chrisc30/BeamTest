@@ -16,27 +16,23 @@
 #include "BmAutoCompleter.h"
 
 class BTextControl;
-class IMPEXPBMGUIBASE BmTextControlCompleter
-	: protected BmAutoCompleter
-	, public BMessageFilter
-{
+class IMPEXPBMGUIBASE BmTextControlCompleter : protected BmAutoCompleter, public BMessageFilter {
 public:
-	BmTextControlCompleter(BTextControl* textControl, 
-								  ChoiceModel* choiceModel = NULL,
-								  PatternSelector* patternSelector = NULL);
+	BmTextControlCompleter(BTextControl* textControl, ChoiceModel* choiceModel = NULL,
+		PatternSelector* patternSelector = NULL);
 	virtual ~BmTextControlCompleter();
-	
+
 private:
-	virtual filter_result Filter(BMessage *message, BHandler **target);
-	
-	class TextControlWrapper : public EditView
-	{
+	virtual filter_result Filter(BMessage* message, BHandler** target);
+
+	class TextControlWrapper : public EditView {
 	public:
 		TextControlWrapper(BTextControl* textControl);
 		virtual BRect GetAdjustmentFrame();
-		virtual void GetEditViewState( BmString& text, int32* caretPos);
-		virtual void SetEditViewState( const BmString& text, int32 caretPos,
-												 int32 selectionLength = 0);
+		virtual void GetEditViewState(BmString& text, int32* caretPos);
+		virtual void SetEditViewState(
+			const BmString& text, int32 caretPos, int32 selectionLength = 0);
+
 	private:
 		BTextControl* mTextControl;
 	};

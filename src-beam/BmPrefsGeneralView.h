@@ -12,7 +12,6 @@
 #include "BmPrefsView.h"
 
 
-
 class BFilePanel;
 class BmTextControl;
 class BmCheckControl;
@@ -20,26 +19,26 @@ class BmMenuControl;
 class MButton;
 /*------------------------------------------------------------------------------*\
 	BmPrefsGeneralView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmPrefsGeneralView : public BmPrefsView {
 	typedef BmPrefsView inherited;
 
 	enum {
-		BM_SHOW_TOOLTIPS_CHANGED 			= 'bmTC',
-		BM_MAKE_BEAM_STD_APP	 				= 'bmBS',
-		BM_SELECT_MAILBOX		 				= 'bmSM',
-		BM_SELECT_ICONBOX		 				= 'bmSI',
-		BM_WORKSPACE_SELECTED				= 'bmWS',
-		BM_TOOLBAR_LABEL_SELECTED			= 'bmTL',
-		BM_LISTVIEW_LIKE_TRACKER_CHANGED	= 'bmLT'
+		BM_SHOW_TOOLTIPS_CHANGED = 'bmTC',
+		BM_MAKE_BEAM_STD_APP = 'bmBS',
+		BM_SELECT_MAILBOX = 'bmSM',
+		BM_SELECT_ICONBOX = 'bmSI',
+		BM_WORKSPACE_SELECTED = 'bmWS',
+		BM_TOOLBAR_LABEL_SELECTED = 'bmTL',
+		BM_LISTVIEW_LIKE_TRACKER_CHANGED = 'bmLT'
 	};
-	
+
 public:
 	// c'tors and d'tor:
 	BmPrefsGeneralView();
 	virtual ~BmPrefsGeneralView();
-	
+
 	// overrides of BmPrefsView base:
 	void Initialize();
 	void Update();
@@ -49,8 +48,8 @@ public:
 	void SetDefaults();
 
 	// overrides of BView base:
-	void MessageReceived( BMessage* msg);
-	
+	void MessageReceived(BMessage* msg);
+
 	static const char* const MSG_WORKSPACE;
 
 private:
@@ -71,8 +70,8 @@ private:
 	BFilePanel* mIconboxPanel;
 
 	// Hide copy-constructor and assignment:
-	BmPrefsGeneralView( const BmPrefsGeneralView&);
-	BmPrefsGeneralView operator=( const BmPrefsGeneralView&);
+	BmPrefsGeneralView(const BmPrefsGeneralView&);
+	BmPrefsGeneralView operator=(const BmPrefsGeneralView&);
 };
 
 #endif

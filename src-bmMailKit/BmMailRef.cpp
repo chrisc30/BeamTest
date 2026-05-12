@@ -23,36 +23,37 @@
 #include "BmStorageUtil.h"
 #include "BmUtil.h"
 
-static BmString BM_REFKEYSTAT( const struct stat& x) 
+static BmString
+BM_REFKEYSTAT(const struct stat& x)
 {
 	return BmString() << x.st_ino;
 }
 
 // archival-fieldnames:
-const char* const BmMailRef::MSG_ACCOUNT = 	"bm:ac";
-const char* const BmMailRef::MSG_ATTACHMENTS= "bm:at";
-const char* const BmMailRef::MSG_CC = 			"bm:cc";
-const char* const BmMailRef::MSG_ENTRYREF = 	"bm:er";
-const char* const BmMailRef::MSG_FROM = 		"bm:fr";
-const char* const BmMailRef::MSG_INODE = 		"bm:in";
-const char* const BmMailRef::MSG_NAME = 		"bm:nm";
-const char* const BmMailRef::MSG_PRIORITY = 	"bm:pr";
+const char* const BmMailRef::MSG_ACCOUNT = "bm:ac";
+const char* const BmMailRef::MSG_ATTACHMENTS = "bm:at";
+const char* const BmMailRef::MSG_CC = "bm:cc";
+const char* const BmMailRef::MSG_ENTRYREF = "bm:er";
+const char* const BmMailRef::MSG_FROM = "bm:fr";
+const char* const BmMailRef::MSG_INODE = "bm:in";
+const char* const BmMailRef::MSG_NAME = "bm:nm";
+const char* const BmMailRef::MSG_PRIORITY = "bm:pr";
 const char* const BmMailRef::MSG_WHEN_CREATED = "bm:cr";
-const char* const BmMailRef::MSG_REPLYTO = 	"bm:rp";
-const char* const BmMailRef::MSG_SIZE = 		"bm:sz";
-const char* const BmMailRef::MSG_STATUS = 	"bm:st";
-const char* const BmMailRef::MSG_SUBJECT = 	"bm:su";
-const char* const BmMailRef::MSG_TO = 			"bm:to";
-const char* const BmMailRef::MSG_WHEN = 		"bm:wh";
-const char* const BmMailRef::MSG_IDENTITY = 	"bm:id";
-const char* const BmMailRef::MSG_IS_VALID = 	"bm:iv";
-const char* const BmMailRef::MSG_CLASSIFICATION = 	"bm:cl";
-const char* const BmMailRef::MSG_RATIO_SPAM= "bm:rs";
-const char* const BmMailRef::MSG_IMAP_UID =	"bm:ui";
+const char* const BmMailRef::MSG_REPLYTO = "bm:rp";
+const char* const BmMailRef::MSG_SIZE = "bm:sz";
+const char* const BmMailRef::MSG_STATUS = "bm:st";
+const char* const BmMailRef::MSG_SUBJECT = "bm:su";
+const char* const BmMailRef::MSG_TO = "bm:to";
+const char* const BmMailRef::MSG_WHEN = "bm:wh";
+const char* const BmMailRef::MSG_IDENTITY = "bm:id";
+const char* const BmMailRef::MSG_IS_VALID = "bm:iv";
+const char* const BmMailRef::MSG_CLASSIFICATION = "bm:cl";
+const char* const BmMailRef::MSG_RATIO_SPAM = "bm:rs";
+const char* const BmMailRef::MSG_IMAP_UID = "bm:ui";
 const int16 BmMailRef::nArchiveVersion = 6;
 
 const float BmMailRef::UNKNOWN_RATIO = 10.0;
-	// just anything outside of [0..1]
+// just anything outside of [0..1]
 
 /*------------------------------------------------------------------------------*\
 	CreateInstance( )
@@ -60,12 +61,13 @@ const float BmMailRef::UNKNOWN_RATIO = 10.0;
 		-	N.B.: In here, we lock the GlobalLocker manually (*not* BmAutolock),
 			because otherwise we may risk deadlocks
 \*------------------------------------------------------------------------------*/
-BmRef<BmMailRef> BmMailRef::CreateInstance( entry_ref &eref, 
-												  		  struct stat* st) {
+BmRef<BmMailRef>
+BmMailRef::CreateInstance(entry_ref& eref, struct stat* st)
+{
 	BmString key;
 	node_ref nref;
 	if (st)
-		key = BM_REFKEYSTAT( *st);
+		key = BM_REFKEYSTAT(*st);
 	else {
 		BEntry entry(&eref);
 		if (entry.GetNodeRef(&nref) != B_OK)
@@ -77,20 +79,17 @@ BmRef<BmMailRef> BmMailRef::CreateInstance( entry_ref &eref,
 		BM_SHOWERR("BmMailRef::CreateInstance(): Could not acquire global lock!");
 		return NULL;
 	}
-	BmRef<BmMailRef> mailRef( 
-		dynamic_cast<BmMailRef*>( 
-			BmRefObj::FetchObject( typeid(BmMailRef).name(), key)
-		)
-	);
+	BmRef<BmMailRef> mailRef(
+		dynamic_cast<BmMailRef*>(BmRefObj::FetchObject(typeid(BmMailRef).name(), key)));
 	GlobalLocker()->Unlock();
 	if (mailRef) {
-		mailRef->ResyncFromDisk( &eref, st);
+		mailRef->ResyncFromDisk(&eref, st);
 		return mailRef;
 	} else {
 		if (st)
-			mailRef = new BmMailRef( eref, *st);
+			mailRef = new BmMailRef(eref, *st);
 		else
-			mailRef = new BmMailRef( eref, nref);
+			mailRef = new BmMailRef(eref, nref);
 		mailRef->Initialize();
 		return mailRef;
 	}
@@ -102,31 +101,30 @@ BmRef<BmMailRef> BmMailRef::CreateInstance( entry_ref &eref,
 		-	N.B.: In here, we lock the GlobalLocker manually (*not* BmAutolock),
 			because otherwise we may risk deadlocks
 \*------------------------------------------------------------------------------*/
-BmRef<BmMailRef> BmMailRef::CreateInstance( BMessage* archive) {
+BmRef<BmMailRef>
+BmMailRef::CreateInstance(BMessage* archive)
+{
 	status_t err;
 	node_ref nref;
-	if ((err = archive->FindInt64( MSG_INODE, &nref.node)) != B_OK) {
-		BM_LOGERR( BmString("BmMailRef: Could not find msg-field ") 
-							<< MSG_INODE << "\n\nError:" << strerror(err));
+	if ((err = archive->FindInt64(MSG_INODE, &nref.node)) != B_OK) {
+		BM_LOGERR(BmString("BmMailRef: Could not find msg-field ")
+				  << MSG_INODE << "\n\nError:" << strerror(err));
 		return NULL;
 	}
 	nref.device = ThePrefs->MailboxVolume.Device();
-	BmString key( BM_REFKEY( nref));
+	BmString key(BM_REFKEY(nref));
 	GlobalLocker()->Lock();
 	if (!GlobalLocker()->IsLocked()) {
 		BM_SHOWERR("BmMailRef::CreateInstance(): Could not acquire global lock!");
 		return NULL;
 	}
-	BmRef<BmMailRef> mailRef( 
-		dynamic_cast<BmMailRef*>( 
-			BmRefObj::FetchObject( typeid(BmMailRef).name(), key)
-		)
-	);
+	BmRef<BmMailRef> mailRef(
+		dynamic_cast<BmMailRef*>(BmRefObj::FetchObject(typeid(BmMailRef).name(), key)));
 	GlobalLocker()->Unlock();
 	if (mailRef)
 		return mailRef;
 	else {
-		mailRef = new BmMailRef( archive, nref);
+		mailRef = new BmMailRef(archive, nref);
 		mailRef->Initialize();
 		return mailRef;
 	}
@@ -136,15 +134,15 @@ BmRef<BmMailRef> BmMailRef::CreateInstance( BMessage* archive) {
 	BmMailRef( eref, nref)
 		-	standard c'tor
 \*------------------------------------------------------------------------------*/
-BmMailRef::BmMailRef( entry_ref &eref, const node_ref& nref)
-	:	inherited( BM_REFKEY(nref), NULL, (BmListModelItem*)NULL)
-	,	mEntryRef( eref)
-	,	mWhen( 0)
-	,	mWhenCreated( 0)
-	,	mSize( 0)
-	,	mHasAttachments( false)
-	,	mRatioSpam( UNKNOWN_RATIO)
-	,	mInitCheck( B_NO_INIT)
+BmMailRef::BmMailRef(entry_ref& eref, const node_ref& nref)
+	: inherited(BM_REFKEY(nref), NULL, (BmListModelItem*)NULL),
+	  mEntryRef(eref),
+	  mWhen(0),
+	  mWhenCreated(0),
+	  mSize(0),
+	  mHasAttachments(false),
+	  mRatioSpam(UNKNOWN_RATIO),
+	  mInitCheck(B_NO_INIT)
 {
 	mNodeRef = nref;
 }
@@ -153,15 +151,15 @@ BmMailRef::BmMailRef( entry_ref &eref, const node_ref& nref)
 	BmMailRef( eref, st)
 		-	standard c'tor
 \*------------------------------------------------------------------------------*/
-BmMailRef::BmMailRef( entry_ref &eref, struct stat& st)
-	:	inherited( BM_REFKEYSTAT(st), NULL, (BmListModelItem*)NULL)
-	,	mEntryRef( eref)
-	,	mWhen( 0)
-	,	mWhenCreated( 0)
-	,	mSize( 0)
-	,	mHasAttachments( false)
-	,	mRatioSpam( UNKNOWN_RATIO)
-	,	mInitCheck( B_NO_INIT)
+BmMailRef::BmMailRef(entry_ref& eref, struct stat& st)
+	: inherited(BM_REFKEYSTAT(st), NULL, (BmListModelItem*)NULL),
+	  mEntryRef(eref),
+	  mWhen(0),
+	  mWhenCreated(0),
+	  mSize(0),
+	  mHasAttachments(false),
+	  mRatioSpam(UNKNOWN_RATIO),
+	  mInitCheck(B_NO_INIT)
 {
 	mNodeRef.device = st.st_dev;
 	mNodeRef.node = st.st_ino;
@@ -171,73 +169,72 @@ BmMailRef::BmMailRef( entry_ref &eref, struct stat& st)
 	BmMailRef( archive)
 		-	unarchive c'tor
 \*------------------------------------------------------------------------------*/
-BmMailRef::BmMailRef( BMessage* archive, node_ref& nref)
-	:	inherited( "", NULL, (BmListModelItem*)NULL)
-	,	mWhen( 0)
-	,	mWhenCreated( 0)
-	,	mSize( 0)
-	,	mHasAttachments( false)
-	,	mNodeRef( nref)
-	,	mRatioSpam( UNKNOWN_RATIO)
-	,	mInitCheck( B_NO_INIT)
+BmMailRef::BmMailRef(BMessage* archive, node_ref& nref)
+	: inherited("", NULL, (BmListModelItem*)NULL),
+	  mWhen(0),
+	  mWhenCreated(0),
+	  mSize(0),
+	  mHasAttachments(false),
+	  mNodeRef(nref),
+	  mRatioSpam(UNKNOWN_RATIO),
+	  mInitCheck(B_NO_INIT)
 {
 	try {
 		status_t err;
-		if ((err = archive->FindRef( MSG_ENTRYREF, &mEntryRef)) != B_OK)
-			BM_THROW_RUNTIME( BmString("BmMailRef: Could not find msg-field ") 
-										<< MSG_ENTRYREF << "\n\nError:" << strerror(err));
+		if ((err = archive->FindRef(MSG_ENTRYREF, &mEntryRef)) != B_OK)
+			BM_THROW_RUNTIME(BmString("BmMailRef: Could not find msg-field ")
+							 << MSG_ENTRYREF << "\n\nError:" << strerror(err));
 		mEntryRef.device = nref.device;
-		Key( BM_REFKEY( mNodeRef));
+		Key(BM_REFKEY(mNodeRef));
 
 		int16 version = 0;
-		archive->FindInt16( MSG_VERSION, &version);
+		archive->FindInt16(MSG_VERSION, &version);
 
-		mAccount = FindMsgString( archive, MSG_ACCOUNT);
-		mHasAttachments = FindMsgBool( archive, MSG_ATTACHMENTS);
-		mCc = FindMsgString( archive, MSG_CC);
-		mFrom = FindMsgString( archive, MSG_FROM);
-		mName = FindMsgString( archive, MSG_NAME);
-		mPriority = FindMsgString( archive, MSG_PRIORITY);
-		mReplyTo = FindMsgString( archive, MSG_REPLYTO);
-		mSize = FindMsgInt64( archive, MSG_SIZE);
-		mStatus = FindMsgString( archive, MSG_STATUS);
-		mSubject = FindMsgString( archive, MSG_SUBJECT);
-		mTo = FindMsgString( archive, MSG_TO);
+		mAccount = FindMsgString(archive, MSG_ACCOUNT);
+		mHasAttachments = FindMsgBool(archive, MSG_ATTACHMENTS);
+		mCc = FindMsgString(archive, MSG_CC);
+		mFrom = FindMsgString(archive, MSG_FROM);
+		mName = FindMsgString(archive, MSG_NAME);
+		mPriority = FindMsgString(archive, MSG_PRIORITY);
+		mReplyTo = FindMsgString(archive, MSG_REPLYTO);
+		mSize = FindMsgInt64(archive, MSG_SIZE);
+		mStatus = FindMsgString(archive, MSG_STATUS);
+		mSubject = FindMsgString(archive, MSG_SUBJECT);
+		mTo = FindMsgString(archive, MSG_TO);
 #ifdef __x86_64__
-		mWhen = static_cast<int64>(FindMsgInt32( archive, MSG_WHEN));
+		mWhen = static_cast<int64>(FindMsgInt32(archive, MSG_WHEN));
 #else
-		mWhen = FindMsgInt32( archive, MSG_WHEN);
+		mWhen = FindMsgInt32(archive, MSG_WHEN);
 #endif
 
 		if (version >= 2)
-			mIdentity = FindMsgString( archive, MSG_IDENTITY);
+			mIdentity = FindMsgString(archive, MSG_IDENTITY);
 
 		if (version >= 3)
-			mWhenCreated = FindMsgInt64( archive, MSG_WHEN_CREATED);
+			mWhenCreated = FindMsgInt64(archive, MSG_WHEN_CREATED);
 		else
-			mWhenCreated = static_cast<int64>(
-				FindMsgInt32( archive, MSG_WHEN_CREATED)
-			)*(1000*1000);
+			mWhenCreated
+				= static_cast<int64>(FindMsgInt32(archive, MSG_WHEN_CREATED)) * (1000 * 1000);
 
 		if (version >= 4)
-			mIsValid = FindMsgBool( archive, MSG_IS_VALID);
+			mIsValid = FindMsgBool(archive, MSG_IS_VALID);
 
 		if (version >= 5) {
-			mClassification = FindMsgString( archive, MSG_CLASSIFICATION);
-			mRatioSpam = FindMsgFloat( archive, MSG_RATIO_SPAM);
+			mClassification = FindMsgString(archive, MSG_CLASSIFICATION);
+			mRatioSpam = FindMsgFloat(archive, MSG_RATIO_SPAM);
 		}
 
 		if (version >= 6) {
-			mImapUID = FindMsgString( archive, MSG_IMAP_UID);
+			mImapUID = FindMsgString(archive, MSG_IMAP_UID);
 		}
 
-		mSizeString = BytesToString( int32(mSize), true);
+		mSizeString = BytesToString(int32(mSize), true);
 		if (mRatioSpam != UNKNOWN_RATIO)
 			mRatioSpamString << mRatioSpam;
 
 		mInitCheck = B_OK;
-	} catch (BM_error &e) {
-		BM_SHOWERR( e.what());
+	} catch (BM_error& e) {
+		BM_SHOWERR(e.what());
 	}
 }
 
@@ -245,43 +242,43 @@ BmMailRef::BmMailRef( BMessage* archive, node_ref& nref)
 	~BmMailRef()
 		-	d'tor
 \*------------------------------------------------------------------------------*/
-BmMailRef::~BmMailRef() {
-	BM_LOG3( BM_LogMailTracking, 
-				BmString("destructor of MailRef ") << Key() << " called");
-	WatchNode( &mNodeRef, B_STOP_WATCHING, TheMailMonitor);
+BmMailRef::~BmMailRef()
+{
+	BM_LOG3(BM_LogMailTracking, BmString("destructor of MailRef ") << Key() << " called");
+	WatchNode(&mNodeRef, B_STOP_WATCHING, TheMailMonitor);
 }
 
 /*------------------------------------------------------------------------------*\
 	Archive( archive)
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmMailRef::Archive( BMessage* archive, bool) const {
-	status_t ret 
-		= archive->AddInt16( MSG_VERSION, nArchiveVersion)
-		|| archive->AddBool( MSG_IS_VALID, mIsValid)
-		|| archive->AddString( MSG_ACCOUNT, mAccount.String())
-		|| archive->AddBool( MSG_ATTACHMENTS, mHasAttachments)
-		|| archive->AddString( MSG_CC, mCc.String())
-		|| archive->AddRef( MSG_ENTRYREF, &mEntryRef)
-		|| archive->AddString( MSG_FROM, mFrom.String())
-		|| archive->AddInt64( MSG_INODE, mNodeRef.node)
-		|| archive->AddString( MSG_NAME, mName.String())
-		|| archive->AddString( MSG_PRIORITY, mPriority.String())
-		|| archive->AddInt64( MSG_WHEN_CREATED, mWhenCreated)
-		|| archive->AddString( MSG_REPLYTO, mReplyTo.String())
-		|| archive->AddInt64( MSG_SIZE, mSize)
-		|| archive->AddString( MSG_STATUS, mStatus.String())
-		|| archive->AddString( MSG_SUBJECT, mSubject.String())
-		|| archive->AddString( MSG_TO, mTo.String())
-		|| archive->AddString( MSG_IDENTITY, mIdentity.String())
+status_t
+BmMailRef::Archive(BMessage* archive, bool) const
+{
+	status_t ret
+		= archive->AddInt16(MSG_VERSION, nArchiveVersion)
+		  || archive->AddBool(MSG_IS_VALID, mIsValid)
+		  || archive->AddString(MSG_ACCOUNT, mAccount.String())
+		  || archive->AddBool(MSG_ATTACHMENTS, mHasAttachments)
+		  || archive->AddString(MSG_CC, mCc.String()) || archive->AddRef(MSG_ENTRYREF, &mEntryRef)
+		  || archive->AddString(MSG_FROM, mFrom.String())
+		  || archive->AddInt64(MSG_INODE, mNodeRef.node)
+		  || archive->AddString(MSG_NAME, mName.String())
+		  || archive->AddString(MSG_PRIORITY, mPriority.String())
+		  || archive->AddInt64(MSG_WHEN_CREATED, mWhenCreated)
+		  || archive->AddString(MSG_REPLYTO, mReplyTo.String())
+		  || archive->AddInt64(MSG_SIZE, mSize) || archive->AddString(MSG_STATUS, mStatus.String())
+		  || archive->AddString(MSG_SUBJECT, mSubject.String())
+		  || archive->AddString(MSG_TO, mTo.String())
+		  || archive->AddString(MSG_IDENTITY, mIdentity.String())
 #ifdef __x86_64__
-		|| archive->AddInt32( MSG_WHEN, (int32)mWhen)
+		  || archive->AddInt32(MSG_WHEN, (int32)mWhen)
 #else
-		|| archive->AddInt32( MSG_WHEN, mWhen)
+		  || archive->AddInt32(MSG_WHEN, mWhen)
 #endif
-		|| archive->AddString( MSG_CLASSIFICATION, mClassification.String())
-		|| archive->AddFloat( MSG_RATIO_SPAM, mRatioSpam)
-		|| archive->AddString( MSG_IMAP_UID, mImapUID.String());
+		  || archive->AddString(MSG_CLASSIFICATION, mClassification.String())
+		  || archive->AddFloat(MSG_RATIO_SPAM, mRatioSpam)
+		  || archive->AddString(MSG_IMAP_UID, mImapUID.String());
 	return ret;
 }
 
@@ -289,8 +286,10 @@ status_t BmMailRef::Archive( BMessage* archive, bool) const {
 	Initialize()
 		-	unarchive c'tor
 \*------------------------------------------------------------------------------*/
-void BmMailRef::Initialize() {
-	WatchNode( &mNodeRef, B_WATCH_STAT | B_WATCH_ATTR, TheMailMonitor);
+void
+BmMailRef::Initialize()
+{
+	WatchNode(&mNodeRef, B_WATCH_STAT | B_WATCH_ATTR, TheMailMonitor);
 	if (mInitCheck != B_OK) {
 		if (ReadAttributes())
 			mInitCheck = B_OK;
@@ -301,80 +300,73 @@ void BmMailRef::Initialize() {
 	ReadAttributes()
 		-	reads attribute-data from mail-file
 \*------------------------------------------------------------------------------*/
-bool BmMailRef::ReadAttributes( const struct stat* statInfo, 
-										  BmUpdFlags* updFlagsOut) {
+bool
+BmMailRef::ReadAttributes(const struct stat* statInfo, BmUpdFlags* updFlagsOut)
+{
 	status_t err;
 	BNode node;
 	BmString filetype;
 	struct stat st;
 	BmUpdFlags updFlags = 0;
 
-	for( int i=0; (err = node.SetTo( &mEntryRef)) == B_BUSY; ++i) {
-		if (i==200)
+	for (int i = 0; (err = node.SetTo(&mEntryRef)) == B_BUSY; ++i) {
+		if (i == 200)
 			break;
-		BM_LOG2( BM_LogMailTracking, 
-					BmString("Node is locked for mail-ref <") << mEntryRef.name 
-						<< ">. We take a nap and try again...");
-		snooze( 10*1000);					// pause for 10ms
+		BM_LOG2(BM_LogMailTracking, BmString("Node is locked for mail-ref <")
+										<< mEntryRef.name << ">. We take a nap and try again...");
+		snooze(10 * 1000);	// pause for 10ms
 	}
 	if (err != B_OK) {
-		BM_LOG2(
-			BM_LogMailTracking, 
-			BmString("Could not get node for mail-ref <") 
-				<< mEntryRef.name << "> \n\nError:" << strerror(err)
-		);
+		BM_LOG2(BM_LogMailTracking, BmString("Could not get node for mail-ref <")
+										<< mEntryRef.name << "> \n\nError:" << strerror(err));
 	}
 	if (err == B_OK) {
 		if (statInfo)
 			st = *statInfo;
 		else {
-			if ((err = node.GetStat( &st)) != B_OK)
-				BM_LOGERR(
-					BmString("Could not get stat-info for mail-ref <") 
-						<< mEntryRef.name << "> \n\nError:" << strerror(err)
-				);
+			if ((err = node.GetStat(&st)) != B_OK)
+				BM_LOGERR(BmString("Could not get stat-info for mail-ref <")
+						  << mEntryRef.name << "> \n\nError:" << strerror(err));
 		}
 	}
 
-	BmReadStringAttr( &node, "BEOS:TYPE", filetype);
-	if (err == B_OK && BeamRoster->IsSupportedEmailMimeType( filetype)) {
+	BmReadStringAttr(&node, "BEOS:TYPE", filetype);
+	if (err == B_OK && BeamRoster->IsSupportedEmailMimeType(filetype)) {
 		// file is indeed a mail, we fetch its attributes:
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_NAME, 	mName))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_NAME, mName))
 			updFlags |= UPD_NAME;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_IMAP_UID, mImapUID))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_IMAP_UID, mImapUID))
 			updFlags |= UPD_IMAP_UID;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_ACCOUNT, mAccount))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_ACCOUNT, mAccount))
 			updFlags |= UPD_ACCOUNT;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_CC, 		mCc))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_CC, mCc))
 			updFlags |= UPD_CC;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_FROM, 	mFrom))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_FROM, mFrom))
 			updFlags |= UPD_FROM;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_REPLY, 	mReplyTo))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_REPLY, mReplyTo))
 			updFlags |= UPD_REPLYTO;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_STATUS, 	mStatus))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_STATUS, mStatus))
 			updFlags |= UPD_STATUS;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_SUBJECT, mSubject))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_SUBJECT, mSubject))
 			updFlags |= UPD_SUBJECT;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_TO, 		mTo))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_TO, mTo))
 			updFlags |= UPD_TO;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_IDENTITY, mIdentity))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_IDENTITY, mIdentity))
 			updFlags |= UPD_IDENTITY;
-		if (BmReadStringAttr( &node, BM_MAIL_ATTR_CLASSIFICATION, mClassification))
+		if (BmReadStringAttr(&node, BM_MAIL_ATTR_CLASSIFICATION, mClassification))
 			updFlags |= UPD_CLASSIFICATION;
 		BmString priority;
-		BmReadStringAttr( &node, BM_MAIL_ATTR_PRIORITY, priority);
+		BmReadStringAttr(&node, BM_MAIL_ATTR_PRIORITY, priority);
 
 		time_t when;
-		node.ReadAttr( BM_MAIL_ATTR_WHEN, B_TIME_TYPE, 0, 
-							&when, sizeof(time_t));
+		node.ReadAttr(BM_MAIL_ATTR_WHEN, B_TIME_TYPE, 0, &when, sizeof(time_t));
 		if (when != mWhen) {
 			mWhen = when;
 			updFlags |= UPD_WHEN;
 		}
 
 		float ratio = UNKNOWN_RATIO;
-		ssize_t sz = node.ReadAttr( BM_MAIL_ATTR_RATIO_SPAM, B_FLOAT_TYPE, 0, 
-											 &ratio, sizeof(float));
+		ssize_t sz = node.ReadAttr(BM_MAIL_ATTR_RATIO_SPAM, B_FLOAT_TYPE, 0, &ratio, sizeof(float));
 		if (sz != sizeof(float)) {
 			RatioSpam(UNKNOWN_RATIO);
 			updFlags |= UPD_RATIO_SPAM;
@@ -386,33 +378,33 @@ bool BmMailRef::ReadAttributes( const struct stat* statInfo,
 		}
 
 		int32 att1 = 0;
-						// standard BeOS kind (BMail, Postmaster, Beam)
-		node.ReadAttr( BM_MAIL_ATTR_ATTACHMENTS, B_INT32_TYPE, 0, 
-							&att1, sizeof(att1));
+		// standard BeOS kind (BMail, Postmaster, Beam)
+		node.ReadAttr(BM_MAIL_ATTR_ATTACHMENTS, B_INT32_TYPE, 0, &att1, sizeof(att1));
 		bool att2 = false;
-						// Scooby kind
-		node.ReadAttr( "MAIL:attachment", B_BOOL_TYPE, 0, &att2, sizeof(att2));
-		if (mHasAttachments != (att1>0 || att2)) {
-			mHasAttachments = (att1>0 || att2);
-							// please notice that we ignore Mail-It, since
-							// it does not give any proper indication 
-							// (other than its internal status-attribute,
-							// which we really do not want to look at...)
+		// Scooby kind
+		node.ReadAttr("MAIL:attachment", B_BOOL_TYPE, 0, &att2, sizeof(att2));
+		if (mHasAttachments != (att1 > 0 || att2)) {
+			mHasAttachments = (att1 > 0 || att2);
+			// please notice that we ignore Mail-It, since
+			// it does not give any proper indication
+			// (other than its internal status-attribute,
+			// which we really do not want to look at...)
 			updFlags |= UPD_ATTACHMENTS;
 		}
 
 		if (mSize != st.st_size) {
 			mSize = st.st_size;
-			mSizeString = BytesToString( int32(mSize), true);
+			mSizeString = BytesToString(int32(mSize), true);
 			updFlags |= UPD_SIZE;
 		}
 
 		bigtime_t whenCreated;
-		if (node.ReadAttr( BM_MAIL_ATTR_WHEN_CREATED, B_UINT64_TYPE, 0, 
-								 &whenCreated, sizeof(bigtime_t)) < 0) {
+		if (node.ReadAttr(
+				BM_MAIL_ATTR_WHEN_CREATED, B_UINT64_TYPE, 0, &whenCreated, sizeof(bigtime_t))
+			< 0) {
 			// corresponding attribute doesn't exist, we fetch it from the
 			// file's modification time (which is just time_t instead of bigtime_t):
-			whenCreated = static_cast<int64>(	st.st_mtime)*(1000*1000);
+			whenCreated = static_cast<int64>(st.st_mtime) * (1000 * 1000);
 		}
 		if (whenCreated != mWhenCreated) {
 			mWhenCreated = whenCreated;
@@ -421,7 +413,7 @@ bool BmMailRef::ReadAttributes( const struct stat* statInfo,
 
 		// simplify priority:
 		if (!priority.Length()) {
-			priority = "3";				// normal priority
+			priority = "3";	 // normal priority
 		} else {
 			if (isdigit(priority[0]))
 				priority.Truncate(1);
@@ -442,8 +434,8 @@ bool BmMailRef::ReadAttributes( const struct stat* statInfo,
 			mPriority = priority;
 			updFlags |= UPD_PRIORITY;
 		}
-			
-		IsValid( true);
+
+		IsValid(true);
 	} else {
 		// item is no mail, we mark it as invalid:
 		mName = "";
@@ -467,10 +459,9 @@ bool BmMailRef::ReadAttributes( const struct stat* statInfo,
 		mRatioSpam = UNKNOWN_RATIO;
 		mRatioSpamString = "";
 
-		BM_LOG2( BM_LogMailTracking, 
-					BmString("file <") << mEntryRef.name 
-						<< " is not a mail, invalidating it.");
-		IsValid( false);
+		BM_LOG2(BM_LogMailTracking, BmString("file <")
+										<< mEntryRef.name << " is not a mail, invalidating it.");
+		IsValid(false);
 	}
 	if (updFlagsOut)
 		*updFlagsOut = updFlags;
@@ -479,80 +470,84 @@ bool BmMailRef::ReadAttributes( const struct stat* statInfo,
 
 /*------------------------------------------------------------------------------*\
 	ResyncFromDisk()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailRef::ResyncFromDisk( entry_ref* newRef, 
-										  const struct stat* statInfo) {
+void
+BmMailRef::ResyncFromDisk(entry_ref* newRef, const struct stat* statInfo)
+{
 	BmUpdFlags updFlags = 0;
 	if (newRef) {
-		if (strcmp( mEntryRef.name, newRef->name) != 0)
+		if (strcmp(mEntryRef.name, newRef->name) != 0)
 			updFlags |= UPD_TRACKERNAME;
 		mEntryRef = *newRef;
 	}
-	if (ReadAttributes( statInfo, &updFlags))
+	if (ReadAttributes(statInfo, &updFlags))
 		mInitCheck = B_OK;
 	if (updFlags)
 		// update only if anything has changed:
-		TellModelItemUpdated( updFlags);
-	BmRef<BmListModel> listModel( ListModel());
-	BmMailRefList* refList = dynamic_cast< BmMailRefList*>( listModel.Get());
+		TellModelItemUpdated(updFlags);
+	BmRef<BmListModel> listModel(ListModel());
+	BmMailRefList* refList = dynamic_cast<BmMailRefList*>(listModel.Get());
 	if (refList)
 		refList->MarkAsChanged();
 }
 
 /*------------------------------------------------------------------------------*\
 	IsSpecial()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-const bool BmMailRef::IsSpecial() const {
+const bool
+BmMailRef::IsSpecial() const
+{
 	return mStatus == BM_MAIL_STATUS_NEW || mStatus == BM_MAIL_STATUS_PENDING;
 }
 
 /*------------------------------------------------------------------------------*\
 	MarkAs()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailRef::MarkAs( const char* status) {
+void
+BmMailRef::MarkAs(const char* status)
+{
 	if (InitCheck() != B_OK || mStatus == status)
 		return;
 	try {
 		BNode mailNode;
 		status_t err;
 		mStatus = status;
-		if ((err = mailNode.SetTo( &mEntryRef)) != B_OK)
-			BM_THROW_RUNTIME( 
-				BmString( "Could not create node for current mail-file.\n\n"
-							 " Result: ") 
-					<< strerror(err)
-			);
+		if ((err = mailNode.SetTo(&mEntryRef)) != B_OK)
+			BM_THROW_RUNTIME(BmString("Could not create node for current mail-file.\n\n"
+									  " Result: ")
+							 << strerror(err));
 		// in order to allow proper handling of B_ATTR_CHANGED events, we
 		// tell the MailMonitor, which folder this mail-ref lives in:
 		node_ref folderNodeRef;
 		folderNodeRef.node = mEntryRef.directory;
 		folderNodeRef.device = mEntryRef.device;
-		BmString folderKey( BM_REFKEY( folderNodeRef));
-		TheMailMonitor->CacheRefToFolder( mNodeRef, folderKey);
+		BmString folderKey(BM_REFKEY(folderNodeRef));
+		TheMailMonitor->CacheRefToFolder(mNodeRef, folderKey);
 		// As there seems to be a problem with multiple Status-attributes
 		// (perhaps a bug in BFS?) we try to remove the attribute before we
 		// write it. Let's see if that helps...
-		mailNode.RemoveAttr( BM_MAIL_ATTR_STATUS);
-		mailNode.WriteAttr( BM_MAIL_ATTR_STATUS, B_STRING_TYPE, 0, 
-								  status, strlen( status)+1);
-		TellModelItemUpdated( UPD_STATUS);
-		BmRef<BmListModel> listModel( ListModel());
-		BmMailRefList* refList = dynamic_cast< BmMailRefList*>( listModel.Get());
+		mailNode.RemoveAttr(BM_MAIL_ATTR_STATUS);
+		mailNode.WriteAttr(BM_MAIL_ATTR_STATUS, B_STRING_TYPE, 0, status, strlen(status) + 1);
+		TellModelItemUpdated(UPD_STATUS);
+		BmRef<BmListModel> listModel(ListModel());
+		BmMailRefList* refList = dynamic_cast<BmMailRefList*>(listModel.Get());
 		if (refList)
 			refList->MarkAsChanged();
-	} catch( BM_error &e) {
+	} catch (BM_error& e) {
 		BM_SHOWERR(e.what());
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	RatioSpam()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailRef::RatioSpam(float rs) {
+void
+BmMailRef::RatioSpam(float rs)
+{
 	mRatioSpam = rs;
 	mRatioSpamString = "";
 	if (mRatioSpam != UNKNOWN_RATIO)
@@ -561,56 +556,60 @@ void BmMailRef::RatioSpam(float rs) {
 
 /*------------------------------------------------------------------------------*\
 	MarkAsSpam()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailRef::MarkAsSpam() {
+void
+BmMailRef::MarkAsSpam()
+{
 	MarkAsSpamOrTofu(true);
 }
 
 /*------------------------------------------------------------------------------*\
 	MarkAsSpam()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailRef::MarkAsTofu() {
+void
+BmMailRef::MarkAsTofu()
+{
 	MarkAsSpamOrTofu(false);
 }
 
 /*------------------------------------------------------------------------------*\
 	MarkAsSpamOrTofu()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailRef::MarkAsSpamOrTofu( bool asSpam) {
+void
+BmMailRef::MarkAsSpamOrTofu(bool asSpam)
+{
 	if (InitCheck() != B_OK)
 		return;
 	try {
 		BNode mailNode;
 		status_t err;
 		mClassification = asSpam ? BM_MAIL_CLASS_SPAM : BM_MAIL_CLASS_TOFU;
-		if ((err = mailNode.SetTo( &mEntryRef)) != B_OK)
-			BM_THROW_RUNTIME( 
-				BmString( "Could not create node for current mail-file.\n\n"
-							 " Result: ") 
-					<< strerror(err)
-			);
+		if ((err = mailNode.SetTo(&mEntryRef)) != B_OK)
+			BM_THROW_RUNTIME(BmString("Could not create node for current mail-file.\n\n"
+									  " Result: ")
+							 << strerror(err));
 		// in order to allow proper handling of B_ATTR_CHANGED events, we
 		// tell the MailMonitor, which folder this mail-ref lives in:
 		node_ref folderNodeRef;
 		folderNodeRef.node = mEntryRef.directory;
 		folderNodeRef.device = mEntryRef.device;
-		BmString folderKey( BM_REFKEY( folderNodeRef));
-		TheMailMonitor->CacheRefToFolder( mNodeRef, folderKey);
+		BmString folderKey(BM_REFKEY(folderNodeRef));
+		TheMailMonitor->CacheRefToFolder(mNodeRef, folderKey);
 		// As there seems to be a problem with multiple attributes
 		// (perhaps a bug in BFS?) we try to remove the attribute before we
 		// write it. Let's see if that helps...
-		mailNode.RemoveAttr( BM_MAIL_ATTR_CLASSIFICATION);
-		mailNode.WriteAttr( BM_MAIL_ATTR_CLASSIFICATION, B_STRING_TYPE, 0, 
-								  mClassification.String(), mClassification.Length()+1);
-		TellModelItemUpdated( UPD_CLASSIFICATION);
-		BmRef<BmListModel> listModel( ListModel());
-		BmMailRefList* refList = dynamic_cast< BmMailRefList*>( listModel.Get());
+		mailNode.RemoveAttr(BM_MAIL_ATTR_CLASSIFICATION);
+		mailNode.WriteAttr(BM_MAIL_ATTR_CLASSIFICATION, B_STRING_TYPE, 0, mClassification.String(),
+			mClassification.Length() + 1);
+		TellModelItemUpdated(UPD_CLASSIFICATION);
+		BmRef<BmListModel> listModel(ListModel());
+		BmMailRefList* refList = dynamic_cast<BmMailRefList*>(listModel.Get());
 		if (refList)
 			refList->MarkAsChanged();
-	} catch( BM_error &e) {
+	} catch (BM_error& e) {
 		BM_SHOWERR(e.what());
 	}
 }

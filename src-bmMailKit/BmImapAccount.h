@@ -14,13 +14,13 @@
 #include "BmRecvAccount.h"
 
 enum {
-	BM_JOBWIN_IMAP	= 'bmei'
-		// sent to JobMetaController (or app) in order to 
-		// start pop-connection
+	BM_JOBWIN_IMAP = 'bmei'
+	// sent to JobMetaController (or app) in order to
+	// start pop-connection
 };
 
 /*------------------------------------------------------------------------------*\
-	BmImapAccount 
+	BmImapAccount
 		-	holds information about one specific IMAP-account
 		- 	extends BmRecvAccount with IMAP-specific functionality
 \*------------------------------------------------------------------------------*/
@@ -28,28 +28,27 @@ class IMPEXPBMMAILKIT BmImapAccount : public BmRecvAccount {
 	typedef BmRecvAccount inherited;
 
 public:
-	BmImapAccount( const char* name, BmRecvAccountList* model);
-	BmImapAccount( BMessage* archive, BmRecvAccountList* model);
+	BmImapAccount(const char* name, BmRecvAccountList* model);
+	BmImapAccount(BMessage* archive, BmRecvAccountList* model);
 	virtual ~BmImapAccount();
-	
-	// overrides of BmRecvAccount base:
-	virtual const char* Type() const		{ return nType; }
-	virtual int32 JobType() const			{ return BM_JOBWIN_IMAP; }
 
-	virtual const char* DefaultPort(bool encrypted) const {
-		return encrypted ? "993" : "143";
-	}
+	// overrides of BmRecvAccount base:
+	virtual const char* Type() const { return nType; }
+	virtual int32 JobType() const { return BM_JOBWIN_IMAP; }
+
+	virtual const char* DefaultPort(bool encrypted) const { return encrypted ? "993" : "143"; }
 
 	virtual void GetSupportedAuthTypes(vector<BmString>& outList) const;
 
 	static const char* const AUTH_LOGIN;
 
 	static const char* const nType;
+
 private:
-	BmImapAccount();					// hide default constructor
+	BmImapAccount();  // hide default constructor
 	// Hide copy-constructor and assignment:
-	BmImapAccount( const BmImapAccount&);
-	BmImapAccount operator=( const BmImapAccount&);
+	BmImapAccount(const BmImapAccount&);
+	BmImapAccount operator=(const BmImapAccount&);
 };
 
 #endif

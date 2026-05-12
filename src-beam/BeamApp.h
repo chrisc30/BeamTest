@@ -24,39 +24,38 @@ class BmWindow;
 extern const char* BM_APP_SIG;
 
 enum {
-	BMM_SET_BUSY						= 'bMxa',
-	BMM_UNSET_BUSY						= 'bMxb',
-	BMM_CREATE_PERSON_FROM_ADDR	= 'bMxc',
-	BMM_EDIT_PERSON_WITH_ADDR		= 'bMxd'
+	BMM_SET_BUSY = 'bMxa',
+	BMM_UNSET_BUSY = 'bMxb',
+	BMM_CREATE_PERSON_FROM_ADDR = 'bMxc',
+	BMM_EDIT_PERSON_WITH_ADDR = 'bMxd'
 };
 
-class BeamApplication : public BmApplication
-{
+class BeamApplication : public BmApplication {
 	typedef BmApplication inherited;
 
-	friend int32 PrintMails( void* data);
+	friend int32 PrintMails(void* data);
 
 public:
 	//
-	BeamApplication( const char *sig);
+	BeamApplication(const char* sig);
 	~BeamApplication();
 
 	// native methods:
 	BRect ScreenFrame();
-	void SetNewWorkspace( uint32 newWorkspace);
+	void SetNewWorkspace(uint32 newWorkspace);
 	uint32 CurrWorkspace();
 	//
-	bool HandlesMimetype( const BmString mimetype);
-	void LaunchURL( const BmString url);
+	bool HandlesMimetype(const BmString mimetype);
+	void LaunchURL(const BmString url);
 
 	// beos-stuff
-	void MessageReceived( BMessage* msg);
+	void MessageReceived(BMessage* msg);
 	bool QuitRequested();
 	void AboutRequested();
 	void ReadyToRun();
-	void ArgvReceived( int32 argc, char** argv);
-	void RefsReceived( BMessage* msg);
-	void AppActivated( bool active);
+	void ArgvReceived(int32 argc, char** argv);
+	void RefsReceived(BMessage* msg);
+	void AppActivated(bool active);
 	thread_id Run();
 
 	// message-fields:
@@ -85,7 +84,6 @@ private:
 	BPrintJob mPrintJob;
 
 	bool mDeskbarItemIsOurs;
-
 };
 
 extern BeamApplication* beamApp;

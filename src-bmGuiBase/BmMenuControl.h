@@ -13,45 +13,41 @@
 
 #include <layout.h>
 
-#include "BmGuiBase.h"
 #include "BmDividable.h"
+#include "BmGuiBase.h"
 
 class HGroup;
 class BMenuBar;
 
-class IMPEXPBMGUIBASE BmMenuControl : public MView, 
-															 public BMenuField,
-															 public BmDividable
-{
+class IMPEXPBMGUIBASE BmMenuControl : public MView, public BMenuField, public BmDividable {
 	typedef BMenuField inherited;
 
 public:
 	// creator-func, c'tors and d'tor:
-	BmMenuControl( const char* label, BMenu* menu, float weight=1.0, 
-						float maxWidth=1E5, const char* fitText=NULL);
+	BmMenuControl(const char* label, BMenu* menu, float weight = 1.0, float maxWidth = 1E5,
+		const char* fitText = NULL);
 	~BmMenuControl();
-	
+
 	// native methods:
 	void MakeEmpty();
-	void MarkItem( const char* label);
+	void MarkItem(const char* label);
 	void ClearMark();
 
 	// overrides:
-	void SetEnabled( bool enabled);
-	void SetDivider( float divider);
+	void SetEnabled(bool enabled);
+	void SetDivider(float divider);
 	float Divider() const;
 	void AllAttached();
 
 private:
-
 	minimax layoutprefs();
 	BRect layout(BRect frame);
-	
+
 	BMenuBar* mMenuBar;
-	
+
 	// Hide copy-constructor and assignment:
-	BmMenuControl( const BmMenuControl&);
-	BmMenuControl operator=( const BmMenuControl&);
+	BmMenuControl(const BmMenuControl&);
+	BmMenuControl operator=(const BmMenuControl&);
 };
 
 

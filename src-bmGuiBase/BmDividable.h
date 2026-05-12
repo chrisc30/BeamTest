@@ -13,12 +13,11 @@
 
 class MView;
 
-class IMPEXPBMGUIBASE BmDividable
-{
+class IMPEXPBMGUIBASE BmDividable {
 public:
-	virtual void SetDivider( float div) = 0;
+	virtual void SetDivider(float div) = 0;
 	virtual float Divider() const = 0;
-	static void DivideSame( MView* div1, ...);
+	static void DivideSame(MView* div1, ...);
 };
 
 

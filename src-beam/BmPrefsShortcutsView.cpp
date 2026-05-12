@@ -9,10 +9,10 @@
 
 #include <BeBuild.h>
 #ifdef B_BEOS_VERSION_DANO
-	class BFont;
-	class BMessage;
-	class BPopUpMenu;
-	class BRect;
+class BFont;
+class BMessage;
+class BPopUpMenu;
+class BRect;
 #endif
 #include <HGroup.h>
 #include <LayeredGroup.h>
@@ -22,12 +22,12 @@
 #include <VGroup.h>
 
 #include "BubbleHelper.h"
+#include "CLVEasyItem.h"
 #include "Colors.h"
 #include "ColumnListView.h"
-#include "CLVEasyItem.h"
 
 #include "BmEncoding.h"
-	using namespace BmEncoding;
+using namespace BmEncoding;
 #include "BmGuiUtil.h"
 #include "BmLogHandler.h"
 #include "BmMenuController.h"
@@ -46,21 +46,22 @@ BmShortcutControl* BmShortcutControl::nTheInstance = NULL;
 
 /*------------------------------------------------------------------------------*\
 	KeyDown()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmShortcutControl::BmShortcutControl( const char* label)
-	: 	inherited( label)
+BmShortcutControl::BmShortcutControl(const char* label)
+	: inherited(label)
 {
 	nTheInstance = this;
-	TextView()->AddFilter( new BMessageFilter( B_ANY_DELIVERY, B_ANY_SOURCE, FilterHook));
+	TextView()->AddFilter(new BMessageFilter(B_ANY_DELIVERY, B_ANY_SOURCE, FilterHook));
 }
 
 /*------------------------------------------------------------------------------*\
 	FilterHook()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-filter_result BmShortcutControl::FilterHook( BMessage* msg, BHandler** handler,
-															BMessageFilter*) {
+filter_result
+BmShortcutControl::FilterHook(BMessage* msg, BHandler** handler, BMessageFilter*)
+{
 	if (msg->what == B_KEY_DOWN)
 		*handler = BmShortcutControl::nTheInstance;
 	return B_DISPATCH_MESSAGE;
@@ -68,36 +69,37 @@ filter_result BmShortcutControl::FilterHook( BMessage* msg, BHandler** handler,
 
 /*------------------------------------------------------------------------------*\
 	KeyDown()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmShortcutControl::KeyDown(const char *bytes, int32 numBytes) { 
+void
+BmShortcutControl::KeyDown(const char* bytes, int32 numBytes)
+{
 	if (numBytes == 1) {
 		BMessage* currMsg = Window()->CurrentMessage();
-		int32 rawKey = currMsg->FindInt32( "raw_char");
+		int32 rawKey = currMsg->FindInt32("raw_char");
 		BmString key;
 		BmString legalKeys("abcdefghijklmnopqrstuvwxyz0123456789<>@#.,:;+-/*^");
 		if (legalKeys.FindFirst((char)rawKey) != B_ERROR) {
-			key.SetTo( (char)rawKey, 1);
+			key.SetTo((char)rawKey, 1);
 			key.ToUpper();
-		} else if (rawKey==B_RIGHT_ARROW)
+		} else if (rawKey == B_RIGHT_ARROW)
 			key = BmString("<RIGHT_ARROW>");
-		else if (rawKey==B_LEFT_ARROW)
+		else if (rawKey == B_LEFT_ARROW)
 			key = BmString("<LEFT_ARROW>");
-		else if (rawKey==B_UP_ARROW)
+		else if (rawKey == B_UP_ARROW)
 			key = BmString("<UP_ARROW>");
-		else if (rawKey==B_DOWN_ARROW)
+		else if (rawKey == B_DOWN_ARROW)
 			key = BmString("<DOWN_ARROW>");
 		if (key.Length()) {
 			int32 mods = currMsg->FindInt32("modifiers");
 			if (mods & B_SHIFT_KEY)
 				key.Prepend("<SHIFT>");
-			SetText( key.String());
+			SetText(key.String());
 		} else
-			SetText( "");
+			SetText("");
 	}
-	BView::KeyDown( bytes, numBytes);
+	BView::KeyDown(bytes, numBytes);
 }
-
 
 
 /********************************************************************************\
@@ -106,77 +108,70 @@ void BmShortcutControl::KeyDown(const char *bytes, int32 numBytes) {
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmPrefsShortcutsView::BmPrefsShortcutsView() 
-	:	inherited( "Shortcuts (changes require a restart)")
+BmPrefsShortcutsView::BmPrefsShortcutsView()
+	: inherited("Shortcuts (changes require a restart)")
 {
-	MView* view = 
-		new VGroup(
-			new BetterScrollView( 
-				minimax(400,300,1E5,1E5), 
-				CreateListView( 400, 400),
-				BM_SV_H_SCROLLBAR | BM_SV_V_SCROLLBAR | BM_SV_CORNER
-				| BM_SV_CAPTION,
-				"99 shortcuts"
-			),
-			new Space( minimax(0,10,0,10)),
-			new MBorder( M_LABELED_BORDER, 10, (char*)"Shortcut info",
-				new VGroup(
-					mNameControl = new BmTextControl( "Menu item:"),
-					new Space( minimax(0,5,0,5)),
-					mShortcutControl = new BmShortcutControl( "Shortcut:"),
-					0
-				)
-			),
-			new Space(minimax(0,0,1E5,1E5,0.5)),
-			0
-		);
-	mGroupView->AddChild( dynamic_cast<BView*>(view));
+	MView* view = new VGroup(
+		new BetterScrollView(minimax(400, 300, 1E5, 1E5), CreateListView(400, 400),
+			BM_SV_H_SCROLLBAR | BM_SV_V_SCROLLBAR | BM_SV_CORNER | BM_SV_CAPTION, "99 shortcuts"),
+		new Space(minimax(0, 10, 0, 10)),
+		new MBorder(M_LABELED_BORDER, 10, (char*)"Shortcut info",
+			new VGroup(mNameControl = new BmTextControl("Menu item:"),
+				new Space(minimax(0, 5, 0, 5)),
+				mShortcutControl = new BmShortcutControl("Shortcut:"), 0)),
+		new Space(minimax(0, 0, 1E5, 1E5, 0.5)), 0);
+	mGroupView->AddChild(dynamic_cast<BView*>(view));
 
-	BmDividable::DivideSame(
-		mShortcutControl,
-		mNameControl,
-		NULL
-	);
-	mNameControl->SetEnabled( false);
+	BmDividable::DivideSame(mShortcutControl, mNameControl, NULL);
+	mNameControl->SetEnabled(false);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmPrefsShortcutsView::~BmPrefsShortcutsView() {
-	TheBubbleHelper->SetHelp( mListView, NULL);
-	TheBubbleHelper->SetHelp( mShortcutControl, NULL);
+BmPrefsShortcutsView::~BmPrefsShortcutsView()
+{
+	TheBubbleHelper->SetHelp(mListView, NULL);
+	TheBubbleHelper->SetHelp(mShortcutControl, NULL);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsShortcutsView::Initialize() {
+void
+BmPrefsShortcutsView::Initialize()
+{
 	inherited::Initialize();
 
-	TheBubbleHelper->SetHelp( mListView, "This list view contains all menu items of Beam \nwith their current shortcuts.");
-	TheBubbleHelper->SetHelp( mShortcutControl, "Here you can define the shortcut to be used for the currently selected item.\nJust type the shortcut you wish to use, but leave out the menu key \n(i.e. <ALT> or <CTRL>), that is added automatically.");
+	TheBubbleHelper->SetHelp(mListView,
+		"This list view contains all menu items of Beam \nwith their current shortcuts.");
+	TheBubbleHelper->SetHelp(mShortcutControl,
+		"Here you can define the shortcut to be used for the currently selected item.\nJust type "
+		"the shortcut you wish to use, but leave out the menu key \n(i.e. <ALT> or <CTRL>), that "
+		"is added automatically.");
 
-	mShortcutControl->SetTarget( this);
+	mShortcutControl->SetTarget(this);
 
-	mListView->SetSelectionMessage( new BMessage( BM_SELECTION_CHANGED));
-	mListView->SetTarget( this);
+	mListView->SetSelectionMessage(new BMessage(BM_SELECTION_CHANGED));
+	mListView->SetTarget(this);
 	Update();
-	ShowShortcut( -1);
+	ShowShortcut(-1);
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsShortcutsView::Update() {
-	BAutolock lock( ThePrefs->Locker());
+void
+BmPrefsShortcutsView::Update()
+{
+	BAutolock lock(ThePrefs->Locker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( "Unable to get lock on Prefs!");
+		BM_THROW_RUNTIME("Unable to get lock on Prefs!");
 	BMessage* scMsg = ThePrefs->ShortcutsMsg();
 	if (scMsg) {
 		CLVEasyItem* item;
@@ -187,123 +182,130 @@ void BmPrefsShortcutsView::Update() {
 		char* name;
 #endif
 		mListView->MakeEmpty();
-		for( int32 i=0; scMsg->GetInfo( B_STRING_TYPE, i, &name, &type)==B_OK; ++i) {
-			item = new CLVEasyItem( 0, false, false, mListView);
-			item->SetColumnContent( 0, name);
-			item->SetColumnContent( 1, scMsg->FindString( name));
-			mListView->AddItem( item);
+		for (int32 i = 0; scMsg->GetInfo(B_STRING_TYPE, i, &name, &type) == B_OK; ++i) {
+			item = new CLVEasyItem(0, false, false, mListView);
+			item->SetColumnContent(0, name);
+			item->SetColumnContent(1, scMsg->FindString(name));
+			mListView->AddItem(item);
 		}
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsShortcutsView::SaveData() {
+void
+BmPrefsShortcutsView::SaveData()
+{
 	// prefs are already stored by General View
 	TheMenuItemManager->UpdateAll();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsShortcutsView::UndoChanges() {
+void
+BmPrefsShortcutsView::UndoChanges()
+{
 	// prefs are already undone by General View
-	ShowShortcut( -1);
+	ShowShortcut(-1);
 }
 
 /*------------------------------------------------------------------------------*\
 	MessageReceived( msg)
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsShortcutsView::MessageReceived( BMessage* msg) {
+void
+BmPrefsShortcutsView::MessageReceived(BMessage* msg)
+{
 	try {
-		switch( msg->what) {
-			case BM_SELECTION_CHANGED: {
-				int32 index = mListView->CurrentSelection( 0);
-				ShowShortcut( index);
+		switch (msg->what) {
+			case BM_SELECTION_CHANGED:
+			{
+				int32 index = mListView->CurrentSelection(0);
+				ShowShortcut(index);
 				break;
 			}
-			case BM_TEXTFIELD_MODIFIED: {
+			case BM_TEXTFIELD_MODIFIED:
+			{
 				BView* srcView = NULL;
-				msg->FindPointer( "source", (void**)&srcView);
-				BmTextControl* source = dynamic_cast<BmTextControl*>( srcView);
+				msg->FindPointer("source", (void**)&srcView);
+				BmTextControl* source = dynamic_cast<BmTextControl*>(srcView);
 				if (source == mShortcutControl) {
 					BmString sc = mShortcutControl->Text();
-					ThePrefs->SetShortcutFor( mNameControl->Text(), sc.String());
-					int32 index = mListView->CurrentSelection( 0);
+					ThePrefs->SetShortcutFor(mNameControl->Text(), sc.String());
+					int32 index = mListView->CurrentSelection(0);
 					if (index != -1) {
-						CLVEasyItem* scItem = dynamic_cast<CLVEasyItem*>(mListView->ItemAt( index));
+						CLVEasyItem* scItem = dynamic_cast<CLVEasyItem*>(mListView->ItemAt(index));
 						if (scItem)
-							scItem->SetColumnContent( 1, sc.String());
-						mListView->InvalidateItem( index);
+							scItem->SetColumnContent(1, sc.String());
+						mListView->InvalidateItem(index);
 					}
 					NoticeChange();
 				}
 				break;
 			}
 			default:
-				inherited::MessageReceived( msg);
+				inherited::MessageReceived(msg);
 		}
-	}
-	catch( BM_error &err) {
+	} catch (BM_error& err) {
 		// a problem occurred, we tell the user:
-		BM_SHOWERR( BmString("PrefsView_") << Name() << ":\n\t" << err.what());
+		BM_SHOWERR(BmString("PrefsView_") << Name() << ":\n\t" << err.what());
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmPrefsShortcutsView::ShowShortcut( int32 selection) {
+void
+BmPrefsShortcutsView::ShowShortcut(int32 selection)
+{
 	bool enabled = (selection != -1);
-	mShortcutControl->SetEnabled( enabled);
-	
+	mShortcutControl->SetEnabled(enabled);
+
 	if (selection == -1) {
-		mShortcutControl->SetTextSilently( "");
-		mNameControl->SetTextSilently( "");
+		mShortcutControl->SetTextSilently("");
+		mNameControl->SetTextSilently("");
 	} else {
-		CLVEasyItem* scItem = dynamic_cast<CLVEasyItem*>(mListView->ItemAt( selection));
+		CLVEasyItem* scItem = dynamic_cast<CLVEasyItem*>(mListView->ItemAt(selection));
 		if (scItem) {
-			BmString name = scItem->GetColumnContentText( 0);
-			BmString sc = ThePrefs->GetShortcutFor( name.String());
-			mNameControl->SetTextSilently( name.String());
-			mShortcutControl->SetTextSilently( sc.String());
+			BmString name = scItem->GetColumnContentText(0);
+			BmString sc = ThePrefs->GetShortcutFor(name.String());
+			mNameControl->SetTextSilently(name.String());
+			mShortcutControl->SetTextSilently(sc.String());
 		}
 	}
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-ColumnListView* BmPrefsShortcutsView::CreateListView( int32 width, int32 height) {
-	mListView = new ColumnListView( BRect( 0, 0, float(width-1), float(height-1)), 
-											  NULL, 
-											  B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE,
-											  B_SINGLE_SELECTION_LIST);
+ColumnListView*
+BmPrefsShortcutsView::CreateListView(int32 width, int32 height)
+{
+	mListView = new ColumnListView(BRect(0, 0, float(width - 1), float(height - 1)), NULL,
+		B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE, B_SINGLE_SELECTION_LIST);
 
-	mListView->SetSelectionMessage( new BMessage( BM_SELECTION_CHANGED));
-	mListView->SetTarget( this);
-	mListView->ClickSetsFocus( true);
+	mListView->SetSelectionMessage(new BMessage(BM_SELECTION_CHANGED));
+	mListView->SetTarget(this);
+	mListView->ClickSetsFocus(true);
 
-	mListView->SetMinItemHeight( 
-		MAX( TheResources->FontLineHeight(),
-			  float(ThePrefs->GetInt( "ListviewFlatMinItemHeight", 16)))
-	);
+	mListView->SetMinItemHeight(MAX(
+		TheResources->FontLineHeight(), float(ThePrefs->GetInt("ListviewFlatMinItemHeight", 16))));
 
 	int32 flags = 0;
 	if (ThePrefs->GetBool("StripedListView"))
-		mListView->SetStripedBackground( true);
+		mListView->SetStripedBackground(true);
 
-	mListView->AddColumn( new CLVColumn( "Menu item", 300.0, CLV_SORT_KEYABLE|flags, 100.0));
-	mListView->AddColumn( new CLVColumn( "Shortcut", 80.0, CLV_SORT_KEYABLE|flags, 4.0));
+	mListView->AddColumn(new CLVColumn("Menu item", 300.0, CLV_SORT_KEYABLE | flags, 100.0));
+	mListView->AddColumn(new CLVColumn("Shortcut", 80.0, CLV_SORT_KEYABLE | flags, 4.0));
 
-	mListView->SetSortFunction( CLVEasyItem::CompareItems);
-	mListView->SetSortKey( 0);
+	mListView->SetSortFunction(CLVEasyItem::CompareItems);
+	mListView->SetSortKey(0);
 
 	return mListView;
 }

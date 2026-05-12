@@ -16,20 +16,19 @@
 // #pragma mark - TextControlWrapper
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmTextControlCompleter::TextControlWrapper
-::TextControlWrapper(BTextControl* textControl)
-	:	mTextControl(textControl)
+BmTextControlCompleter::TextControlWrapper ::TextControlWrapper(BTextControl* textControl)
+	: mTextControl(textControl)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmTextControlCompleter::TextControlWrapper
-::GetEditViewState( BmString& text, int32* caretPos)
+void
+BmTextControlCompleter::TextControlWrapper ::GetEditViewState(BmString& text, int32* caretPos)
 {
 	if (mTextControl && mTextControl->LockLooper()) {
 		text = mTextControl->Text();
@@ -43,14 +42,15 @@ void BmTextControlCompleter::TextControlWrapper
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmTextControlCompleter::TextControlWrapper
-::SetEditViewState( const BmString& text, int32 caretPos, int32 selectionLength)
+void
+BmTextControlCompleter::TextControlWrapper ::SetEditViewState(
+	const BmString& text, int32 caretPos, int32 selectionLength)
 {
 	if (mTextControl && mTextControl->LockLooper()) {
 		mTextControl->TextView()->SetText(text.String(), text.Length());
-		mTextControl->TextView()->Select(caretPos, caretPos+selectionLength);
+		mTextControl->TextView()->Select(caretPos, caretPos + selectionLength);
 		mTextControl->TextView()->ScrollToSelection();
 		mTextControl->UnlockLooper();
 	}
@@ -58,9 +58,10 @@ void BmTextControlCompleter::TextControlWrapper
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BRect BmTextControlCompleter::TextControlWrapper::GetAdjustmentFrame()
+BRect
+BmTextControlCompleter::TextControlWrapper::GetAdjustmentFrame()
 {
 	BRect frame = mTextControl->TextView()->Bounds();
 	frame = mTextControl->TextView()->ConvertToScreen(frame);
@@ -71,38 +72,35 @@ BRect BmTextControlCompleter::TextControlWrapper::GetAdjustmentFrame()
 // #pragma mark - BmTextControlCompleter
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmTextControlCompleter::BmTextControlCompleter(BTextControl* textControl, 
-															  ChoiceModel* model,
-															  PatternSelector* patternSelector)
-	:	BmAutoCompleter(new TextControlWrapper(textControl), model, 
-							 new BmDefaultChoiceView(), patternSelector)
-	,	BMessageFilter(B_KEY_DOWN)
+BmTextControlCompleter::BmTextControlCompleter(
+	BTextControl* textControl, ChoiceModel* model, PatternSelector* patternSelector)
+	: BmAutoCompleter(
+		  new TextControlWrapper(textControl), model, new BmDefaultChoiceView(), patternSelector),
+	  BMessageFilter(B_KEY_DOWN)
 {
 	textControl->TextView()->AddFilter(this);
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmTextControlCompleter::~BmTextControlCompleter()
-{
-}
+BmTextControlCompleter::~BmTextControlCompleter() {}
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-filter_result BmTextControlCompleter::Filter(BMessage *message, 
-															BHandler **target)
+filter_result
+BmTextControlCompleter::Filter(BMessage* message, BHandler** target)
 {
 	int32 rawChar, modifiers;
-	if	(!target || message->FindInt32("raw_char", &rawChar) != B_OK
-	|| message->FindInt32("modifiers", &modifiers) != B_OK)
+	if (!target || message->FindInt32("raw_char", &rawChar) != B_OK
+		|| message->FindInt32("modifiers", &modifiers) != B_OK)
 		return B_DISPATCH_MESSAGE;
-	
+
 	switch (rawChar) {
 		case B_UP_ARROW:
 			SelectPrevious();
@@ -117,7 +115,8 @@ filter_result BmTextControlCompleter::Filter(BMessage *message,
 			ApplyChoice();
 			EditViewStateChanged();
 			return B_SKIP_MESSAGE;
-		case B_TAB: {
+		case B_TAB:
+		{
 			// make sure that the choices-view is closed when tabbing out:
 			CancelChoice();
 			return B_DISPATCH_MESSAGE;

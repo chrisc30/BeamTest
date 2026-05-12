@@ -9,7 +9,7 @@
 #define _BmNetEndpoint_h
 
 #ifdef BEAM_FOR_BONE
-# include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #include <Message.h>
 #include <NetAddress.h>
@@ -22,6 +22,7 @@ class BNetEndpoint;
 
 class IMPEXPBMDAEMON BmNetEndpoint {
 	friend class BmNetEndpointRoster;
+
 public:
 	virtual ~BmNetEndpoint();
 
@@ -29,8 +30,8 @@ public:
 	virtual int Error() const;
 	virtual BmString ErrorStr() const;
 	//
-	virtual status_t Connect( const BNetAddress& address);
- 	virtual void Close();
+	virtual status_t Connect(const BNetAddress& address);
+	virtual void Close();
 	//
 	virtual status_t StartEncryption(const char* encType);
 	virtual status_t StopEncryption();
@@ -40,17 +41,18 @@ public:
 	const BmString& NewAcceptedCertID();
 	void NewAcceptedCertID(const BmString& s);
 	//
-	virtual int32 Send( const void* buffer, size_t size, int flags = 0);
-	virtual int32 Receive( void* buffer, size_t size, int flags = 0);
-	virtual bool IsDataPending( bigtime_t timeout = 0);
+	virtual int32 Send(const void* buffer, size_t size, int flags = 0);
+	virtual int32 Receive(void* buffer, size_t size, int flags = 0);
+	virtual bool IsDataPending(bigtime_t timeout = 0);
 	virtual void SetTimeout(int32 timeout);
 
-	inline bool IsStopRequested()			{ return mStopRequested; }
+	inline bool IsStopRequested() { return mStopRequested; }
 
 	// message component definitions for additional info:
 	static const char* const MSG_CLIENT_CERT_NAME;
 	static const char* const MSG_SERVER_NAME;
 	static const char* const MSG_ACCEPTED_CERT_ID;
+
 protected:
 	BmNetEndpoint();
 

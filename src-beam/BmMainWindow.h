@@ -24,8 +24,7 @@ class BmLogWindow;
 class BmMailRefFilterControl;
 class BmMailRefViewFilterControl;
 
-class BmMainWindow : public BmWindow
-{
+class BmMainWindow : public BmWindow {
 	typedef BmWindow inherited;
 
 	// archival-fieldnames:
@@ -45,32 +44,32 @@ public:
 	void BeginLife();
 
 	// overrides of BWindow base:
-	void MessageReceived( BMessage*);
+	void MessageReceived(BMessage*);
 	bool QuitRequested();
 	void Quit();
-	void WorkspacesChanged( uint32 oldWorkspaces, uint32 newWorkspaces);
-	void Minimize( bool minimize);
+	void WorkspacesChanged(uint32 oldWorkspaces, uint32 newWorkspaces);
+	void Minimize(bool minimize);
 
 	static BmMainWindow* theInstance;
 
 protected:
-	status_t ArchiveState( BMessage* archive) const;
-	status_t UnarchiveState( BMessage* archive);
+	status_t ArchiveState(BMessage* archive) const;
+	status_t UnarchiveState(BMessage* archive);
 
 private:
 	MMenuBar* CreateMenu();
-	void MailFolderSelectionChanged( bool haveSelectedFolder);
-	void MailRefSelectionChanged( bool haveSelectedRef);
-	void MailViewChanged( bool hasMail);
+	void MailFolderSelectionChanged(bool haveSelectedFolder);
+	void MailRefSelectionChanged(bool haveSelectedRef);
+	void MailViewChanged(bool hasMail);
 
 	BmMailFolderView* mMailFolderView;
 	BmMailRefView* mMailRefView;
 	BmMailView* mMailView;
 	UserResizeSplitView* mVertSplitter;
 	UserResizeSplitView* mHorzSplitter;
-	
+
 	BmLogWindow* mErrLogWin;
-	
+
 	BmToolbarButton* mCheckButton;
 	BmToolbarButton* mNewButton;
 	BmToolbarButton* mReplyButton;
@@ -79,18 +78,18 @@ private:
 	BmToolbarButton* mSpamButton;
 	BmToolbarButton* mPrintButton;
 	BmToolbarButton* mTrashButton;
-	
+
 	BmMenuController* mAccountMenu;
-	
+
 	BmMailRefFilterControl* mMailRefFilterControl;
 	BmMailRefViewFilterControl* mMailRefViewFilterControl;
-	
+
 	MMenuBar* mMainMenuBar;
 	static bool nIsAlive;
 
 	// Hide copy-constructor and assignment:
-	BmMainWindow( const BmMainWindow&);
-	BmMainWindow operator=( const BmMainWindow&);
+	BmMainWindow(const BmMainWindow&);
+	BmMainWindow operator=(const BmMainWindow&);
 };
 
 #define TheMainWindow BmMainWindow::theInstance

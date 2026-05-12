@@ -19,24 +19,24 @@
 	types of messages handled by a BmMailEditWin:
 \*------------------------------------------------------------------------------*/
 enum {
-	BM_TO_CLEAR 			= 'bMYa',
-	BM_TO_ADDED				= 'bMYb',
-	BM_CC_CLEAR 			= 'bMYc',
-	BM_CC_ADDED				= 'bMYd',
-	BM_BCC_CLEAR 			= 'bMYe',
-	BM_BCC_ADDED			= 'bMYf',
-	BM_CHARSET_SELECTED	= 'bMYg',
-	BM_FROM_SET	 			= 'bMYi',
-	BM_SMTP_SELECTED		= 'bMYj',
-	BM_EDIT_HEADER_DONE	= 'bMYk',
-	BM_SHOWDETAILS1		= 'bMYl',
-	BM_SHOWDETAILS2		= 'bMYm',
-	BM_SHOWDETAILS3		= 'bMYn',
-	BM_SIGNATURE_SELECTED= 'bMYo',
-	BM_TO_REMOVE			= 'bMYp',
-	BM_CC_REMOVE			= 'bMYq',
-	BM_BCC_REMOVE			= 'bMYr',
-	BM_FILEINTO_SELECTED	= 'bMYs'
+	BM_TO_CLEAR = 'bMYa',
+	BM_TO_ADDED = 'bMYb',
+	BM_CC_CLEAR = 'bMYc',
+	BM_CC_ADDED = 'bMYd',
+	BM_BCC_CLEAR = 'bMYe',
+	BM_BCC_ADDED = 'bMYf',
+	BM_CHARSET_SELECTED = 'bMYg',
+	BM_FROM_SET = 'bMYi',
+	BM_SMTP_SELECTED = 'bMYj',
+	BM_EDIT_HEADER_DONE = 'bMYk',
+	BM_SHOWDETAILS1 = 'bMYl',
+	BM_SHOWDETAILS2 = 'bMYm',
+	BM_SHOWDETAILS3 = 'bMYn',
+	BM_SIGNATURE_SELECTED = 'bMYo',
+	BM_TO_REMOVE = 'bMYp',
+	BM_CC_REMOVE = 'bMYq',
+	BM_BCC_REMOVE = 'bMYr',
+	BM_FILEINTO_SELECTED = 'bMYs'
 };
 
 
@@ -62,14 +62,13 @@ class BFilePanel;
 
 
 typedef vector<BmString> BmStringVect;
-BmString SelectEmailForPerson( const BmStringVect& emails);
+BmString SelectEmailForPerson(const BmStringVect& emails);
 
 /*------------------------------------------------------------------------------*\
 	BmMailEditWin
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-class BmMailEditWin : public BmWindow
-{
+class BmMailEditWin : public BmWindow {
 	typedef BmWindow inherited;
 
 	friend class BmPeopleDropMsgFilter;
@@ -82,18 +81,18 @@ class BmMailEditWin : public BmWindow
 
 public:
 	// creator-funcs, c'tors and d'tor:
-	static BmMailEditWin* CreateInstance( BmMailRef* mailRef=NULL);
-	static BmMailEditWin* CreateInstance( BmMail* mail=NULL);
+	static BmMailEditWin* CreateInstance(BmMailRef* mailRef = NULL);
+	static BmMailEditWin* CreateInstance(BmMail* mail = NULL);
 	~BmMailEditWin();
 
 	// overrides of BmWindow base:
 	void BeginLife();
-	void MessageReceived( BMessage*);
+	void MessageReceived(BMessage*);
 	bool QuitRequested();
 	void Quit();
-	status_t ArchiveState( BMessage* archive) const;
-	status_t UnarchiveState( BMessage* archive);
-	
+	status_t ArchiveState(BMessage* archive) const;
+	status_t UnarchiveState(BMessage* archive);
+
 	// getters:
 	BmRef<BmMail> CurrMail() const;
 
@@ -104,32 +103,31 @@ public:
 private:
 	// hide constructors:
 	BmMailEditWin();
-	BmMailEditWin( BmMailRef* mailRef, BmMail* mail=NULL);
+	BmMailEditWin(BmMailRef* mailRef, BmMail* mail = NULL);
 
 	// native methods:
-	void AddAddressToTextControl( BmTextControl* cntrl, const BmString& email);
-	void RemoveAddressFromTextControl( BmTextControl* cntrl, 
-												  const BmString& email);
-	
-	void SetDetailsButton( int32 nr, int32 newVal);
-	void EditMail( BmMailRef* ref);
-	void EditMail( BmMail* mail);
-	BmMailViewContainer* CreateMailView( minimax minmax, BRect frame);
+	void AddAddressToTextControl(BmTextControl* cntrl, const BmString& email);
+	void RemoveAddressFromTextControl(BmTextControl* cntrl, const BmString& email);
+
+	void SetDetailsButton(int32 nr, int32 newVal);
+	void EditMail(BmMailRef* ref);
+	void EditMail(BmMail* mail);
+	BmMailViewContainer* CreateMailView(minimax minmax, BRect frame);
 	void CreateGUI();
 	MMenuBar* CreateMenu();
 
-	bool CreateMailFromFields( bool hardWrapIfNeeded=true);
-	bool SaveMail( bool hardWrapIfNeeded=true);
-	void SetFieldsFromMail( BmMail* mail, BmIdentity* identity = NULL);
+	bool CreateMailFromFields(bool hardWrapIfNeeded = true);
+	bool SaveMail(bool hardWrapIfNeeded = true);
+	void SetFieldsFromMail(BmMail* mail, BmIdentity* identity = NULL);
 
-	void SendMail( bool sendNow);
+	void SendMail(bool sendNow);
 	bool EditHeaders();
-	void HandleFromSet( const BmString& from);
+	void HandleFromSet(const BmString& from);
 
-	static void RebuildPeopleMenu( BmMenuControllerBase* peopleMenu);
+	static void RebuildPeopleMenu(BmMenuControllerBase* peopleMenu);
 
 	BmMailView* mMailView;
-	
+
 	MPictureButton* mShowDetails1Button;
 	MPictureButton* mShowDetails2Button;
 	MPictureButton* mShowDetails3Button;
@@ -139,7 +137,7 @@ private:
 	BmToolbarButton* mNewButton;
 	BmToolbarButton* mAttachButton;
 	BmToolbar* mToolbar;
-	
+
 	BmTextControl* mBccControl;
 	BmTextControl* mCcControl;
 	BmTextControl* mToControl;
@@ -148,12 +146,12 @@ private:
 	BmTextControl* mReplyToControl;
 	BmTextControl* mSenderControl;
 	BmTextControl* mSubjectControl;
-	
+
 	BmMenuControl* mCharsetControl;
 	BmMenuControl* mSmtpControl;
 	BmMenuControl* mSignatureControl;
 	BmMenuControl* mFileIntoControl;
-	
+
 	BmCheckControl* mEditHeaderControl;
 
 	bool mShowDetails1;
@@ -178,10 +176,9 @@ private:
 	static float nNextYPos;
 
 	// Hide copy-constructor and assignment:
-	BmMailEditWin( const BmMailEditWin&);
-	BmMailEditWin operator=( const BmMailEditWin&);
+	BmMailEditWin(const BmMailEditWin&);
+	BmMailEditWin operator=(const BmMailEditWin&);
 };
-
 
 
 #endif

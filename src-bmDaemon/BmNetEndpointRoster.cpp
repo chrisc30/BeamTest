@@ -25,20 +25,20 @@ BmNetEndpointRoster* TheNetEndpointRoster = &gNetEndpointRoster;
 
 /*------------------------------------------------------------------------------*\
 	BmNetEndpointRoster()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmNetEndpointRoster::BmNetEndpointRoster()
-	:	mNeedInit(true)
-	,	mAddonImage(-1)
-	,	mAddonName()
-	,	mAddonInstantiateFunc(NULL)
-	,	mLocker("NetEndpointRosterLock")
+	: mNeedInit(true),
+	  mAddonImage(-1),
+	  mAddonName(),
+	  mAddonInstantiateFunc(NULL),
+	  mLocker("NetEndpointRosterLock")
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	~BmNetEndpointRoster()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmNetEndpointRoster::~BmNetEndpointRoster()
 {
@@ -47,9 +47,10 @@ BmNetEndpointRoster::~BmNetEndpointRoster()
 
 /*------------------------------------------------------------------------------*\
 	CreateEndpoint()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmNetEndpoint* BmNetEndpointRoster::CreateEndpoint()
+BmNetEndpoint*
+BmNetEndpointRoster::CreateEndpoint()
 {
 	_InitializeIfNeeded();
 	BmNetEndpoint* endpoint = NULL;
@@ -64,9 +65,10 @@ BmNetEndpoint* BmNetEndpointRoster::CreateEndpoint()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmNetEndpointRoster::SupportsEncryption()
+bool
+BmNetEndpointRoster::SupportsEncryption()
 {
 	_InitializeIfNeeded();
 	bool supportsEncryption = false;
@@ -76,14 +78,15 @@ bool BmNetEndpointRoster::SupportsEncryption()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmNetEndpointRoster::SupportsEncryptionType(const char* _encType)
+bool
+BmNetEndpointRoster::SupportsEncryptionType(const char* _encType)
 {
 	_InitializeIfNeeded();
 	BmString encType(_encType);
 	const char* type;
-	for(int32 i=0; mEncryptionInfo.FindString("type", i, &type)==B_OK; ++i) {
+	for (int32 i = 0; mEncryptionInfo.FindString("type", i, &type) == B_OK; ++i) {
 		if (encType == type)
 			return true;
 	}
@@ -92,9 +95,10 @@ bool BmNetEndpointRoster::SupportsEncryptionType(const char* _encType)
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmString BmNetEndpointRoster::GetCertPath()
+BmString
+BmNetEndpointRoster::GetCertPath()
 {
 	_InitializeIfNeeded();
 	BmString certPath = mEncryptionInfo.FindString("cert-path");
@@ -103,9 +107,10 @@ BmString BmNetEndpointRoster::GetCertPath()
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-status_t BmNetEndpointRoster::GetEncryptionInfo(BMessage* encryptionInfo)
+status_t
+BmNetEndpointRoster::GetEncryptionInfo(BMessage* encryptionInfo)
 {
 	_InitializeIfNeeded();
 	if (!encryptionInfo)
@@ -116,9 +121,10 @@ status_t BmNetEndpointRoster::GetEncryptionInfo(BMessage* encryptionInfo)
 
 /*------------------------------------------------------------------------------*\
 	_InitializeIfNeeded()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetEndpointRoster::_InitializeIfNeeded()
+void
+BmNetEndpointRoster::_InitializeIfNeeded()
 {
 	if (mLocker.Lock()) {
 		if (mNeedInit) {
@@ -126,52 +132,45 @@ void BmNetEndpointRoster::_InitializeIfNeeded()
 			BPath path;
 			BEntry entry;
 			status_t err;
-		
-			BM_LOG2( BM_LogApp, "Started loading of BmNetEndpoint-addons...");
-		
-			BmString addonPath 
-				= BmString(BeamRoster->AppPath()) + "/add-ons/NetEndpoints";
-			addonDir.SetTo( addonPath.String());
+
+			BM_LOG2(BM_LogApp, "Started loading of BmNetEndpoint-addons...");
+
+			BmString addonPath = BmString(BeamRoster->AppPath()) + "/add-ons/NetEndpoints";
+			addonDir.SetTo(addonPath.String());
 			// scan through all its entries for add-ons:
-			while ( addonDir.GetNextEntry( &entry, true) == B_OK) {
+			while (addonDir.GetNextEntry(&entry, true) == B_OK) {
 				if (entry.IsFile()) {
 					char nameBuf[B_FILE_NAME_LENGTH];
-					entry.GetName( nameBuf);
+					entry.GetName(nameBuf);
 					// try to load addon:
-					BM_LOG2( BM_LogApp, BmString("Trying to load netendpoint-addon ") 
-												<< nameBuf << "...");
-					entry.GetPath( &path);
-					if ((mAddonImage = load_add_on( path.Path())) < 0) {
-						BM_LOG( BM_LogApp, 
-								  BmString("Unable to load netendpoint-addon\n\t")
-									<< nameBuf << "\n\nError:\n\t" 
-									<< strerror( mAddonImage));
+					BM_LOG2(BM_LogApp, BmString("Trying to load netendpoint-addon ")
+										   << nameBuf << "...");
+					entry.GetPath(&path);
+					if ((mAddonImage = load_add_on(path.Path())) < 0) {
+						BM_LOG(BM_LogApp, BmString("Unable to load netendpoint-addon\n\t")
+											  << nameBuf << "\n\nError:\n\t"
+											  << strerror(mAddonImage));
 						continue;
 					}
-					if ((err = get_image_symbol( 
-						mAddonImage, "InstantiateNetEndpoint", B_SYMBOL_TYPE_ANY, 
-						(void**)&mAddonInstantiateFunc
-					)) != B_OK) {
-						BM_LOGERR( BmString("Unable to load netendpoint-addon\n\t")
-										<< nameBuf
-										<< "\n\nMissing symbol 'InstantiateNetEndpoint'");
+					if ((err = get_image_symbol(mAddonImage, "InstantiateNetEndpoint",
+							 B_SYMBOL_TYPE_ANY, (void**)&mAddonInstantiateFunc))
+						!= B_OK) {
+						BM_LOGERR(BmString("Unable to load netendpoint-addon\n\t")
+								  << nameBuf << "\n\nMissing symbol 'InstantiateNetEndpoint'");
 						continue;
 					}
-					if ((err = get_image_symbol( 
-						mAddonImage, "GetEncryptionInfo", B_SYMBOL_TYPE_ANY, 
-						(void**)&mAddonGetEncryptionInfoFunc
-					)) != B_OK) {
-						BM_LOGERR( BmString("Unable to load netendpoint-addon\n\t")
-										<< nameBuf
-										<< "\n\nMissing symbol 'GetEncryptionInfo'");
+					if ((err = get_image_symbol(mAddonImage, "GetEncryptionInfo", B_SYMBOL_TYPE_ANY,
+							 (void**)&mAddonGetEncryptionInfoFunc))
+						!= B_OK) {
+						BM_LOGERR(BmString("Unable to load netendpoint-addon\n\t")
+								  << nameBuf << "\n\nMissing symbol 'GetEncryptionInfo'");
 						continue;
 					}
 					mAddonName = nameBuf;
-					BM_LOG( BM_LogApp, 
-							  BmString("Successfully loaded addon ") << nameBuf);
+					BM_LOG(BM_LogApp, BmString("Successfully loaded addon ") << nameBuf);
 				}
 			}
-			BM_LOG2( BM_LogApp, "Done with loading BmNetEndpoint-addons.");
+			BM_LOG2(BM_LogApp, "Done with loading BmNetEndpoint-addons.");
 			mNeedInit = false;
 			// fill message with info from addon:
 			if (mAddonGetEncryptionInfoFunc)
@@ -183,9 +182,10 @@ void BmNetEndpointRoster::_InitializeIfNeeded()
 
 /*------------------------------------------------------------------------------*\
 	Cleanup()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmNetEndpointRoster::_Cleanup()
+void
+BmNetEndpointRoster::_Cleanup()
 {
 	if (mAddonImage >= 0) {
 		unload_add_on(mAddonImage);

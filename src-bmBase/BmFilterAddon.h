@@ -21,7 +21,7 @@ struct IMPEXPBMBASE BmHeaderInfo {
 };
 /*------------------------------------------------------------------------------*\
 	BmMsgContext
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 struct IMPEXPBMBASE BmMsgContext {
 	BmMsgContext();
@@ -30,8 +30,8 @@ struct IMPEXPBMBASE BmMsgContext {
 	// info fields, are set before filtering starts:
 	BmMail* mail;
 	int32 headerInfoCount;
-	BmHeaderInfo *headerInfos;
-	
+	BmHeaderInfo* headerInfos;
+
 	void ResetChanges();
 	bool FieldHasChanged(const char* fieldName) const;
 
@@ -43,7 +43,7 @@ struct IMPEXPBMBASE BmMsgContext {
 
 	void SetString(const char* fieldName, const char* value);
 	const char* GetString(const char* fieldName) const;
-	
+
 	void SetBool(const char* fieldName, bool value);
 	bool GetBool(const char* fieldName) const;
 
@@ -59,56 +59,50 @@ private:
 	BMessage mStatusMsg;
 
 	// Hide copy-constructor:
-	BmMsgContext( const BmMsgContext&);
+	BmMsgContext(const BmMsgContext&);
 };
 
 
-
 /*------------------------------------------------------------------------------*\
-	BmFilterAddon 
+	BmFilterAddon
 		-	base class for all filter-addons, this is used as filter-addon-API
 \*------------------------------------------------------------------------------*/
 class IMPEXPBMBASE BmFilterAddon {
-
 public:
 	BmFilterAddon();
 	virtual ~BmFilterAddon();
-	
+
 	// native methods:
-	virtual bool Execute( BmMsgContext* msgContext, 
-								 const BMessage* jobSpecs = NULL) = 0;
-	virtual void Initialize()				{}
-	virtual bool SanityCheck( BmString& complaint, BmString& fieldName) = 0;
-	virtual status_t Archive( BMessage* archive, bool deep = true) const = 0;
+	virtual bool Execute(BmMsgContext* msgContext, const BMessage* jobSpecs = NULL) = 0;
+	virtual void Initialize() {}
+	virtual bool SanityCheck(BmString& complaint, BmString& fieldName) = 0;
+	virtual status_t Archive(BMessage* archive, bool deep = true) const = 0;
 	virtual BmString ErrorString() const = 0;
 
-	virtual void ForeignKeyChanged( const BmString& /* key */, 
-											  const BmString& /* oldVal */, 
-											  const BmString& /* newVal */) 
-											  		{}
+	virtual void ForeignKeyChanged(
+		const BmString& /* key */, const BmString& /* oldVal */, const BmString& /* newVal */)
+	{
+	}
 
-	virtual void SetupFromMailData( const BmString& /* subject */, 
-											  const BmString& /* from */, 
-											  const BmString& /* To */)	  
-											  		{}
+	virtual void SetupFromMailData(
+		const BmString& /* subject */, const BmString& /* from */, const BmString& /* To */)
+	{
+	}
 
 	// foreign-key identifiers:
 	static const char* const FK_FOLDER;
 	static const char* const FK_IDENTITY;
 
 private:
-
 	// Hide copy-constructor:
-	BmFilterAddon( const BmFilterAddon&);
+	BmFilterAddon(const BmFilterAddon&);
 };
 
-typedef BmFilterAddon* (*BmInstantiateFilterFunc)( const BmString& name, 
-																	const BMessage* archive,
-																	const BmString& kind);
+typedef BmFilterAddon* (*BmInstantiateFilterFunc)(
+	const BmString& name, const BMessage* archive, const BmString& kind);
 
 class BmFilterAddonPrefsView;
-typedef BmFilterAddonPrefsView* (*BmInstantiateFilterPrefsFunc)( 
-	float minX, float minY, float maxX, float maxY, const BmString& kind
-);
+typedef BmFilterAddonPrefsView* (*BmInstantiateFilterPrefsFunc)(
+	float minX, float minY, float maxX, float maxY, const BmString& kind);
 
 #endif

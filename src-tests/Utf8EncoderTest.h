@@ -15,24 +15,24 @@
 #ifndef _Utf8EncoderTest_h
 #define _Utf8EncoderTest_h
 
+#include <TestCase.h>
 #include <cppunit/TestCaller.h>
 #include <cppunit/TestSuite.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <TestCase.h>
 
-class Utf8EncoderTest : public BTestCase
-{
+class Utf8EncoderTest : public BTestCase {
 	typedef TestCase inherited;
-	CPPUNIT_TEST_SUITE( Utf8EncoderTest );
-	CPPUNIT_TEST( SimpleTest);
-	CPPUNIT_TEST( LargeDataTest);
+	CPPUNIT_TEST_SUITE(Utf8EncoderTest);
+	CPPUNIT_TEST(SimpleTest);
+	CPPUNIT_TEST(LargeDataTest);
 	CPPUNIT_TEST_SUITE_END();
+
 public:
-//	static CppUnit::Test* Suite();
-	
+	//	static CppUnit::Test* Suite();
+
 	// This function called before *each* test added in Suite()
 	void setUp();
-	
+
 	// This function called after *each* test added in Suite()
 	void tearDown();
 

@@ -15,24 +15,24 @@
 
 #include "BmString.h"
 
-class IMPEXPBMGUIBASE BmAutoCompleter
-{
+class IMPEXPBMGUIBASE BmAutoCompleter {
 public:
-	class Choice
-	{
+	class Choice {
 	public:
-		Choice( const BmString& choiceText, const BmString& displayText, 
-				  int32 matchPos, int32 matchLen)
-			:	mText(choiceText)
-			,	mDisplayText(displayText)
-			,	mMatchPos(matchPos)
-			,	mMatchLen(matchLen)			{}
-		virtual ~Choice()						{}
-		const BmString& Text() const		{ return mText; }
-		const BmString& DisplayText() const		
-													{ return mDisplayText; }
-		int32 MatchPos() const				{ return mMatchPos; }
-		int32 MatchLen() const				{ return mMatchLen; }
+		Choice(
+			const BmString& choiceText, const BmString& displayText, int32 matchPos, int32 matchLen)
+			: mText(choiceText),
+			  mDisplayText(displayText),
+			  mMatchPos(matchPos),
+			  mMatchLen(matchLen)
+		{
+		}
+		virtual ~Choice() {}
+		const BmString& Text() const { return mText; }
+		const BmString& DisplayText() const { return mDisplayText; }
+		int32 MatchPos() const { return mMatchPos; }
+		int32 MatchLen() const { return mMatchLen; }
+
 	private:
 		BmString mText;
 		BmString mDisplayText;
@@ -40,43 +40,40 @@ public:
 		int32 mMatchLen;
 	};
 
-	class EditView
-	{
+	class EditView {
 	public:
-		virtual ~EditView()					{}
+		virtual ~EditView() {}
 
 		virtual BRect GetAdjustmentFrame() = 0;
-		virtual void GetEditViewState( BmString& text, int32* caretPos) = 0;
-		virtual void SetEditViewState( const BmString& text, int32 caretPos,
-												 int32 selectionLength = 0) = 0;
+		virtual void GetEditViewState(BmString& text, int32* caretPos) = 0;
+		virtual void SetEditViewState(
+			const BmString& text, int32 caretPos, int32 selectionLength = 0)
+			= 0;
 	};
 
-	class PatternSelector
-	{
+	class PatternSelector {
 	public:
-		virtual ~PatternSelector()	{}
-		
-		virtual void SelectPatternBounds( const BmString& text, int32 caretPos,
-													 int32* start, int32* length) = 0;
+		virtual ~PatternSelector() {}
+
+		virtual void SelectPatternBounds(
+			const BmString& text, int32 caretPos, int32* start, int32* length)
+			= 0;
 	};
 
-	class ChoiceModel
-	{
+	class ChoiceModel {
 	public:
-	
-		virtual ~ChoiceModel()				{}
-		
+		virtual ~ChoiceModel() {}
+
 		virtual void FetchChoicesFor(const BmString& pattern) = 0;
 
 		virtual int32 CountChoices() const = 0;
 		virtual const Choice* ChoiceAt(int32 index) const = 0;
 	};
-	
+
 	class CompletionStyle;
-	class ChoiceView
-	{
+	class ChoiceView {
 	public:
-		virtual ~ChoiceView()				{}
+		virtual ~ChoiceView() {}
 
 		virtual void SelectChoiceAt(int32 index) = 0;
 		virtual void ShowChoices(BmAutoCompleter::CompletionStyle* completer) = 0;
@@ -84,12 +81,10 @@ public:
 		virtual bool ChoicesAreShown() = 0;
 	};
 
-	class CompletionStyle
-	{
+	class CompletionStyle {
 	public:
-		CompletionStyle(EditView* editView, ChoiceModel* choiceModel,
-							 ChoiceView* choiceView, 
-							 PatternSelector* patternSelector);
+		CompletionStyle(EditView* editView, ChoiceModel* choiceModel, ChoiceView* choiceView,
+			PatternSelector* patternSelector);
 		virtual ~CompletionStyle();
 
 		virtual bool Select(int32 index) = 0;
@@ -106,11 +101,10 @@ public:
 		void SetChoiceModel(ChoiceModel* model);
 		void SetChoiceView(ChoiceView* view);
 
-		EditView* GetEditView()				{ return mEditView; }
-		PatternSelector* GetPatternSelector()
-													{ return mPatternSelector; }
-		ChoiceModel* GetChoiceModel()		{ return mChoiceModel; }
-		ChoiceView* GetChoiceView()		{ return mChoiceView; }
+		EditView* GetEditView() { return mEditView; }
+		PatternSelector* GetPatternSelector() { return mPatternSelector; }
+		ChoiceModel* GetChoiceModel() { return mChoiceModel; }
+		ChoiceView* GetChoiceView() { return mChoiceView; }
 
 	protected:
 		EditView* mEditView;
@@ -121,10 +115,10 @@ public:
 
 protected:
 	BmAutoCompleter(CompletionStyle* completionStyle = NULL);
-	BmAutoCompleter(EditView* editView, ChoiceModel* choiceModel,
-						 ChoiceView* choiceView, PatternSelector* patternSelector);
+	BmAutoCompleter(EditView* editView, ChoiceModel* choiceModel, ChoiceView* choiceView,
+		PatternSelector* patternSelector);
 	virtual ~BmAutoCompleter();
-	
+
 	void EditViewStateChanged();
 
 	bool Select(int32 index);
@@ -133,14 +127,14 @@ protected:
 
 	void ApplyChoice(bool hideChoices = true);
 	void CancelChoice();
-	
+
 	void SetEditView(EditView* view);
 	void SetPatternSelector(PatternSelector* selector);
 	void SetChoiceModel(ChoiceModel* model);
 	void SetChoiceView(ChoiceView* view);
 
 	void SetCompletionStyle(CompletionStyle* style);
-	
+
 private:
 	CompletionStyle* mCompletionStyle;
 };

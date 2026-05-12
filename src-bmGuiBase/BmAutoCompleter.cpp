@@ -15,19 +15,18 @@
 #include "BmAutoCompleterDefaultImpl.h"
 
 // #pragma mark - DefaultPatternSelector
-class DefaultPatternSelector : public BmAutoCompleter::PatternSelector
-{
+class DefaultPatternSelector : public BmAutoCompleter::PatternSelector {
 public:
-	virtual void SelectPatternBounds( const BmString& text, int32 caretPos,
-												 int32* start, int32* length);
+	virtual void SelectPatternBounds(
+		const BmString& text, int32 caretPos, int32* start, int32* length);
 };
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void DefaultPatternSelector
-::SelectPatternBounds( const BmString& text, int32 caretPos,
-							  int32* start, int32* length)
+void
+DefaultPatternSelector ::SelectPatternBounds(
+	const BmString& text, int32 caretPos, int32* start, int32* length)
 {
 	if (!start || !length)
 		return;
@@ -38,24 +37,20 @@ void DefaultPatternSelector
 // #pragma mark - CompletionStyle
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmAutoCompleter::CompletionStyle
-::CompletionStyle(EditView* editView, ChoiceModel* choiceModel,
-						ChoiceView* choiceView, 
-						PatternSelector* patternSelector)
-	:	mEditView(editView)
-	,	mChoiceModel(choiceModel)
-	,	mChoiceView(choiceView)
-	,	mPatternSelector(patternSelector 
-									? patternSelector 
-									: new DefaultPatternSelector())
+BmAutoCompleter::CompletionStyle ::CompletionStyle(EditView* editView, ChoiceModel* choiceModel,
+	ChoiceView* choiceView, PatternSelector* patternSelector)
+	: mEditView(editView),
+	  mChoiceModel(choiceModel),
+	  mChoiceView(choiceView),
+	  mPatternSelector(patternSelector ? patternSelector : new DefaultPatternSelector())
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmAutoCompleter::CompletionStyle::~CompletionStyle()
 {
@@ -67,9 +62,10 @@ BmAutoCompleter::CompletionStyle::~CompletionStyle()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::CompletionStyle::SetEditView(EditView* view)
+void
+BmAutoCompleter::CompletionStyle::SetEditView(EditView* view)
 {
 	delete mEditView;
 	mEditView = view;
@@ -77,10 +73,10 @@ void BmAutoCompleter::CompletionStyle::SetEditView(EditView* view)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::CompletionStyle
-::SetPatternSelector(PatternSelector* selector)
+void
+BmAutoCompleter::CompletionStyle ::SetPatternSelector(PatternSelector* selector)
 {
 	delete mPatternSelector;
 	mPatternSelector = selector;
@@ -88,9 +84,10 @@ void BmAutoCompleter::CompletionStyle
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::CompletionStyle::SetChoiceModel(ChoiceModel* model)
+void
+BmAutoCompleter::CompletionStyle::SetChoiceModel(ChoiceModel* model)
 {
 	delete mChoiceModel;
 	mChoiceModel = model;
@@ -98,9 +95,10 @@ void BmAutoCompleter::CompletionStyle::SetChoiceModel(ChoiceModel* model)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::CompletionStyle::SetChoiceView(ChoiceView* view)
+void
+BmAutoCompleter::CompletionStyle::SetChoiceView(ChoiceView* view)
 {
 	delete mChoiceView;
 	mChoiceView = view;
@@ -109,31 +107,27 @@ void BmAutoCompleter::CompletionStyle::SetChoiceView(ChoiceView* view)
 // #pragma mark - BmAutoCompleter
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmAutoCompleter::BmAutoCompleter(CompletionStyle* completionStyle)
-	:	mCompletionStyle(completionStyle)
+	: mCompletionStyle(completionStyle)
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmAutoCompleter::BmAutoCompleter(EditView* editView, 
-										   ChoiceModel* choiceModel,
-										   ChoiceView* choiceView, 
-										   PatternSelector* patternSelector)
-	:	mCompletionStyle(
-			new BmDefaultCompletionStyle(editView, choiceModel,
-											     choiceView, patternSelector)
-		)
+BmAutoCompleter::BmAutoCompleter(EditView* editView, ChoiceModel* choiceModel,
+	ChoiceView* choiceView, PatternSelector* patternSelector)
+	: mCompletionStyle(
+		  new BmDefaultCompletionStyle(editView, choiceModel, choiceView, patternSelector))
 {
 }
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmAutoCompleter::~BmAutoCompleter()
 {
@@ -142,9 +136,10 @@ BmAutoCompleter::~BmAutoCompleter()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmAutoCompleter::Select(int32 index)
+bool
+BmAutoCompleter::Select(int32 index)
 {
 	if (mCompletionStyle)
 		return mCompletionStyle->Select(index);
@@ -154,9 +149,10 @@ bool BmAutoCompleter::Select(int32 index)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmAutoCompleter::SelectNext(bool wrap)
+bool
+BmAutoCompleter::SelectNext(bool wrap)
 {
 	if (mCompletionStyle)
 		return mCompletionStyle->SelectNext(wrap);
@@ -166,9 +162,10 @@ bool BmAutoCompleter::SelectNext(bool wrap)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-bool BmAutoCompleter::SelectPrevious(bool wrap)
+bool
+BmAutoCompleter::SelectPrevious(bool wrap)
 {
 	if (mCompletionStyle)
 		return mCompletionStyle->SelectPrevious(wrap);
@@ -178,9 +175,10 @@ bool BmAutoCompleter::SelectPrevious(bool wrap)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::ApplyChoice(bool hideChoices)
+void
+BmAutoCompleter::ApplyChoice(bool hideChoices)
 {
 	if (mCompletionStyle)
 		mCompletionStyle->ApplyChoice(hideChoices);
@@ -188,9 +186,10 @@ void BmAutoCompleter::ApplyChoice(bool hideChoices)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::CancelChoice()
+void
+BmAutoCompleter::CancelChoice()
 {
 	if (mCompletionStyle)
 		mCompletionStyle->CancelChoice();
@@ -198,9 +197,10 @@ void BmAutoCompleter::CancelChoice()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::EditViewStateChanged()
+void
+BmAutoCompleter::EditViewStateChanged()
 {
 	if (mCompletionStyle)
 		mCompletionStyle->EditViewStateChanged();
@@ -208,9 +208,10 @@ void BmAutoCompleter::EditViewStateChanged()
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::SetEditView(EditView* view)
+void
+BmAutoCompleter::SetEditView(EditView* view)
 {
 	if (mCompletionStyle)
 		mCompletionStyle->SetEditView(view);
@@ -218,9 +219,10 @@ void BmAutoCompleter::SetEditView(EditView* view)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::SetPatternSelector(PatternSelector* selector)
+void
+BmAutoCompleter::SetPatternSelector(PatternSelector* selector)
 {
 	if (mCompletionStyle)
 		mCompletionStyle->SetPatternSelector(selector);
@@ -228,9 +230,10 @@ void BmAutoCompleter::SetPatternSelector(PatternSelector* selector)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::SetChoiceModel(ChoiceModel* model)
+void
+BmAutoCompleter::SetChoiceModel(ChoiceModel* model)
 {
 	if (mCompletionStyle)
 		mCompletionStyle->SetChoiceModel(model);
@@ -238,9 +241,10 @@ void BmAutoCompleter::SetChoiceModel(ChoiceModel* model)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::SetChoiceView(ChoiceView* view)
+void
+BmAutoCompleter::SetChoiceView(ChoiceView* view)
 {
 	if (mCompletionStyle)
 		mCompletionStyle->SetChoiceView(view);
@@ -248,9 +252,10 @@ void BmAutoCompleter::SetChoiceView(ChoiceView* view)
 
 /*------------------------------------------------------------------------------*\
 	( )
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmAutoCompleter::SetCompletionStyle(CompletionStyle* style)
+void
+BmAutoCompleter::SetCompletionStyle(CompletionStyle* style)
 {
 	delete mCompletionStyle;
 	mCompletionStyle = style;

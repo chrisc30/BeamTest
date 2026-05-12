@@ -5,7 +5,7 @@
  * Authors:
  *		Oliver Tappe <beam@hirschkaefer.de>
  */
-/* 
+/*
  * multiple-reader single-writer locking class,
  * inspired by BMultiLocker, which is
  *    Copyright 1999, Be Incorporated.   All Rights Reserved.
@@ -25,14 +25,13 @@
 
 using std::map;
 
-class IMPEXPBMBASE BmMultiLocker
-{
-	typedef map<thread_id,int32> ThreadMap;
+class IMPEXPBMBASE BmMultiLocker {
+	typedef map<thread_id, int32> ThreadMap;
 
 public:
-	BmMultiLocker( const BmString& name);
+	BmMultiLocker(const BmString& name);
 	virtual ~BmMultiLocker();
-		
+
 	// locking for reading or writing
 	bool ReadLock();
 	bool WriteLock();

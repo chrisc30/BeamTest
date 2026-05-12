@@ -18,13 +18,13 @@
 
 class BmOpenSslNetEndpoint : public BmNetEndpoint {
 	typedef BmNetEndpoint inherited;
-	
+
 public:
 	BmOpenSslNetEndpoint();
 	virtual ~BmOpenSslNetEndpoint();
 
-	virtual status_t Connect( const BNetAddress& address);
- 	virtual void Close();
+	virtual status_t Connect(const BNetAddress& address);
+	virtual void Close();
 
 	virtual int Error() const;
 	virtual BmString ErrorStr() const;
@@ -33,28 +33,26 @@ public:
 	virtual status_t StopEncryption();
 	virtual bool EncryptionIsActive();
 
-	virtual int32 Send( const void* buffer, size_t size, int flags = 0);
-	virtual int32 Receive( void* buffer, size_t size, int flags = 0);
-	virtual bool IsDataPending( bigtime_t timeout = 0);
+	virtual int32 Send(const void* buffer, size_t size, int flags = 0);
+	virtual int32 Receive(void* buffer, size_t size, int flags = 0);
+	virtual bool IsDataPending(bigtime_t timeout = 0);
 
 	static status_t GetEncryptionInfo(BMessage* encryptionInfo);
 
-	static int ClientCertCallback(SSL* ssl, X509 **certP, EVP_PKEY **pkeyP);
-	static int VerifyCallback(int ok, X509_STORE_CTX *store);
+	static int ClientCertCallback(SSL* ssl, X509** certP, EVP_PKEY** pkeyP);
+	static int VerifyCallback(int ok, X509_STORE_CTX* store);
 
-	static void LockingCallback(int mode, int type, const char *file, int line);
+	static void LockingCallback(int mode, int type, const char* file, int line);
 	static unsigned long ThreadIdCallback(void);
 
 private:
 	status_t _StartEncryptionAfterConnecting();
-	status_t _TranslateErrorCode( int result);
-	status_t _FetchClientCertificateAndKey(SSL* ssl, X509 **x509, 
-														EVP_PKEY **pkey);
+	status_t _TranslateErrorCode(int result);
+	status_t _FetchClientCertificateAndKey(SSL* ssl, X509** x509, EVP_PKEY** pkey);
 	BmString _FingerprintForCert(X509* cert);
-	int _FetchVerificationError(X509_STORE_CTX *store);
+	int _FetchVerificationError(X509_STORE_CTX* store);
 	bool _MatchHostname(const BmString& hostname, const BmString& pattern);
-	bool _VerifyHostname(X509* cert, const BmString& hostname, 
-								BmString& namesFoundInCert);
+	bool _VerifyHostname(X509* cert, const BmString& hostname, BmString& namesFoundInCert);
 	BmString _CertAsString(X509* cert);
 	void _ClearErrorState();
 	status_t _PostHandshakeCheck();
@@ -67,22 +65,23 @@ private:
 
 	class ContextManager {
 		typedef std::map<thread_id, BmOpenSslNetEndpoint*> UserdataMap;
+
 	public:
 		ContextManager();
 		~ContextManager();
-	
-		SSL_CTX* TlsContext()					{ return mTlsContext; }
-	
+
+		SSL_CTX* TlsContext() { return mTlsContext; }
+
 		void SetUserdataForCurrentThread(BmOpenSslNetEndpoint* userdata);
 		BmOpenSslNetEndpoint* GetUserdataForCurrentThread();
 		void RemoveUserdataForCurrentThread();
-		void LockingCallback(int mode, int type, const char *file, int line);
+		void LockingCallback(int mode, int type, const char* file, int line);
 		unsigned long ThreadIdCallback(void);
-	
+
 	private:
 		void _SetupSslLocks();
 		void _CleanupSslLocks();
-	
+
 		BLocker mLocker;
 		SSL_CTX* mTlsContext;
 		status_t mStatus;

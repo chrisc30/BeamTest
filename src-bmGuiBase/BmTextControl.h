@@ -14,8 +14,8 @@
 
 #include <layout.h>
 
-#include "BmGuiBase.h"
 #include "BmDividable.h"
+#include "BmGuiBase.h"
 
 class HGroup;
 
@@ -23,36 +23,32 @@ class HGroup;
 
 class BmMenuControllerBase;
 
-class IMPEXPBMGUIBASE BmTextControl : public MView, 
-															 public BTextControl,
-															 public BmDividable
-{
+class IMPEXPBMGUIBASE BmTextControl : public MView, public BTextControl, public BmDividable {
 	typedef BTextControl inherited;
 
 public:
 	// creator-func, c'tors and d'tor:
-	BmTextControl( const char* label, bool labelIsMenu=false,
-						int32 fixedTextLen=0, int32 minTextLen=0);
-	BmTextControl( const char* label, BmMenuControllerBase* menu, 
-						int32 fixedTextLen=0, int32 minTextLen=0);
+	BmTextControl(
+		const char* label, bool labelIsMenu = false, int32 fixedTextLen = 0, int32 minTextLen = 0);
+	BmTextControl(const char* label, BmMenuControllerBase* menu, int32 fixedTextLen = 0,
+		int32 minTextLen = 0);
 	~BmTextControl();
-	
+
 	// native methods:
-	void InitSize( const char* label, int32 fixedTextLen, int32 minTextLen,
-						BmMenuControllerBase* popup);
-	void SetTextSilently( const char* text);
+	void InitSize(
+		const char* label, int32 fixedTextLen, int32 minTextLen, BmMenuControllerBase* popup);
+	void SetTextSilently(const char* text);
 
 	// overrides of BTextControl:
-	void FrameResized( float new_width, float new_height);
-	void SetDivider( float divider);
+	void FrameResized(float new_width, float new_height);
+	void SetDivider(float divider);
 	float Divider() const;
-	void SetEnabled( bool enabled);
-	void SetText( const char* text);
+	void SetEnabled(bool enabled);
+	void SetText(const char* text);
 
 	// getters:
-	inline BTextView* TextView() const 	{ return mTextView; }
-	inline BMenuField* MenuField() const
-													{ return mMenuField; }
+	inline BTextView* TextView() const { return mTextView; }
+	inline BMenuField* MenuField() const { return mMenuField; }
 	BmMenuControllerBase* Menu() const;
 
 protected:
@@ -64,8 +60,8 @@ protected:
 	BMenuField* mMenuField;
 
 	// Hide copy-constructor and assignment:
-	BmTextControl( const BmTextControl&);
-	BmTextControl operator=( const BmTextControl&);
+	BmTextControl(const BmTextControl&);
+	BmTextControl operator=(const BmTextControl&);
 };
 
 

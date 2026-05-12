@@ -10,7 +10,7 @@
 #define _BmAutoCompleterVariations_h
 
 #include <ListView.h>
-//#include <MessageFilter.h>
+// #include <MessageFilter.h>
 
 #include "BmGuiBase.h"
 
@@ -18,23 +18,18 @@
 
 #include "BmAutoCompleter.h"
 
-class IMPEXPBMGUIBASE BmDefaultPatternSelector 
-	: public BmAutoCompleter::PatternSelector
-{
+class IMPEXPBMGUIBASE BmDefaultPatternSelector : public BmAutoCompleter::PatternSelector {
 public:
-	virtual void SelectPatternBounds( const BmString& text, int32 caretPos,
-												 int32* start, int32* length);
+	virtual void SelectPatternBounds(
+		const BmString& text, int32 caretPos, int32* start, int32* length);
 };
 
 
-class IMPEXPBMGUIBASE BmDefaultCompletionStyle 
-	: public BmAutoCompleter::CompletionStyle
-{
+class IMPEXPBMGUIBASE BmDefaultCompletionStyle : public BmAutoCompleter::CompletionStyle {
 public:
-	BmDefaultCompletionStyle(BmAutoCompleter::EditView* editView, 
-									 BmAutoCompleter::ChoiceModel* choiceModel,
-									 BmAutoCompleter::ChoiceView* choiceView, 
-									 BmAutoCompleter::PatternSelector* patternSelector);
+	BmDefaultCompletionStyle(BmAutoCompleter::EditView* editView,
+		BmAutoCompleter::ChoiceModel* choiceModel, BmAutoCompleter::ChoiceView* choiceView,
+		BmAutoCompleter::PatternSelector* patternSelector);
 	virtual ~BmDefaultCompletionStyle();
 
 	virtual bool Select(int32 index);
@@ -54,38 +49,36 @@ private:
 };
 
 
-class IMPEXPBMGUIBASE BmDefaultChoiceView 
-	: public BmAutoCompleter::ChoiceView
-{
+class IMPEXPBMGUIBASE BmDefaultChoiceView : public BmAutoCompleter::ChoiceView {
 protected:
-	class ListView : public BListView
-	{
+	class ListView : public BListView {
 	public:
 		ListView(BmAutoCompleter::CompletionStyle* completer);
 		virtual void SelectionChanged();
 		virtual void MessageReceived(BMessage* msg);
 		virtual void MouseDown(BPoint point);
 		virtual void AttachedToWindow();
+
 	private:
 		BmAutoCompleter::CompletionStyle* mCompleter;
 	};
 
-	class ListItem : public BListItem
-	{
+	class ListItem : public BListItem {
 	public:
 		ListItem(const BmAutoCompleter::Choice* choice);
 		virtual void DrawItem(BView* owner, BRect frame, bool complete = false);
+
 	private:
 		BmString mPreText;
 		BmString mMatchText;
 		BmString mPostText;
 	};
-	
-	
+
+
 public:
 	BmDefaultChoiceView();
 	virtual ~BmDefaultChoiceView();
-	
+
 	virtual void SelectChoiceAt(int32 index);
 	virtual void ShowChoices(BmAutoCompleter::CompletionStyle* completer);
 	virtual void HideChoices();

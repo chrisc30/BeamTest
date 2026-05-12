@@ -22,8 +22,7 @@ class BmToolbarButton;
 class BmToolbar;
 class UserResizeSplitView;
 
-class BmMailViewWin : public BmWindow
-{
+class BmMailViewWin : public BmWindow {
 	typedef BmWindow inherited;
 
 	// archival-fieldnames:
@@ -31,32 +30,32 @@ class BmMailViewWin : public BmWindow
 
 public:
 	// creator-func, c'tors and d'tor:
-	static BmMailViewWin* CreateInstance( BmMailRef* mailRef=NULL);
-	BmMailViewWin( BmMailRef* mailRef=NULL);
+	static BmMailViewWin* CreateInstance(BmMailRef* mailRef = NULL);
+	BmMailViewWin(BmMailRef* mailRef = NULL);
 	~BmMailViewWin();
 
-	void ShowMail( BmMailRef* mailRef, bool async=true);
+	void ShowMail(BmMailRef* mailRef, bool async = true);
 
 	// overrides of BmWindow base:
 	void BeginLife();
-	void MessageReceived( BMessage*);
+	void MessageReceived(BMessage*);
 	bool QuitRequested();
 	void Quit();
-	status_t ArchiveState( BMessage* archive) const;
-	status_t UnarchiveState( BMessage* archive);
-	
+	status_t ArchiveState(BMessage* archive) const;
+	status_t UnarchiveState(BMessage* archive);
+
 	// getters:
-	BmMailView* MailView() const			{ return mMailView; }
-	
+	BmMailView* MailView() const { return mMailView; }
+
 private:
 	void CreateGUI();
 	MMenuBar* CreateMenu();
 
 	BmMailRefView* mMailRefView;
 	BmMailView* mMailView;
-	
+
 	UserResizeSplitView* mHorzSplitter;
-	
+
 	BmToolbarButton* mNewButton;
 	BmToolbarButton* mReplyButton;
 	BmToolbarButton* mForwardButton;
@@ -64,9 +63,9 @@ private:
 	BmToolbarButton* mSpamButton;
 	BmToolbarButton* mPrintButton;
 	BmToolbarButton* mTrashButton;
-	
+
 	BmToolbar* mToolbar;
-	
+
 	MView* mOuterGroup;
 
 	BmMailRefViewFilterControl* mMailRefViewFilterControl;
@@ -77,8 +76,8 @@ private:
 	static float nNextYPos;
 
 	// Hide copy-constructor and assignment:
-	BmMailViewWin( const BmMailViewWin&);
-	BmMailViewWin operator=( const BmMailViewWin&);
+	BmMailViewWin(const BmMailViewWin&);
+	BmMailViewWin operator=(const BmMailViewWin&);
 };
 
 

@@ -35,8 +35,8 @@ const char* const BmPopAccount::nType = "POP";
 	BmPopAccount()
 		-	c'tor
 \*------------------------------------------------------------------------------*/
-BmPopAccount::BmPopAccount( const char* name, BmRecvAccountList* model) 
-	:	inherited( name, model)
+BmPopAccount::BmPopAccount(const char* name, BmRecvAccountList* model)
+	: inherited(name, model)
 {
 	mPortNr = 110;
 	mPortNrString = "110";
@@ -48,8 +48,8 @@ BmPopAccount::BmPopAccount( const char* name, BmRecvAccountList* model)
 		-	c'tor
 		-	constructs a BmPopAccount from a BMessage
 \*------------------------------------------------------------------------------*/
-BmPopAccount::BmPopAccount( BMessage* archive, BmRecvAccountList* model) 
-	:	inherited( archive, model)
+BmPopAccount::BmPopAccount(BMessage* archive, BmRecvAccountList* model)
+	: inherited(archive, model)
 {
 	SetupIntervalRunner();
 }
@@ -58,14 +58,14 @@ BmPopAccount::BmPopAccount( BMessage* archive, BmRecvAccountList* model)
 	~BmPopAccount()
 		-	d'tor
 \*------------------------------------------------------------------------------*/
-BmPopAccount::~BmPopAccount() {
-}
+BmPopAccount::~BmPopAccount() {}
 
 /*------------------------------------------------------------------------------*\
 	GetSupportedAuthTypes()
 		-
 \*------------------------------------------------------------------------------*/
-void BmPopAccount::GetSupportedAuthTypes(vector<BmString>& outList) const
+void
+BmPopAccount::GetSupportedAuthTypes(vector<BmString>& outList) const
 {
 	outList.push_back(AUTH_AUTO);
 	outList.push_back(AUTH_CRAM_MD5);
@@ -74,4 +74,3 @@ void BmPopAccount::GetSupportedAuthTypes(vector<BmString>& outList) const
 	outList.push_back(AUTH_APOP);
 	outList.push_back(AUTH_NONE);
 }
-

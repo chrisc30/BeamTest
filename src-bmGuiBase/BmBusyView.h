@@ -18,13 +18,12 @@
 
 class BmBitmapHandle;
 
-class IMPEXPBMGUIBASE BmBusyView : public BView
-{
+class IMPEXPBMGUIBASE BmBusyView : public BView {
 	typedef BView inherited;
 
 public:
 	// creator-func, c'tors and d'tor:
-	BmBusyView( BPoint leftTop);
+	BmBusyView(BPoint leftTop);
 	~BmBusyView();
 
 	// native methods:
@@ -34,13 +33,12 @@ public:
 	void UnsetErrorText();
 	void Pulse();
 
-	static void SetErrorIcon( const BmBitmapHandle* icon)
-													{ nErrorIcon = icon; }
+	static void SetErrorIcon(const BmBitmapHandle* icon) { nErrorIcon = icon; }
 
 	// overrides of BStringView base:
-	void Draw( BRect bounds);
-	void MessageReceived( BMessage* msg);
-	
+	void Draw(BRect bounds);
+	void MessageReceived(BMessage* msg);
+
 private:
 	void UpdateErrorStatus();
 
@@ -51,8 +49,8 @@ private:
 	static const BmBitmapHandle* nErrorIcon;
 
 	// Hide copy-constructor and assignment:
-	BmBusyView( const BmBusyView&);
-	BmBusyView operator=( const BmBusyView&);
+	BmBusyView(const BmBusyView&);
+	BmBusyView operator=(const BmBusyView&);
 };
 
 

@@ -18,4 +18,4 @@ IMPEXPBMGUIBASE const BCursor* c_crosshairs_cursor();
 IMPEXPBMGUIBASE const BCursor* c_magnify_cursor();
 
 
-#endif //_SGB_CURSORS_H_
+#endif	//_SGB_CURSORS_H_

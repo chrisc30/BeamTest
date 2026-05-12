@@ -32,42 +32,43 @@ class BmRulerView;
 	types of messages sent via the observe/notify system:
 \*------------------------------------------------------------------------------*/
 enum {
-	BM_NTFY_MAIL_VIEW							= 'bmbc',
-						// sent from BmMailView to observers whenever 
-						// selection changes
-	BM_MAILVIEW_SHOWRAW						= 'bmMa',
-	BM_MAILVIEW_SHOWCOOKED					= 'bmMb',
-	BM_MAILVIEW_SHOWINLINES_SEPARATELY	= 'bmMc',
-	BM_MAILVIEW_SHOWINLINES_CONCATENATED= 'bmMd',
-	BM_MAILVIEW_SELECT_CHARSET				= 'bmMe',
-	BM_MAILVIEW_COPY_URL						= 'bmMf',
-	BM_MAILVIEW_HIGHLIGHT_SIG				= 'bmMg',
-	BM_MAILVIEW_HIGHLIGHT_URL				= 'bmMh'
+	BM_NTFY_MAIL_VIEW = 'bmbc',
+	// sent from BmMailView to observers whenever
+	// selection changes
+	BM_MAILVIEW_SHOWRAW = 'bmMa',
+	BM_MAILVIEW_SHOWCOOKED = 'bmMb',
+	BM_MAILVIEW_SHOWINLINES_SEPARATELY = 'bmMc',
+	BM_MAILVIEW_SHOWINLINES_CONCATENATED = 'bmMd',
+	BM_MAILVIEW_SELECT_CHARSET = 'bmMe',
+	BM_MAILVIEW_COPY_URL = 'bmMf',
+	BM_MAILVIEW_HIGHLIGHT_SIG = 'bmMg',
+	BM_MAILVIEW_HIGHLIGHT_URL = 'bmMh'
 };
 
 /*------------------------------------------------------------------------------*\
 	utility function to wrap lines at word boundary:
 \*------------------------------------------------------------------------------*/
-void WordWrap( const BmString& in, BmString& out, int32 maxLineLen, 
-					BmString nl);
+void WordWrap(const BmString& in, BmString& out, int32 maxLineLen, BmString nl);
 
 /*------------------------------------------------------------------------------*\
 	BmMailView
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmMailView : public WrappingTextView, public BmJobController {
 	typedef WrappingTextView inherited;
 	typedef BmJobController inheritedController;
 	struct BmTextRunInfo {
-		BmTextRunInfo( rgb_color c= ui_color(B_DOCUMENT_TEXT_COLOR), bool url=false) { 
-			color = c; isURL = url;
+		BmTextRunInfo(rgb_color c = ui_color(B_DOCUMENT_TEXT_COLOR), bool url = false)
+		{
+			color = c;
+			isURL = url;
 		}
 		rgb_color color;
 		bool isURL;
 	};
-	typedef map<int32,BmTextRunInfo> BmTextRunMap;
+	typedef map<int32, BmTextRunInfo> BmTextRunMap;
 	typedef BmTextRunMap::const_iterator BmTextRunIter;
-	
+
 	// archival-fieldnames:
 	static const char* const MSG_VERSION;
 	static const char* const MSG_RAW;
@@ -78,84 +79,78 @@ class BmMailView : public WrappingTextView, public BmJobController {
 	static const char* const MSG_MAIL;
 
 	static const int16 nArchiveVersion;
-	
-	static const int16 HIGHLIGHT_SIG = 1<<0;
-	static const int16 HIGHLIGHT_URL = 1<<1;
+
+	static const int16 HIGHLIGHT_SIG = 1 << 0;
+	static const int16 HIGHLIGHT_URL = 1 << 1;
 
 public:
 	static const char* const MSG_HAS_MAIL;
 
 	// creator-func, c'tors and d'tor:
-	static BmMailView* CreateInstance( BRect frame, bool outbound);
+	static BmMailView* CreateInstance(BRect frame, bool outbound);
 	~BmMailView();
 
 	// native methods:
-	void ShowMail( BmMailRef* ref, bool async=true);
-	void ShowMail( BmMail* mail, bool async=true);
-	void DisplayBodyPart( BmStringOBuf& displayBuf, BmBodyPart* bodyPart);
+	void ShowMail(BmMailRef* ref, bool async = true);
+	void ShowMail(BmMail* mail, bool async = true);
+	void DisplayBodyPart(BmStringOBuf& displayBuf, BmBodyPart* bodyPart);
 	void UpdateParsingStatus();
-	status_t Archive( BMessage* archive, bool deep=true) const;
-	status_t Unarchive( BMessage* archive, bool deep=true);
+	status_t Archive(BMessage* archive, bool deep = true) const;
+	status_t Unarchive(BMessage* archive, bool deep = true);
 	bool WriteStateInfo();
-	void GetWrappedText( BmString& out, bool hardWrapIfNeeded=true);
-	void SetSignatureByName( const BmString sigName);
-	void UpdateFont( const BFont& font);
-	bool IsOverURL( BPoint point);
-	BmString GetTextForTextrun( BmTextRunIter run);
-	void SendNoticesIfNeeded( bool haveMail);
+	void GetWrappedText(BmString& out, bool hardWrapIfNeeded = true);
+	void SetSignatureByName(const BmString sigName);
+	void UpdateFont(const BFont& font);
+	bool IsOverURL(BPoint point);
+	BmString GetTextForTextrun(BmTextRunIter run);
+	void SendNoticesIfNeeded(bool haveMail);
 	bool IsDisplayComplete();
 	//
 	void StartIncrementalSearch();
 
 	// overrides of BTextView base:
-	bool AcceptsDrop( const BMessage* msg);
+	bool AcceptsDrop(const BMessage* msg);
 	void AttachedToWindow();
 	bool CanEndLine(int32 offset);
-	void FrameResized( float newWidth, float newHeight);
-	void InsertText(const char *text, int32 length, int32 offset,
-						 const text_run_array *runs);
-	void KeyDown(const char *bytes, int32 numBytes);
+	void FrameResized(float newWidth, float newHeight);
+	void InsertText(const char* text, int32 length, int32 offset, const text_run_array* runs);
+	void KeyDown(const char* bytes, int32 numBytes);
 	void MakeFocus(bool focused);
-	void MessageReceived( BMessage* msg);
-	void MouseDown( BPoint point);
-	void MouseUp( BPoint point);
-	void MouseMoved( BPoint point, uint32 transit, const BMessage *message);
-	
+	void MessageReceived(BMessage* msg);
+	void MouseDown(BPoint point);
+	void MouseUp(BPoint point);
+	void MouseMoved(BPoint point, uint32 transit, const BMessage* message);
+
 	// overrides of BmController base:
-	BHandler* GetControllerHandler()		{ return this; }
+	BHandler* GetControllerHandler() { return this; }
 	void DetachModel();
 
 	// getters:
-	inline BmMailViewContainer* ContainerView() const	
-													{ return mScrollView; }
-	inline BmRef<BmMail> CurrMail()		{ return mCurrMail; }
-	inline bool ShowRaw()					{ return mShowRaw; }
-	inline bool ShowInlinesSeparately()	{ return mShowInlinesSeparately; }
-	inline BmBodyPartView* BodyPartView()
-													{ return mBodyPartView; }
-	inline BmMailHeaderView* HeaderView()
-													{ return mHeaderView; }
+	inline BmMailViewContainer* ContainerView() const { return mScrollView; }
+	inline BmRef<BmMail> CurrMail() { return mCurrMail; }
+	inline bool ShowRaw() { return mShowRaw; }
+	inline bool ShowInlinesSeparately() { return mShowInlinesSeparately; }
+	inline BmBodyPartView* BodyPartView() { return mBodyPartView; }
+	inline BmMailHeaderView* HeaderView() { return mHeaderView; }
 
 	// setters:
-	inline void TeamUpWith( BmMailRefView* v)
-													{ mPartnerMailRefView = v; }
-	inline void ShowRaw( bool b) 			{ mShowRaw = b; }
-	inline void ShowInlinesSeparately( bool b)	
-													{ mShowInlinesSeparately = b; }
-	void AddParsingError( const BmString& errStr);
+	inline void TeamUpWith(BmMailRefView* v) { mPartnerMailRefView = v; }
+	inline void ShowRaw(bool b) { mShowRaw = b; }
+	inline void ShowInlinesSeparately(bool b) { mShowInlinesSeparately = b; }
+	void AddParsingError(const BmString& errStr);
 
 protected:
 	void HandleIncrementalSearchKeys(const char* bytes, int32 numBytes);
-	void IncrementalSearch(const BmString& search, bool next=false);
-	void JobIsDone( bool completed);
+	void IncrementalSearch(const BmString& search, bool next = false);
+	void JobIsDone(bool completed);
 
 private:
-	void ShowMenu( BPoint point);
-	BmTextRunIter TextRunInfoAt( int32 pos) const;
+	void ShowMenu(BPoint point);
+	BmTextRunIter TextRunInfoAt(int32 pos) const;
 
 	// will not be archived:
 	bool mOutbound;
-	BmRef< BmMail> mCurrMail;
+	BmRef<BmMail> mCurrMail;
 	BmMailViewContainer* mScrollView;
 	BmMailHeaderView* mHeaderView;
 	BmBodyPartView* mBodyPartView;
@@ -168,7 +163,7 @@ private:
 	bool mHaveMail;
 	BmString mParsingErrors;
 	int32 mIncrSearchPos;
-	
+
 	// will be archived:
 	BmString mFontName;
 	int16 mFontSize;
@@ -179,22 +174,22 @@ private:
 	bool mDisplayInProgress;
 
 	// Hide copy-constructor and assignment:
-	BmMailView( BRect frame, bool outbound);
-	BmMailView( const BmMailView&);
-	BmMailView operator=( const BmMailView&);
+	BmMailView(BRect frame, bool outbound);
+	BmMailView(const BmMailView&);
+	BmMailView operator=(const BmMailView&);
 };
 
 class BmBusyView;
 class BmCaption;
 /*------------------------------------------------------------------------------*\
 	BmMailViewContainer
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 class BmMailViewContainer : public BetterScrollView {
 	typedef BetterScrollView inherited;
 
 public:
-	BmMailViewContainer( minimax minmax, BmMailView* target);
+	BmMailViewContainer(minimax minmax, BmMailView* target);
 	~BmMailViewContainer();
 
 	// native methods:
@@ -202,8 +197,8 @@ public:
 
 private:
 	// Hide copy-constructor and assignment:
-	BmMailViewContainer( const BmMailViewContainer&);
-	BmMailViewContainer operator=( const BmMailViewContainer&);
+	BmMailViewContainer(const BmMailViewContainer&);
+	BmMailViewContainer operator=(const BmMailViewContainer&);
 };
 
 #endif

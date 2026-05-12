@@ -26,15 +26,15 @@ using namespace regexx;
 	BmIdentity
 \********************************************************************************/
 
-const char* const BmIdentity::MSG_NAME = 				"bm:name";
-const char* const BmIdentity::MSG_RECV_ACCOUNT = 	"bm:recvacc";
-const char* const BmIdentity::MSG_SMTP_ACCOUNT = 	"bm:smtpacc";
-const char* const BmIdentity::MSG_REAL_NAME = 		"bm:realname";
-const char* const BmIdentity::MSG_MAIL_ADDR = 		"bm:mailaddr";
+const char* const BmIdentity::MSG_NAME = "bm:name";
+const char* const BmIdentity::MSG_RECV_ACCOUNT = "bm:recvacc";
+const char* const BmIdentity::MSG_SMTP_ACCOUNT = "bm:smtpacc";
+const char* const BmIdentity::MSG_REAL_NAME = "bm:realname";
+const char* const BmIdentity::MSG_MAIL_ADDR = "bm:mailaddr";
 const char* const BmIdentity::MSG_SIGNATURE_NAME = "bm:signaturename";
-const char* const BmIdentity::MSG_MARK_BUCKET = 	"bm:markbucket";
+const char* const BmIdentity::MSG_MARK_BUCKET = "bm:markbucket";
 const char* const BmIdentity::MSG_MAIL_ALIASES = "bm:mailaliases";
-const char* const BmIdentity::MSG_REPLY_TO = 		"bm:replyto";
+const char* const BmIdentity::MSG_REPLY_TO = "bm:replyto";
 const char* const BmIdentity::MSG_SPECIAL_HEADERS = "bm:spechead";
 const int16 BmIdentity::nArchiveVersion = 4;
 
@@ -42,9 +42,9 @@ const int16 BmIdentity::nArchiveVersion = 4;
 	BmIdentity()
 		-	c'tor
 \*------------------------------------------------------------------------------*/
-BmIdentity::BmIdentity( const char* name, BmIdentityList* model) 
-	:	inherited( name, model, (BmListModelItem*)NULL)
-	,	mMarkedAsBitBucket( false)
+BmIdentity::BmIdentity(const char* name, BmIdentityList* model)
+	: inherited(name, model, (BmListModelItem*)NULL),
+	  mMarkedAsBitBucket(false)
 {
 }
 
@@ -53,30 +53,30 @@ BmIdentity::BmIdentity( const char* name, BmIdentityList* model)
 		-	c'tor
 		-	constructs a BmIdentity from a BMessage
 \*------------------------------------------------------------------------------*/
-BmIdentity::BmIdentity( BMessage* archive, BmIdentityList* model) 
-	:	inherited( FindMsgString( archive, MSG_NAME), model, (BmListModelItem*)NULL)
+BmIdentity::BmIdentity(BMessage* archive, BmIdentityList* model)
+	: inherited(FindMsgString(archive, MSG_NAME), model, (BmListModelItem*)NULL)
 {
 	int16 version;
-	if (archive->FindInt16( MSG_VERSION, &version) != B_OK)
+	if (archive->FindInt16(MSG_VERSION, &version) != B_OK)
 		version = 0;
-	mSMTPAccount = FindMsgString( archive, MSG_SMTP_ACCOUNT);
-	mRealName = FindMsgString( archive, MSG_REAL_NAME);
-	mMailAddr = FindMsgString( archive, MSG_MAIL_ADDR);
-	mSignatureName = FindMsgString( archive, MSG_SIGNATURE_NAME);
-	mMarkedAsBitBucket = FindMsgBool( archive, MSG_MARK_BUCKET);
-	mMailAliases = FindMsgString( archive, MSG_MAIL_ALIASES);
+	mSMTPAccount = FindMsgString(archive, MSG_SMTP_ACCOUNT);
+	mRealName = FindMsgString(archive, MSG_REAL_NAME);
+	mMailAddr = FindMsgString(archive, MSG_MAIL_ADDR);
+	mSignatureName = FindMsgString(archive, MSG_SIGNATURE_NAME);
+	mMarkedAsBitBucket = FindMsgBool(archive, MSG_MARK_BUCKET);
+	mMailAliases = FindMsgString(archive, MSG_MAIL_ALIASES);
 	_SplitMailAliases();
 	if (version >= 2) {
-		mReplyTo = FindMsgString( archive, MSG_REPLY_TO);
+		mReplyTo = FindMsgString(archive, MSG_REPLY_TO);
 	}
 	if (version >= 3) {
-		mSpecialHeaders = FindMsgString( archive, MSG_SPECIAL_HEADERS);
+		mSpecialHeaders = FindMsgString(archive, MSG_SPECIAL_HEADERS);
 	}
 	if (version < 4) {
 		// with version 4 we renamed popacc to recvacc:
-		mRecvAccount = FindMsgString( archive, "bm:popacc");
+		mRecvAccount = FindMsgString(archive, "bm:popacc");
 	} else {
-		mRecvAccount = FindMsgString( archive, MSG_RECV_ACCOUNT);
+		mRecvAccount = FindMsgString(archive, MSG_RECV_ACCOUNT);
 	}
 }
 
@@ -84,17 +84,17 @@ BmIdentity::BmIdentity( BMessage* archive, BmIdentityList* model)
 	~BmIdentity()
 		-	d'tor
 \*------------------------------------------------------------------------------*/
-BmIdentity::~BmIdentity() {
-}
+BmIdentity::~BmIdentity() {}
 
 /*------------------------------------------------------------------------------*\
 	RecvAcc()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-BmRef<BmRecvAccount> BmIdentity::RecvAcc() const {
-	BmRef<BmListModelItem> accRef 
-		= TheRecvAccountList->FindItemByKey( mRecvAccount);
-	return dynamic_cast< BmRecvAccount*>( accRef.Get());
+BmRef<BmRecvAccount>
+BmIdentity::RecvAcc() const
+{
+	BmRef<BmListModelItem> accRef = TheRecvAccountList->FindItemByKey(mRecvAccount);
+	return dynamic_cast<BmRecvAccount*>(accRef.Get());
 }
 
 /*------------------------------------------------------------------------------*\
@@ -102,18 +102,19 @@ BmRef<BmRecvAccount> BmIdentity::RecvAcc() const {
 		-	writes BmIdentity into archive
 		-	parameter deep makes no difference...
 \*------------------------------------------------------------------------------*/
-status_t BmIdentity::Archive( BMessage* archive, bool deep) const {
-	status_t ret = inherited::Archive( archive, deep)
-		||	archive->AddString( MSG_NAME, Key().String())
-		||	archive->AddString( MSG_RECV_ACCOUNT, mRecvAccount.String())
-		||	archive->AddString( MSG_SMTP_ACCOUNT, mSMTPAccount.String())
-		||	archive->AddString( MSG_REAL_NAME, mRealName.String())
-		||	archive->AddString( MSG_MAIL_ADDR, mMailAddr.String())
-		||	archive->AddString( MSG_SIGNATURE_NAME, mSignatureName.String())
-		||	archive->AddBool( MSG_MARK_BUCKET, mMarkedAsBitBucket)
-		||	archive->AddString( MSG_REPLY_TO, mReplyTo.String())
-		||	archive->AddString( MSG_SPECIAL_HEADERS, mSpecialHeaders.String())
-		||	archive->AddString( MSG_MAIL_ALIASES, mMailAliases.String());
+status_t
+BmIdentity::Archive(BMessage* archive, bool deep) const
+{
+	status_t ret = inherited::Archive(archive, deep) || archive->AddString(MSG_NAME, Key().String())
+				   || archive->AddString(MSG_RECV_ACCOUNT, mRecvAccount.String())
+				   || archive->AddString(MSG_SMTP_ACCOUNT, mSMTPAccount.String())
+				   || archive->AddString(MSG_REAL_NAME, mRealName.String())
+				   || archive->AddString(MSG_MAIL_ADDR, mMailAddr.String())
+				   || archive->AddString(MSG_SIGNATURE_NAME, mSignatureName.String())
+				   || archive->AddBool(MSG_MARK_BUCKET, mMarkedAsBitBucket)
+				   || archive->AddString(MSG_REPLY_TO, mReplyTo.String())
+				   || archive->AddString(MSG_SPECIAL_HEADERS, mSpecialHeaders.String())
+				   || archive->AddString(MSG_MAIL_ALIASES, mMailAliases.String());
 	return ret;
 }
 
@@ -121,14 +122,16 @@ status_t BmIdentity::Archive( BMessage* archive, bool deep) const {
 	GetFromAddress()
 		-	returns the constructed from - address for this identity
 \*------------------------------------------------------------------------------*/
-BmString BmIdentity::GetFromAddress() const {
+BmString
+BmIdentity::GetFromAddress() const
+{
 	BmRef<BmRecvAccount> recvAcc = RecvAcc();
 	if (!recvAcc)
 		return "";
-	BmString addr( BmAddress::QuotedPhrase(mRealName));
+	BmString addr(BmAddress::QuotedPhrase(mRealName));
 	BmString domainPart = GetDomainName();
 	if (domainPart.Length())
-		domainPart.Prepend( "@");
+		domainPart.Prepend("@");
 	if (addr.Length()) {
 		if (mMailAddr.Length())
 			addr << " <" << mMailAddr << ">";
@@ -147,12 +150,14 @@ BmString BmIdentity::GetFromAddress() const {
 	GetDomainName()
 		-	returns the domain part of this identity's address
 \*------------------------------------------------------------------------------*/
-BmString BmIdentity::GetDomainName() const {
+BmString
+BmIdentity::GetDomainName() const
+{
 	BmString domainName;
 	int32 atPos = mMailAddr.FindFirst("@");
 	if (atPos >= 0) {
 		// fetch domain name from our given mail-address:
-		domainName.SetTo(mMailAddr.String()+atPos+1);
+		domainName.SetTo(mMailAddr.String() + atPos + 1);
 	} else {
 		// fetch domain name from receiving account's server name:
 		BmRef<BmRecvAccount> recvAcc = RecvAcc();
@@ -166,28 +171,30 @@ BmString BmIdentity::GetDomainName() const {
 	HandlesAddrSpec()
 		-	determines if the given addrSpec belongs to this identity
 \*------------------------------------------------------------------------------*/
-bool BmIdentity::HandlesAddrSpec( BmString addrSpec, bool needExactMatch) const {
+bool
+BmIdentity::HandlesAddrSpec(BmString addrSpec, bool needExactMatch) const
+{
 	BmRef<BmRecvAccount> recvAcc = RecvAcc();
 	if (!recvAcc || !addrSpec.Length())
 		return false;
 	Regexx rx;
-	if (addrSpec==GetFromAddress() || addrSpec==mMailAddr)
+	if (addrSpec == GetFromAddress() || addrSpec == mMailAddr)
 		return true;
 	int32 atPos = addrSpec.FindFirst("@");
 	if (atPos != B_ERROR) {
-		BmString addrDomain( addrSpec.String()+atPos+1);
+		BmString addrDomain(addrSpec.String() + atPos + 1);
 		if (addrDomain != GetDomainName())
-			return false;						// address is from different domain
-		if (addrSpec == recvAcc->Username()+"@"+addrDomain)
+			return false;  // address is from different domain
+		if (addrSpec == recvAcc->Username() + "@" + addrDomain)
 			return true;
-		addrSpec.Truncate( atPos);
+		addrSpec.Truncate(atPos);
 	}
 	if (!needExactMatch && mMarkedAsBitBucket)
 		return true;
-		
+
 	vector<BmString>::const_iterator iter;
-	for(iter = mMailAliasesVect.begin(); iter != mMailAliasesVect.end(); ++iter) {
-		if  (addrSpec.ICompare(*iter) == 0)
+	for (iter = mMailAliasesVect.begin(); iter != mMailAliasesVect.end(); ++iter) {
+		if (addrSpec.ICompare(*iter) == 0)
 			return true;
 	}
 	return false;
@@ -198,7 +205,8 @@ bool BmIdentity::HandlesAddrSpec( BmString addrSpec, bool needExactMatch) const 
 		-	splits the given comma-/space-separated string into a vector of
 			mail aliases
 \*------------------------------------------------------------------------------*/
-void BmIdentity::_SplitMailAliases()
+void
+BmIdentity::_SplitMailAliases()
 {
 	split("[\\s,]", mMailAliases, mMailAliasesVect);
 }
@@ -209,16 +217,18 @@ void BmIdentity::_SplitMailAliases()
 			given out-params
 		-	returns true if values are ok, false (and error-info) if not
 \*------------------------------------------------------------------------------*/
-bool BmIdentity::SanityCheck( BmString& complaint, BmString& fieldName) const {
+bool
+BmIdentity::SanityCheck(BmString& complaint, BmString& fieldName) const
+{
 	if (!mRecvAccount.Length()) {
-		complaint 
+		complaint
 			= "Please select a receiving-account to be associated with "
 			  "this identity.";
 		fieldName = "recvaccount";
 		return false;
 	}
 	if (!mSMTPAccount.Length()) {
-		complaint 
+		complaint
 			= "Please select a sending-account to be associated with "
 			  "this identity.";
 		fieldName = "smtpaccount";
@@ -228,22 +238,23 @@ bool BmIdentity::SanityCheck( BmString& complaint, BmString& fieldName) const {
 }
 
 
-
 /********************************************************************************\
 	BmIdentityList
 \********************************************************************************/
 
-BmRef< BmIdentityList> BmIdentityList::theInstance( NULL);
+BmRef<BmIdentityList> BmIdentityList::theInstance(NULL);
 
 const int16 BmIdentityList::nArchiveVersion = 1;
 
-const char* const BmIdentityList::MSG_CURR_IDENTITY = 		"bm:cid";
+const char* const BmIdentityList::MSG_CURR_IDENTITY = "bm:cid";
 
 /*------------------------------------------------------------------------------*\
 	CreateInstance()
 		-	initialiazes object by reading info from settings file (if any)
 \*------------------------------------------------------------------------------*/
-BmIdentityList* BmIdentityList::CreateInstance() {
+BmIdentityList*
+BmIdentityList::CreateInstance()
+{
 	if (!theInstance) {
 		theInstance = new BmIdentityList();
 	}
@@ -255,17 +266,18 @@ BmIdentityList* BmIdentityList::CreateInstance() {
 		-	default constructor, creates empty list
 \*------------------------------------------------------------------------------*/
 BmIdentityList::BmIdentityList()
-	:	inherited( "IdentityList", BM_LogMailTracking) 
-	,	mCurrIdentity( NULL)
+	: inherited("IdentityList", BM_LogMailTracking),
+	  mCurrIdentity(NULL)
 {
-	NeedControllersToContinue( false);
+	NeedControllersToContinue(false);
 }
 
 /*------------------------------------------------------------------------------*\
 	~BmIdentityList()
 		-	standard destructor
 \*------------------------------------------------------------------------------*/
-BmIdentityList::~BmIdentityList() {
+BmIdentityList::~BmIdentityList()
+{
 	theInstance = NULL;
 }
 
@@ -273,32 +285,35 @@ BmIdentityList::~BmIdentityList() {
 	SettingsFileName()
 		-	returns the name of the settins-file for the identity-list
 \*------------------------------------------------------------------------------*/
-const BmString BmIdentityList::SettingsFileName() {
-	return BmString( BeamRoster->SettingsPath()) << "/" << "Identities";
+const BmString
+BmIdentityList::SettingsFileName()
+{
+	return BmString(BeamRoster->SettingsPath()) << "/" << "Identities";
 }
 
 /*------------------------------------------------------------------------------*\
 	ForeignKeyChanged( keyName, oldVal, newVal)
 		-	updates the specified foreign-key with the given new value
 \*------------------------------------------------------------------------------*/
-void BmIdentityList::ForeignKeyChanged( const BmString& key, 
-													 const BmString& oldVal, 
-													 const BmString& newVal) {
-	BmAutolockCheckGlobal lock( ModelLocker());
+void
+BmIdentityList::ForeignKeyChanged(
+	const BmString& key, const BmString& oldVal, const BmString& newVal)
+{
+	BmAutolockCheckGlobal lock(ModelLocker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
 	BmModelItemMap::const_iterator iter;
-	for( iter = begin(); iter != end(); ++iter) {
-		BmIdentity* ident = dynamic_cast< BmIdentity*>( iter->second.Get());
+	for (iter = begin(); iter != end(); ++iter) {
+		BmIdentity* ident = dynamic_cast<BmIdentity*>(iter->second.Get());
 		if (key == BmIdentity::MSG_RECV_ACCOUNT) {
 			if (ident && ident->RecvAccount() == oldVal)
-				ident->RecvAccount( newVal);
+				ident->RecvAccount(newVal);
 		} else if (key == BmIdentity::MSG_SMTP_ACCOUNT) {
 			if (ident && ident->SMTPAccount() == oldVal)
-				ident->SMTPAccount( newVal);
+				ident->SMTPAccount(newVal);
 		} else if (key == BmIdentity::MSG_SIGNATURE_NAME) {
 			if (ident && ident->SignatureName() == oldVal)
-				ident->SignatureName( newVal);
+				ident->SignatureName(newVal);
 		}
 	}
 }
@@ -308,11 +323,12 @@ void BmIdentityList::ForeignKeyChanged( const BmString& key,
 		-	writes BmIdentity into archive
 		-	parameter deep makes no difference...
 \*------------------------------------------------------------------------------*/
-status_t BmIdentityList::Archive( BMessage* archive, bool deep) const {
-	status_t ret = inherited::Archive( archive, deep)
-		||	archive->AddString( MSG_CURR_IDENTITY, mCurrIdentity 
-																	? mCurrIdentity->Key().String()
-																	: "");
+status_t
+BmIdentityList::Archive(BMessage* archive, bool deep) const
+{
+	status_t ret = inherited::Archive(archive, deep)
+				   || archive->AddString(
+					   MSG_CURR_IDENTITY, mCurrIdentity ? mCurrIdentity->Key().String() : "");
 	return ret;
 }
 
@@ -320,12 +336,13 @@ status_t BmIdentityList::Archive( BMessage* archive, bool deep) const {
 	InstantiateItem( archive)
 		-	instantiates an identity from the given archive
 \*------------------------------------------------------------------------------*/
-void BmIdentityList::InstantiateItem( BMessage* archive) {
-	BmIdentity* newIdent = new BmIdentity( archive, this);
-	BM_LOG3( BM_LogMailTracking, 
-				BmString("Identity <") << newIdent->Name() << "," 
-					<< newIdent->Key() << "> read");
-	AddItemToList( newIdent);
+void
+BmIdentityList::InstantiateItem(BMessage* archive)
+{
+	BmIdentity* newIdent = new BmIdentity(archive, this);
+	BM_LOG3(BM_LogMailTracking, BmString("Identity <")
+									<< newIdent->Name() << "," << newIdent->Key() << "> read");
+	AddItemToList(newIdent);
 	if (!mCurrIdentity)
 		mCurrIdentity = newIdent;
 }
@@ -334,14 +351,16 @@ void BmIdentityList::InstantiateItem( BMessage* archive) {
 	InstantiateItems( archive)
 		-	fetches info about last current identity from archive
 \*------------------------------------------------------------------------------*/
-void BmIdentityList::InstantiateItems( BMessage* archive) {
+void
+BmIdentityList::InstantiateItems(BMessage* archive)
+{
 	mCurrIdentity = NULL;
 	inherited::InstantiateItems(archive);
-	BmString currIdentName = archive->FindString( MSG_CURR_IDENTITY);
+	BmString currIdentName = archive->FindString(MSG_CURR_IDENTITY);
 	if (currIdentName.Length()) {
-		BmRef<BmListModelItem> identRef = FindItemByKey( currIdentName);
+		BmRef<BmListModelItem> identRef = FindItemByKey(currIdentName);
 		if (identRef)
-			mCurrIdentity = dynamic_cast< BmIdentity*>( identRef.Get());
+			mCurrIdentity = dynamic_cast<BmIdentity*>(identRef.Get());
 	}
 }
 
@@ -349,31 +368,34 @@ void BmIdentityList::InstantiateItems( BMessage* archive) {
 	ResetToSaved()
 		-	resets the identites to last saved state
 \*------------------------------------------------------------------------------*/
-void BmIdentityList::ResetToSaved() {
-	BM_LOG2( BM_LogMailTracking, BmString("Start of ResetToSaved() for IdentityList"));
-	BmAutolockCheckGlobal lock( ModelLocker());
+void
+BmIdentityList::ResetToSaved()
+{
+	BM_LOG2(BM_LogMailTracking, BmString("Start of ResetToSaved() for IdentityList"));
+	BmAutolockCheckGlobal lock(ModelLocker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
 	Cleanup();
 	StartJobInThisThread();
-	BM_LOG2( BM_LogMailTracking, BmString("End of ResetToSaved() for IdentityList"));
+	BM_LOG2(BM_LogMailTracking, BmString("End of ResetToSaved() for IdentityList"));
 }
 
 /*------------------------------------------------------------------------------*\
 	FindIdentitiesForRecvAccount( accName)
 		-	returns the identities matching the given account
 \*------------------------------------------------------------------------------*/
-void BmIdentityList::FindIdentitiesForRecvAccount( const BmString accName, 
-																 BmIdentityVect& identities) {
-	BmAutolockCheckGlobal lock( ModelLocker());
+void
+BmIdentityList::FindIdentitiesForRecvAccount(const BmString accName, BmIdentityVect& identities)
+{
+	BmAutolockCheckGlobal lock(ModelLocker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
 
 	identities.clear();
 	BmModelItemMap::const_iterator iter;
-	for( iter = begin(); iter != end(); ++iter) {
-		BmIdentity* ident = dynamic_cast< BmIdentity*>( iter->second.Get());
-		if (ident->RecvAccount()==accName)
+	for (iter = begin(); iter != end(); ++iter) {
+		BmIdentity* ident = dynamic_cast<BmIdentity*>(iter->second.Get());
+		if (ident->RecvAccount() == accName)
 			identities.push_back(ident);
 	}
 }
@@ -382,11 +404,12 @@ void BmIdentityList::FindIdentitiesForRecvAccount( const BmString accName,
 	FindFromAddressForRecvAccount( accName)
 		-	returns the from-address corresponding to the given account
 \*------------------------------------------------------------------------------*/
-BmString BmIdentityList
-::FindFromAddressForRecvAccount( const BmString accName) {
-	BmAutolockCheckGlobal lock( ModelLocker());
+BmString
+BmIdentityList ::FindFromAddressForRecvAccount(const BmString accName)
+{
+	BmAutolockCheckGlobal lock(ModelLocker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
 
 	BmIdentityVect identities;
 	FindIdentitiesForRecvAccount(accName, identities);
@@ -403,22 +426,24 @@ BmString BmIdentityList
 	FindIdentityForAddress( addrSpec)
 		-	determines which identity the given addrSpec belongs to (if any)
 \*------------------------------------------------------------------------------*/
-BmRef<BmIdentity> BmIdentityList::FindIdentityForAddrSpec( const BmString addrSpec) {
-	BmAutolockCheckGlobal lock( ModelLocker());
+BmRef<BmIdentity>
+BmIdentityList::FindIdentityForAddrSpec(const BmString addrSpec)
+{
+	BmAutolockCheckGlobal lock(ModelLocker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
+		BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
 	BmModelItemMap::const_iterator iter;
 	// we first check whether any identity handles the given address (as primary
 	// address):
-	for( iter = begin(); iter != end(); ++iter) {
-		BmIdentity* ident = dynamic_cast< BmIdentity*>( iter->second.Get());
-		if (ident->HandlesAddrSpec( addrSpec, true))
+	for (iter = begin(); iter != end(); ++iter) {
+		BmIdentity* ident = dynamic_cast<BmIdentity*>(iter->second.Get());
+		if (ident->HandlesAddrSpec(addrSpec, true))
 			return ident;
 	}
 	// maybe we have a bit-bucket identity/account (catch-all for failed delivery):
-	for( iter = begin(); iter != end(); ++iter) {
-		BmIdentity* ident = dynamic_cast< BmIdentity*>( iter->second.Get());
-		if (ident->HandlesAddrSpec( addrSpec, false))
+	for (iter = begin(); iter != end(); ++iter) {
+		BmIdentity* ident = dynamic_cast<BmIdentity*>(iter->second.Get());
+		if (ident->HandlesAddrSpec(addrSpec, false))
 			return ident;
 	}
 	// nothing found !?!
@@ -429,12 +454,13 @@ BmRef<BmIdentity> BmIdentityList::FindIdentityForAddrSpec( const BmString addrSp
 	FindRecvAccountForAddrSpec( addr)
 		-	determines to which recv-account the given addrSpec belongs (if any)
 \*------------------------------------------------------------------------------*/
-BmRef<BmRecvAccount> BmIdentityList
-::FindRecvAccountForAddrSpec( const BmString addrSpec) {
-	BmAutolockCheckGlobal lock( ModelLocker());
+BmRef<BmRecvAccount>
+BmIdentityList ::FindRecvAccountForAddrSpec(const BmString addrSpec)
+{
+	BmAutolockCheckGlobal lock(ModelLocker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( ModelNameNC() << ": Unable to get lock");
-	BmRef<BmIdentity> ident = FindIdentityForAddrSpec( addrSpec);
+		BM_THROW_RUNTIME(ModelNameNC() << ": Unable to get lock");
+	BmRef<BmIdentity> ident = FindIdentityForAddrSpec(addrSpec);
 	if (ident)
 		return ident->RecvAcc();
 	else

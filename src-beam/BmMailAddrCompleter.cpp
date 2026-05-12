@@ -14,10 +14,10 @@
 #include "BmString.h"
 
 #include <HGroup.h>
-#include <VGroup.h>
 #include <MBorder.h>
 #include <MMenuBar.h>
 #include <Space.h>
+#include <VGroup.h>
 
 #include "TextEntryAlert.h"
 
@@ -32,8 +32,8 @@
 #include "BmLogHandler.h"
 #include "BmMail.h"
 #include "BmMailAddrCompleter.h"
-#include "BmMailFolder.h"
 #include "BmMailEditWin.h"
+#include "BmMailFolder.h"
 #include "BmMailRef.h"
 #include "BmMailView.h"
 #include "BmMenuControl.h"
@@ -41,8 +41,8 @@
 #include "BmMsgTypes.h"
 #include "BmPeople.h"
 #include "BmPrefs.h"
-#include "BmRosterBase.h"
 #include "BmResources.h"
+#include "BmRosterBase.h"
 #include "BmSignature.h"
 #include "BmSmtpAccount.h"
 #include "BmStorageUtil.h"
@@ -52,14 +52,13 @@
 // #pragma mark - MailAddrChoiceModel
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-static int MailAddrSorter(const void* l, const void* r) 
+static int
+MailAddrSorter(const void* l, const void* r)
 {
-	const BmAutoCompleter::Choice* left 
-		= *static_cast<const BmAutoCompleter::Choice* const *>(l);
-	const BmAutoCompleter::Choice* right 
-		= *static_cast<const BmAutoCompleter::Choice* const *>(r);
+	const BmAutoCompleter::Choice* left = *static_cast<const BmAutoCompleter::Choice* const*>(l);
+	const BmAutoCompleter::Choice* right = *static_cast<const BmAutoCompleter::Choice* const*>(r);
 	BmString leftStr(left->Text());
 	leftStr.RemoveSet("\"'");
 	BmString rightStr(right->Text());
@@ -67,29 +66,28 @@ static int MailAddrSorter(const void* l, const void* r)
 	return strcasecmp(leftStr.String(), rightStr.String());
 }
 
-void BmMailAddressCompleter::MailAddrChoiceModel
-::FetchChoicesFor(const BmString& pattern)
+void
+BmMailAddressCompleter::MailAddrChoiceModel ::FetchChoicesFor(const BmString& pattern)
 {
 	int32 count = mChoicesList.CountItems();
-	for( int32 i=0; i<count; ++i)
+	for (int32 i = 0; i < count; ++i)
 		delete static_cast<Choice*>(mChoicesList.ItemAt(i));
 	mChoicesList.MakeEmpty();
 	int32 pattLen = pattern.Length();
 	if (pattLen == 0)
 		return;
-	BmAutolockCheckGlobal lock( ThePeopleList->ModelLocker());
+	BmAutolockCheckGlobal lock(ThePeopleList->ModelLocker());
 	if (!lock.IsLocked())
-		BM_THROW_RUNTIME( "MailAddrChoiceModel: Unable to get lock on people-list");
+		BM_THROW_RUNTIME("MailAddrChoiceModel: Unable to get lock on people-list");
 	BmModelItemMap::const_iterator iter;
-	for( iter = ThePeopleList->begin(); iter != ThePeopleList->end(); 
-		  ++iter) {
-		BmPerson* person = dynamic_cast< BmPerson*>( iter->second.Get());
+	for (iter = ThePeopleList->begin(); iter != ThePeopleList->end(); ++iter) {
+		BmPerson* person = dynamic_cast<BmPerson*>(iter->second.Get());
 		if (person) {
 			// TODO: maybe it'd make more sense to only show the default (first)
 			// email for each person, as otherwise the list may get rather long
 			// (without improving the usefulness a lot).
 			const BmStringVect& emails = person->Emails();
-			for( uint32 e=0; e<emails.size(); ++e) {
+			for (uint32 e = 0; e < emails.size(); ++e) {
 				int32 namePos = 0;
 				int32 emailPos = 0;
 				int32 nickPos = 0;
@@ -104,29 +102,24 @@ void BmMailAddressCompleter::MailAddrChoiceModel
 				}
 				displayAddr = rawAddr;
 				if (person->Nick().Length() > 0) {
-					nickPos = rawAddr.Length()+2;
+					nickPos = rawAddr.Length() + 2;
 					displayAddr << " (" << person->Nick() << ")";
 				}
 				if (person->Name().ICompare(pattern, pattLen) == 0)
-					mChoicesList.AddItem(new Choice(rawAddr, displayAddr, namePos, 
-															  pattLen));
+					mChoicesList.AddItem(new Choice(rawAddr, displayAddr, namePos, pattLen));
 				else if (emails[e].ICompare(pattern, pattLen) == 0)
-					mChoicesList.AddItem(new Choice(rawAddr, displayAddr, emailPos, 
-															  pattLen));
+					mChoicesList.AddItem(new Choice(rawAddr, displayAddr, emailPos, pattLen));
 				else if (person->Nick().ICompare(pattern, pattLen) == 0)
-					mChoicesList.AddItem(new Choice(rawAddr, displayAddr, nickPos, 
-															  pattLen));
+					mChoicesList.AddItem(new Choice(rawAddr, displayAddr, nickPos, pattLen));
 				else if (displayAddr.ICompare(pattern, pattLen) == 0) {
-					mChoicesList.AddItem(new Choice(rawAddr, displayAddr, 0, 
-															  pattLen));
+					mChoicesList.AddItem(new Choice(rawAddr, displayAddr, 0, pattLen));
 				}
 			}
 		}
 	}
 	BmKnownAddrSet::const_iterator kaIter;
-	for( kaIter = ThePeopleList->KnownAddrBegin(); 
-		  kaIter != ThePeopleList->KnownAddrEnd(); 
-		  ++kaIter) {
+	for (kaIter = ThePeopleList->KnownAddrBegin(); kaIter != ThePeopleList->KnownAddrEnd();
+		 ++kaIter) {
 		BmString addr = *kaIter;
 		if (addr.ICompare(pattern, pattLen) == 0)
 			mChoicesList.AddItem(new Choice(addr, addr, 0, pattLen));
@@ -136,33 +129,33 @@ void BmMailAddressCompleter::MailAddrChoiceModel
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-int32 BmMailAddressCompleter::MailAddrChoiceModel
-::CountChoices() const
+int32
+BmMailAddressCompleter::MailAddrChoiceModel ::CountChoices() const
 {
 	return mChoicesList.CountItems();
 }
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-const BmAutoCompleter::Choice* BmMailAddressCompleter::MailAddrChoiceModel
-::ChoiceAt(int32 index) const
+const BmAutoCompleter::Choice*
+BmMailAddressCompleter::MailAddrChoiceModel ::ChoiceAt(int32 index) const
 {
 	return static_cast<Choice*>(mChoicesList.ItemAt(index));
 }
-	
+
 
 // #pragma mark - MailAddrPatternSelector
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
-void BmMailAddressCompleter::MailAddrPatternSelector
-::SelectPatternBounds( const BmString& text, int32 caretPos,
-							  int32* start, int32* length)
+void
+BmMailAddressCompleter::MailAddrPatternSelector ::SelectPatternBounds(
+	const BmString& text, int32 caretPos, int32* start, int32* length)
 {
 	if (!text.Length()) {
 		*start = *length = 0;
@@ -172,28 +165,27 @@ void BmMailAddressCompleter::MailAddrPatternSelector
 	const char* endPos;
 	int32 pattStart = 0;
 	int32 pattLen = 0;
-	while( *pos) {
+	while (*pos) {
 		if (*pos == '"') {
 			// quoted-string started, we skip over it en-block (avoiding
 			// to interprete any contained commas as mail-addr separators).
-			for( 	endPos=pos+1; 
-					*endPos && (*endPos!='"' || *(endPos-1)=='\\'); ++endPos)
+			for (endPos = pos + 1; *endPos && (*endPos != '"' || *(endPos - 1) == '\\'); ++endPos)
 				;
 			if (*endPos) {
 				// found complete quoted-string.
-				size_t numChars = 1+endPos-pos;
+				size_t numChars = 1 + endPos - pos;
 				pos += numChars;
 			} else {
-				// it seems that there is no ending quote, we assume the 
+				// it seems that there is no ending quote, we assume the
 				// remainder to be part of the quoted string:
 				pos = endPos;
 			}
 		} else {
-			// we copy characters until we find the start of a quoted string or 
+			// we copy characters until we find the start of a quoted string or
 			// the separator char:
-			for(  endPos=pos; *endPos && *endPos!='"' && *endPos!=','; ++endPos)
+			for (endPos = pos; *endPos && *endPos != '"' && *endPos != ','; ++endPos)
 				;
-			size_t numChars = endPos-pos;
+			size_t numChars = endPos - pos;
 			pos += numChars;
 			if (*endPos == ',') {
 				pattLen = (int32)(endPos - text.String()) - pattStart;
@@ -203,10 +195,10 @@ void BmMailAddressCompleter::MailAddrPatternSelector
 				pattStart = (int32)(pos - text.String());
 			}
 			if (!*endPos)
-				pattLen = (int32)(endPos-text.String()) - pattStart;
+				pattLen = (int32)(endPos - text.String()) - pattStart;
 		}
 	}
-	while(isspace(text[pattStart])) {
+	while (isspace(text[pattStart])) {
 		pattStart++;
 		pattLen--;
 	}
@@ -216,11 +208,9 @@ void BmMailAddressCompleter::MailAddrPatternSelector
 
 /*------------------------------------------------------------------------------*\
 	()
-		-	
+		-
 \*------------------------------------------------------------------------------*/
 BmMailAddressCompleter::BmMailAddressCompleter(BTextControl* textControl)
-	: BmTextControlCompleter(textControl, new MailAddrChoiceModel(), 
-									 new MailAddrPatternSelector())
+	: BmTextControlCompleter(textControl, new MailAddrChoiceModel(), new MailAddrPatternSelector())
 {
 }
-
